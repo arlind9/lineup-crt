@@ -231,13 +231,17 @@ export default function App() {
             <h1 className="text-3xl font-bold mb-4 text-center">FutBin-Style Player Ratings</h1>
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                 <Input type="text" placeholder="Search players..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full md:w-1/2" />
-                <Tabs value={positionFilter} onValueChange={setPositionFilter}>
-                    <TabsList>
-                        {["All", "ST", "MF", "DF", "GK"].map((pos) => (
-                            <TabsTrigger key={pos} value={pos}>{pos}</TabsTrigger>
-                        ))}
-                    </TabsList>
-                </Tabs>
+                <div className="flex gap-2">
+                    {["All", "ST", "MF", "DF", "GK"].map((pos) => (
+                        <button
+                            key={pos}
+                            className={`px-3 py-1 rounded ${positionFilter === pos ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+                            onClick={() => setPositionFilter(pos)}
+                        >
+                            {pos}
+                        </button>
+                    ))}
+                </div>
                 <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border p-2 rounded-md">
                     {["overall", "speed", "shooting", "passing", "dribbling", "physical", "defending"].map(key => (
                         <option key={key} value={key}>Sort by {key.charAt(0).toUpperCase() + key.slice(1)}</option>
