@@ -132,6 +132,7 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
                     </p>
                     <p>
                         Physical: {avg("physical")}, Defending: {avg("defending")}, Weak Foot: {avg("weakFoot")}, Goalkeeping: {avg("goalkeeping")}
+                        Physical: {avg("physical")}, Defending: {avg("defending")}, Weak Foot: {avg("weakFoot")}, Goalkeeping: {avg("goalkeeping")}
                     </p>
                 </div>
             )}
