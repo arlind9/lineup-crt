@@ -87,7 +87,7 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
                         >
                             ×
                         </button>
-                        <DraggablePlayer player={player} fromTeam={id} fromIndex={i} small />
+                        <DraggablePlayer player={player} fromTeam={id} fromIndex={i} small assigned />
                     </>
                 ) : (
                     <div
@@ -139,11 +139,14 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
     );
 }
 
-function DraggablePlayer({ player, fromTeam, fromIndex, small }) {
+function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned }) {
     return (
         <Card
             className={
                 "border border-gray-300 cursor-move space-y-1 " +
+                (assigned
+                    ? "bg-green-50 border-green-400 "
+                    : "") +
                 (small
                     ? "p-1 text-xs min-h-0"
                     : "p-4 text-sm")
