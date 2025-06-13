@@ -10,8 +10,12 @@ permissions:
   pages: write
   id-token: write
 
+
 jobs:
   build:
+      defaults:
+      run:
+        working-directory: lineup-crt
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
