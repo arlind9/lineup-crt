@@ -13,10 +13,10 @@ permissions:
 
 jobs:
   build:
-      defaults:
+    runs-on: ubuntu-latest
+    defaults:
       run:
         working-directory: lineup-crt
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
