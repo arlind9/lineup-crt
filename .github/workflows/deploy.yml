@@ -3,7 +3,7 @@ name: Deploy Vite App to GitHub Pages
 on:
   push:
     branches:
-      - master  # or main if your repo uses that
+      - master  # or "main" if that's your default
 
 permissions:
   contents: read
@@ -38,7 +38,6 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     permissions:
       pages: write
