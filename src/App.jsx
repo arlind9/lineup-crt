@@ -1,10 +1,11 @@
 ﻿import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DndContext, closestCenter } from '@dnd-kit/core';
 
-function DroppableTeam({ id, label, players, formation, onPlayerDrop }) {
+function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers }) {
+    const [activeSlot, setActiveSlot] = useState(null);
+
     const formationMap = {
         "4-4-1": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST"],
         "4-3-2": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
@@ -28,6 +29,24 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop }) {
     };
 
     const avg = (key) => players.length ? Math.round(players.reduce((s, p) => s + (p?.[key] || 0), 0) / players.filter(Boolean).length) : 0;
+
+    const compatiblePlayers = (pos) =>
+        allPlayers.filter(
+            (p) =>
+                isPositionCompatible(pos, p.position) &&
+                !players.some((pl) => pl && pl.name === p.name)
+        );
+
+    const handlePlayerSelect = (slotIdx, player) => {
+        onPlayerDrop({
+            toTeam: id,
+            toIndex: slotIdx,
+            fromTeam: null,
+            fromIndex: null,
+            player,
+        });
+        setActiveSlot(null);
+    };
 
     const lineup = formationPositions.map((pos, i) => {
         const player = players[i];
@@ -71,8 +90,31 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop }) {
                         <DraggablePlayer player={player} fromTeam={id} fromIndex={i} small />
                     </>
                 ) : (
-                    <div className="text-muted-foreground italic">{pos}</div>
-                )}            </div>
+                    <div
+                        className="text-muted-foreground italic cursor-pointer"
+                        onClick={() => setActiveSlot(i)}
+                    >
+                        {pos}
+                        {activeSlot === i && (
+                            <div className="absolute left-0 top-full mt-2 w-full z-20 bg-white border rounded shadow max-h-48 overflow-auto">
+                                {compatiblePlayers(pos).length === 0 ? (
+                                    <div className="p-2 text-xs text-gray-400">No available players</div>
+                                ) : (
+                                    compatiblePlayers(pos).map((p) => (
+                                        <div
+                                            key={p.name}
+                                            className="p-2 hover:bg-blue-100 cursor-pointer text-left text-xs"
+                                            onClick={() => handlePlayerSelect(i, p)}
+                                        >
+                                            <span className="font-semibold">{p.name}</span> <span className="text-gray-500">({p.position})</span> <span className="text-gray-400">OVR: {p.overall}</span>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
         );
     });
 
@@ -276,6 +318,7 @@ export default function App() {
                         players={teamA}
                         onPlayerDrop={handlePlayerDrop}
                         formation={formationA}
+                        allPlayers={players}
                     />
                     <DroppableTeam
                         id="teamB"
@@ -283,6 +326,7 @@ export default function App() {
                         players={teamB}
                         onPlayerDrop={handlePlayerDrop}
                         formation={formationB}
+                        allPlayers={players}
                     />
                 </div>
 
