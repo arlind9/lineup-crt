@@ -273,7 +273,7 @@ export default function App() {
 
     return (
         <div className="p-4 max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold mb-4 text-center">FutBin-Style Player Ratings</h1>
+            <h1 className="text-3xl font-bold mb-4 text-center">Lineup Creator</h1>
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                 <Input type="text" placeholder="Search players..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full md:w-1/2" />
                 <div className="flex gap-2">
