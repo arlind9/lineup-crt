@@ -140,17 +140,14 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
     );
 }
 
-function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned }) {
+function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selected }) {
     return (
         <Card
             className={
                 "border border-gray-300 cursor-move space-y-1 " +
-                (assigned
-                    ? "bg-green-50 border-green-400 "
-                    : "") +
-                (small
-                    ? "p-1 text-xs min-h-0"
-                    : "p-4 text-sm")
+                (assigned ? "bg-green-50 border-green-400 " : "") +
+                (selected ? "bg-blue-100 border-blue-400 " : "") +
+                (small ? "p-1 text-xs min-h-0" : "p-4 text-sm")
             }
             draggable
             onDragStart={(e) => {
@@ -190,6 +187,11 @@ export default function App() {
     const [sortBy, setSortBy] = useState("overall");
     const [teamA, setTeamA] = useState(Array(10).fill(null));
     const [teamB, setTeamB] = useState(Array(10).fill(null));
+
+    const assignedNames = [
+        ...teamA.filter(Boolean).map(p => p.name),
+        ...teamB.filter(Boolean).map(p => p.name)
+    ];
 
     useEffect(() => {
         fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
@@ -337,7 +339,13 @@ export default function App() {
                 <h2 className="text-xl font-semibold mb-2">Available Players</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                     {filtered.map((p) => (
-                        <DraggablePlayer key={p.name} player={p} fromTeam={null} fromIndex={null} />
+                        <DraggablePlayer
+                            key={p.name}
+                            player={p}
+                            fromTeam={null}
+                            fromIndex={null}
+                            selected={assignedNames.includes(p.name)}
+                        />
                     ))}
                 </div>
             </DndContext>
