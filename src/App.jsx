@@ -3,6 +3,75 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { DndContext, closestCenter } from '@dnd-kit/core';
 
+function TeamAttributesBarChart({ players }) {
+    // Only consider filled slots
+    const filled = players.filter(Boolean);
+    if (filled.length === 0) return null;
+
+    const attributes = [
+        { key: "overall", label: "Overall" },
+        { key: "speed", label: "Speed" },
+        { key: "shooting", label: "Shooting" },
+        { key: "passing", label: "Passing" },
+        { key: "dribbling", label: "Dribbling" },
+        { key: "physical", label: "Physical" },
+        { key: "defending", label: "Defending" },
+        { key: "goalkeeping", label: "Goalkeeping" },
+        { key: "weakFoot", label: "Weak Foot" }
+    ];
+
+    // Compute averages
+    const avgs = {};
+    attributes.forEach(attr => {
+        if (attr.key === "goalkeeping") {
+            const gks = filled.filter(p => p.position === "GK");
+            avgs[attr.key] = gks.length
+                ? Math.round(gks.reduce((sum, p) => sum + (p.goalkeeping || 0), 0) / gks.length)
+                : 0;
+        } else {
+            avgs[attr.key] = Math.round(
+                filled.reduce((sum, p) => sum + (p[attr.key] || 0), 0) / filled.length
+            );
+        }
+    });
+
+    // Set cap for each attribute (default 100, but 50 for weakFoot)
+    const caps = {
+        weakFoot: 50
+    };
+
+    // Find max for scaling bars (for visual balance, use cap or max value)
+    const maxValue = Math.max(
+        ...attributes.map(a => caps[a.key] || 100)
+    );
+
+    return (
+        <div className="mb-4">
+            <div className="text-xs font-semibold mb-1 text-gray-600">Average Attributes</div>
+            <div className="space-y-1">
+                {attributes.map(attr => {
+                    const cap = caps[attr.key] || 100;
+                    return (
+                        <div key={attr.key} className="flex items-center gap-2">
+                            <span className="w-20 text-xs text-gray-500">{attr.label}</span>
+                            <div className="flex-1 bg-gray-200 rounded h-3 relative">
+                                <div
+                                    className="bg-blue-500 h-3 rounded"
+                                    style={{
+                                        width: `${(avgs[attr.key] / cap) * 100}%`,
+                                        minWidth: avgs[attr.key] > 0 ? 12 : 0
+                                    }}
+                                />
+                            </div>
+                            <span className="w-8 text-right text-xs">{avgs[attr.key]}</span>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
 function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers }) {
     const [activeSlot, setActiveSlot] = useState(null);
 
@@ -121,6 +190,7 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
     return (
         <div className="bg-muted p-4 rounded-xl min-h-[300px]">
             <h3 className="font-bold text-lg mb-4">{label} ({players.filter(Boolean).length}/10)</h3>
+            <TeamAttributesBarChart players={players} />
             <div className="grid grid-cols-3 gap-2 mb-4">
                 {lineup}
             </div>
@@ -140,17 +210,14 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
     );
 }
 
-function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned }) {
+function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selected }) {
     return (
         <Card
             className={
                 "border border-gray-300 cursor-move space-y-1 " +
-                (assigned
-                    ? "bg-green-50 border-green-400 "
-                    : "") +
-                (small
-                    ? "p-1 text-xs min-h-0"
-                    : "p-4 text-sm")
+                (assigned ? "bg-green-50 border-green-400 " : "") +
+                (selected ? "bg-blue-100 border-blue-400 " : "") +
+                (small ? "p-1 text-xs min-h-0" : "p-4 text-sm")
             }
             draggable
             onDragStart={(e) => {
@@ -190,6 +257,11 @@ export default function App() {
     const [sortBy, setSortBy] = useState("overall");
     const [teamA, setTeamA] = useState(Array(10).fill(null));
     const [teamB, setTeamB] = useState(Array(10).fill(null));
+
+    const assignedNames = [
+        ...teamA.filter(Boolean).map(p => p.name),
+        ...teamB.filter(Boolean).map(p => p.name)
+    ];
 
     useEffect(() => {
         fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
@@ -274,7 +346,7 @@ export default function App() {
 
     return (
         <div className="p-4 max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold mb-4 text-center">Lineup Creator A na cau karin</h1>
+            <h1 className="text-3xl font-bold mb-4 text-center">Lineup Creator A</h1>
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                 <Input type="text" placeholder="Search players..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full md:w-1/2" />
                 <div className="flex gap-2">
@@ -295,8 +367,8 @@ export default function App() {
                 </select>
             </div>
 
-            <div className="mb-4 flex flex-col md:flex-row gap-4">
-                <div>
+            <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
                     <label className="mr-2 font-medium">Team A Formation:</label>
                     <select value={formationA} onChange={(e) => setFormationA(e.target.value)} className="border p-2 rounded-md">
                         {["4-4-1", "4-3-2", "4-2-3", "5-2-2", "5-3-1", "3-3-3", "3-4-2", "3-5-1", "3-2-4"].map(f => (
@@ -304,7 +376,7 @@ export default function App() {
                         ))}
                     </select>
                 </div>
-                <div>
+                <div className="flex-1">
                     <label className="mr-2 font-medium">Team B Formation:</label>
                     <select value={formationB} onChange={(e) => setFormationB(e.target.value)} className="border p-2 rounded-md">
                         {["4-4-1", "4-3-2", "4-2-3", "5-2-2", "5-3-1", "3-3-3", "3-4-2", "3-5-1", "3-2-4"].map(f => (
@@ -337,7 +409,13 @@ export default function App() {
                 <h2 className="text-xl font-semibold mb-2">Available Players</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                     {filtered.map((p) => (
-                        <DraggablePlayer key={p.name} player={p} fromTeam={null} fromIndex={null} />
+                        <DraggablePlayer
+                            key={p.name}
+                            player={p}
+                            fromTeam={null}
+                            fromIndex={null}
+                            selected={assignedNames.includes(p.name)}
+                        />
                     ))}
                 </div>
             </DndContext>
