@@ -1,0 +1,6 @@
+import React, { useEffect, useState, useRef } from "react";
+// ...all your imports and code from App.jsx except the export default App at the bottom...
+
+export default function LineupCreator() {
+    // ...all the code from your current App component...
+}
