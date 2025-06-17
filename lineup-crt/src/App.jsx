@@ -40,30 +40,126 @@ function TeamAttributesBarChart({ players }) {
         weakFoot: 50
     };
 
-    // Find max for scaling bars (for visual balance, use cap or max value)
-    const maxValue = Math.max(
-        ...attributes.map(a => caps[a.key] || 100)
-    );
-
     return (
         <div className="mb-4">
-            <div className="text-xs font-semibold mb-1 text-gray-600">Average Attributes</div>
+            <div className="text-xs font-semibold mb-1 text-gray-600 text-center">Average Attributes</div>
             <div className="space-y-1">
                 {attributes.map(attr => {
                     const cap = caps[attr.key] || 100;
+                    const percent = (avgs[attr.key] / cap) * 100;
                     return (
-                        <div key={attr.key} className="flex items-center gap-2">
-                            <span className="w-20 text-xs text-gray-500">{attr.label}</span>
-                            <div className="flex-1 bg-gray-200 rounded h-3 relative">
+                        <div key={attr.key} className="flex items-center gap-2 w-full">
+                            {/* Left bar and value */}
+                            <span className="w-8 text-right text-xs">{avgs[attr.key]}</span>
+                            <div className="flex-1 flex justify-end">
                                 <div
-                                    className="bg-blue-500 h-3 rounded"
+                                    className="bg-blue-500 h-3 rounded-l"
                                     style={{
-                                        width: `${(avgs[attr.key] / cap) * 100}%`,
-                                        minWidth: avgs[attr.key] > 0 ? 12 : 0
+                                        width: `${percent}%`,
+                                        minWidth: avgs[attr.key] > 0 ? 12 : 0,
+                                        transition: "width 0.3s"
                                     }}
                                 />
                             </div>
-                            <span className="w-8 text-right text-xs">{avgs[attr.key]}</span>
+                            {/* Center label */}
+                            <span className="w-20 text-xs text-gray-500 text-center">{attr.label}</span>
+                            {/* Right bar and value (mirrored) */}
+                            <div className="flex-1 flex">
+                                <div
+                                    className="bg-blue-500 h-3 rounded-r"
+                                    style={{
+                                        width: `${percent}%`,
+                                        minWidth: avgs[attr.key] > 0 ? 12 : 0,
+                                        transition: "width 0.3s"
+                                    }}
+                                />
+                            </div>
+                            <span className="w-8 text-left text-xs">{avgs[attr.key]}</span>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel = "Team A", teamBLabel = "Team B" }) {
+    const attributes = [
+        { key: "overall", label: "Overall" },
+        { key: "speed", label: "Speed" },
+        { key: "shooting", label: "Shooting" },
+        { key: "passing", label: "Passing" },
+        { key: "dribbling", label: "Dribbling" },
+        { key: "physical", label: "Physical" },
+        { key: "defending", label: "Defending" },
+        { key: "goalkeeping", label: "Goalkeeping" },
+        { key: "weakFoot", label: "Weak Foot" }
+    ];
+
+    // Helper to compute averages
+    function getAvg(players, key) {
+        const filled = players.filter(Boolean);
+        if (key === "goalkeeping") {
+            const gks = filled.filter(p => p.position === "GK");
+            return gks.length
+                ? Math.round(gks.reduce((sum, p) => sum + (p.goalkeeping || 0), 0) / gks.length)
+                : 0;
+        }
+        if (!filled.length) return 0;
+        return Math.round(filled.reduce((sum, p) => sum + (p[key] || 0), 0) / filled.length);
+    }
+
+    // Set cap for each attribute (default 100, but 50 for weakFoot)
+    const caps = { weakFoot: 50 };
+
+    // Compute averages for both teams
+    const avgsA = {};
+    const avgsB = {};
+    attributes.forEach(attr => {
+        avgsA[attr.key] = getAvg(teamAPlayers, attr.key);
+        avgsB[attr.key] = getAvg(teamBPlayers, attr.key);
+    });
+
+    return (
+        <div className="mb-6 max-w-2xl mx-auto">
+            <div className="text-xs font-semibold mb-1 text-gray-600 text-center">Average Attributes Comparison</div>
+            <div className="flex justify-between text-xs font-semibold mb-1">
+                <span className="w-24 text-left text-blue-700">{teamALabel}</span>
+                <span className="w-24 text-right text-red-700">{teamBLabel}</span>
+            </div>
+            <div className="space-y-1">
+                {attributes.map(attr => {
+                    const cap = caps[attr.key] || 100;
+                    const percentA = (avgsA[attr.key] / cap) * 100;
+                    const percentB = (avgsB[attr.key] / cap) * 100;
+                    return (
+                        <div key={attr.key} className="flex items-center gap-2 w-full">
+                            {/* Team A: value and bar (right-aligned) */}
+                            <span className="w-8 text-right text-xs text-blue-700">{avgsA[attr.key]}</span>
+                            <div className="flex-1 flex justify-end">
+                                <div
+                                    className="bg-blue-500 h-3 rounded-l"
+                                    style={{
+                                        width: `${percentA}%`,
+                                        minWidth: avgsA[attr.key] > 0 ? 12 : 0,
+                                        transition: "width 0.3s"
+                                    }}
+                                />
+                            </div>
+                            {/* Center label */}
+                            <span className="w-20 text-xs text-gray-500 text-center">{attr.label}</span>
+                            {/* Team B: bar and value (left-aligned) */}
+                            <div className="flex-1 flex">
+                                <div
+                                    className="bg-red-500 h-3 rounded-r"
+                                    style={{
+                                        width: `${percentB}%`,
+                                        minWidth: avgsB[attr.key] > 0 ? 12 : 0,
+                                        transition: "width 0.3s"
+                                    }}
+                                />
+                            </div>
+                            <span className="w-8 text-left text-xs text-red-700">{avgsB[attr.key]}</span>
                         </div>
                     );
                 })}
@@ -190,7 +286,6 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
     return (
         <div className="bg-muted p-4 rounded-xl min-h-[300px]">
             <h3 className="font-bold text-lg mb-4">{label} ({players.filter(Boolean).length}/10)</h3>
-            <TeamAttributesBarChart players={players} />
             <div className="grid grid-cols-3 gap-2 mb-4">
                 {lineup}
             </div>
@@ -367,26 +462,15 @@ export default function App() {
                 </select>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1">
-                    <label className="mr-2 font-medium">Team A Formation:</label>
-                    <select value={formationA} onChange={(e) => setFormationA(e.target.value)} className="border p-2 rounded-md">
-                        {["4-4-1", "4-3-2", "4-2-3", "5-2-2", "5-3-1", "3-3-3", "3-4-2", "3-5-1", "3-2-4"].map(f => (
-                            <option key={f} value={f}>{f}</option>
-                        ))}
-                    </select>
-                </div>
-                <div className="flex-1">
-                    <label className="mr-2 font-medium">Team B Formation:</label>
-                    <select value={formationB} onChange={(e) => setFormationB(e.target.value)} className="border p-2 rounded-md">
-                        {["4-4-1", "4-3-2", "4-2-3", "5-2-2", "5-3-1", "3-3-3", "3-4-2", "3-5-1", "3-2-4"].map(f => (
-                            <option key={f} value={f}>{f}</option>
-                        ))}
-                    </select>
-                </div>
-            </div>
-
             <DndContext collisionDetection={closestCenter}>
+                {/* Place the comparison chart above the lineups */}
+                <MirroredTeamAttributesBarChart
+                    teamAPlayers={teamA}
+                    teamBPlayers={teamB}
+                    teamALabel="Team A"
+                    teamBLabel="Team B"
+                />
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <DroppableTeam
                         id="teamA"
