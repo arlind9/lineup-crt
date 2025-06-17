@@ -96,7 +96,6 @@ function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel
         { key: "weakFoot", label: "Weak Foot" }
     ];
 
-    // Helper to compute averages
     function getAvg(players, key) {
         const filled = players.filter(Boolean);
         if (key === "goalkeeping") {
@@ -109,57 +108,54 @@ function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel
         return Math.round(filled.reduce((sum, p) => sum + (p[key] || 0), 0) / filled.length);
     }
 
-    // Set cap for each attribute (default 100, but 50 for weakFoot)
     const caps = { weakFoot: 50 };
-
-    // Compute averages for both teams
-    const avgsA = {};
-    const avgsB = {};
+    const avgsA = {}, avgsB = {};
     attributes.forEach(attr => {
         avgsA[attr.key] = getAvg(teamAPlayers, attr.key);
         avgsB[attr.key] = getAvg(teamBPlayers, attr.key);
     });
 
     return (
-        <div className="mb-6 max-w-2xl mx-auto">
-            <div className="text-xs font-semibold mb-1 text-gray-600 text-center">Average Attributes Comparison</div>
-            <div className="flex justify-between text-xs font-semibold mb-1">
+        <div className="mb-6 max-w-2xl mx-auto bg-white rounded-xl shadow p-4 border">
+            <div className="text-base font-bold mb-2 text-center text-gray-700">Attribute Comparison</div>
+            <div className="flex justify-between text-xs font-semibold mb-2">
                 <span className="w-24 text-left text-blue-700">{teamALabel}</span>
                 <span className="w-24 text-right text-red-700">{teamBLabel}</span>
             </div>
-            <div className="space-y-1">
+            <div>
                 {attributes.map(attr => {
                     const cap = caps[attr.key] || 100;
                     const percentA = (avgsA[attr.key] / cap) * 100;
                     const percentB = (avgsB[attr.key] / cap) * 100;
+                    const aBold = avgsA[attr.key] > avgsB[attr.key];
+                    const bBold = avgsB[attr.key] > avgsA[attr.key];
                     return (
-                        <div key={attr.key} className="flex items-center gap-2 w-full">
-                            {/* Team A: value and bar (right-aligned) */}
-                            <span className="w-8 text-right text-xs text-blue-700">{avgsA[attr.key]}</span>
+                        <div key={attr.key} className="flex items-center gap-2 w-full py-1 border-b last:border-b-0 border-gray-100">
+                            <span className={`w-8 text-right text-xs ${aBold ? "font-bold text-blue-800" : "text-blue-700"}`}>{avgsA[attr.key]}</span>
                             <div className="flex-1 flex justify-end">
                                 <div
-                                    className="bg-blue-500 h-3 rounded-l"
+                                    className="h-3 rounded-l"
                                     style={{
                                         width: `${percentA}%`,
                                         minWidth: avgsA[attr.key] > 0 ? 12 : 0,
+                                        background: "linear-gradient(to left, #3b82f6, #60a5fa)",
                                         transition: "width 0.3s"
                                     }}
                                 />
                             </div>
-                            {/* Center label */}
-                            <span className="w-20 text-xs text-gray-500 text-center">{attr.label}</span>
-                            {/* Team B: bar and value (left-aligned) */}
+                            <span className="w-20 text-xs text-gray-700 text-center font-medium">{attr.label}</span>
                             <div className="flex-1 flex">
                                 <div
-                                    className="bg-red-500 h-3 rounded-r"
+                                    className="h-3 rounded-r"
                                     style={{
                                         width: `${percentB}%`,
                                         minWidth: avgsB[attr.key] > 0 ? 12 : 0,
+                                        background: "linear-gradient(to right, #ef4444, #f87171)",
                                         transition: "width 0.3s"
                                     }}
                                 />
                             </div>
-                            <span className="w-8 text-left text-xs text-red-700">{avgsB[attr.key]}</span>
+                            <span className={`w-8 text-left text-xs ${bBold ? "font-bold text-red-800" : "text-red-700"}`}>{avgsB[attr.key]}</span>
                         </div>
                     );
                 })}
