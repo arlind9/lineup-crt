@@ -189,8 +189,6 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
         return false;
     };
 
-    const avg = (key) => players.length ? Math.round(players.reduce((s, p) => s + (p?.[key] || 0), 0) / players.filter(Boolean).length) : 0;
-
     const compatiblePlayers = (pos) =>
         allPlayers.filter(
             (p) =>
@@ -285,18 +283,6 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
             <div className="grid grid-cols-3 gap-2 mb-4">
                 {lineup}
             </div>
-            {players.length > 0 && (
-                <div className="text-sm space-y-1">
-                    <p>Avg Overall: {avg("overall")}</p>
-                    <p>
-                        Speed: {avg("speed")}, Passing: {avg("passing")}, Shooting: {avg("shooting")}, Dribbling: {avg("dribbling")}
-                    </p>
-                    <p>
-                        Physical: {avg("physical")}, Defending: {avg("defending")}, Weak Foot: {avg("weakFoot")}, Goalkeeping: {avg("goalkeeping")}
-                        Physical: {avg("physical")}, Defending: {avg("defending")}, Weak Foot: {avg("weakFoot")}, Goalkeeping: {avg("goalkeeping")}
-                    </p>
-                </div>
-            )}
         </div>
     );
 }
