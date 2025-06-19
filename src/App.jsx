@@ -92,6 +92,8 @@ function TeamAttributesBarChart({ players }) {
     );
 }
 
+
+
 function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel = "Team A", teamBLabel = "Team B" }) {
     const attributes = [
         { key: "overall", label: "Overall" },
@@ -267,8 +269,9 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
                     </>
                 ) : (
                     <div
-                        className="text-muted-foreground italic cursor-pointer"
+                        className="w-full h-full flex items-center justify-center text-muted-foreground italic cursor-pointer"
                         onClick={() => setActiveSlot(i)}
+                        style={{ minHeight: 56 }}
                     >
                         {pos}
                         {activeSlot === i && (
@@ -544,4 +547,7 @@ export default function App() {
             </DndContext>
         </div>
     );
+
+
 }
+
