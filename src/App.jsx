@@ -28,7 +28,18 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
 
     if (!open) return null;
 
-    const filtered = players.filter(
+    // Sort: first players with the same position as slotLabel, then others, both by highest overall
+    const sortedPlayers = [...players].sort((a, b) => {
+        // slotLabel is "GK", "DF", "MF", or "ST"
+        const aMatch = a.position === slotLabel;
+        const bMatch = b.position === slotLabel;
+        if (aMatch && !bMatch) return -1;
+        if (!aMatch && bMatch) return 1;
+        // If both match or both don't, sort by overall descending
+        return b.overall - a.overall;
+    });
+
+    const filtered = sortedPlayers.filter(
         p =>
             p.name.toLowerCase().includes(search.toLowerCase())
     );
