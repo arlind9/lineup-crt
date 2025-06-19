@@ -1,7 +1,80 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { DndContext, closestCenter } from '@dnd-kit/core';
+
+// --- Helper for nice glass effect ---
+const glass = "backdrop-blur-md bg-white/80 shadow-lg border border-gray-200";
+
+// --- PlayerSelectModal: Modal for picking a player with search ---
+function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
+    const [search, setSearch] = useState("");
+    const modalRef = useRef(null);
+
+    // Close on outside click or Escape
+    useEffect(() => {
+        if (!open) return;
+        function handle(e) {
+            if (modalRef.current && !modalRef.current.contains(e.target)) onClose();
+            if (e.key === "Escape") onClose();
+        }
+        document.addEventListener("mousedown", handle);
+        document.addEventListener("keydown", handle);
+        return () => {
+            document.removeEventListener("mousedown", handle);
+            document.removeEventListener("keydown", handle);
+        };
+    }, [open, onClose]);
+
+    if (!open) return null;
+
+    const filtered = players.filter(
+        p =>
+            p.name.toLowerCase().includes(search.toLowerCase())
+    );
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+            <div ref={modalRef} className={`w-full max-w-xs bg-white rounded-xl shadow-xl border p-4 ${glass} relative`}>
+                <button
+                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg font-bold"
+                    onClick={onClose}
+                    aria-label="Close"
+                    type="button"
+                >×</button>
+                <div className="mb-2 text-base font-semibold text-center text-green-900">
+                    Select Player {slotLabel ? `for ${slotLabel}` : ""}
+                </div>
+                <Input
+                    autoFocus
+                    placeholder="Search players..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="mb-3"
+                />
+                <div className="max-h-64 overflow-y-auto">
+                    {filtered.length === 0 ? (
+                        <div className="text-xs text-gray-400 p-2 text-center">No available players</div>
+                    ) : (
+                        filtered.map(p => (
+                            <div
+                                key={p.name}
+                                className="p-2 rounded hover:bg-blue-100 cursor-pointer flex justify-between items-center"
+                                onClick={() => onSelect(p)}
+                            >
+                                <span>
+                                    <span className="font-semibold">{p.name}</span>
+                                    <span className="text-gray-500 ml-1">({p.position})</span>
+                                </span>
+                                <span className="text-gray-400 text-xs">OVR: {p.overall}</span>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
 
 function TeamAttributesBarChart({ players }) {
     // Only consider filled slots
@@ -92,9 +165,7 @@ function TeamAttributesBarChart({ players }) {
     );
 }
 
-
-
-function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel = "Team A", teamBLabel = "Team B" }) {
+function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel = "Team A", teamBLabel = "Team B", onHide }) {
     const attributes = [
         { key: "overall", label: "Overall" },
         { key: "speed", label: "Speed" },
@@ -135,7 +206,18 @@ function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel
     });
 
     return (
-        <div className="mb-6 max-w-2xl mx-auto bg-white rounded-xl shadow p-4 border">
+        <div className="mb-6 max-w-2xl mx-auto bg-white rounded-xl shadow p-4 border relative">
+            {/* Hide button */}
+            {onHide && (
+                <button
+                    onClick={onHide}
+                    className="absolute top-2 right-2 px-2 py-0.5 rounded text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold shadow transition"
+                    aria-label="Hide attribute comparison"
+                    type="button"
+                >
+                    Hide
+                </button>
+            )}
             <div className="text-base font-bold mb-2 text-center text-gray-700">Attribute Comparison</div>
             <div className="flex justify-between text-xs font-semibold mb-2">
                 <span className="w-24 text-left text-blue-700">{teamALabel}</span>
@@ -183,9 +265,51 @@ function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel
     );
 }
 
-function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers, onFormationChange }) {
-    const [activeSlot, setActiveSlot] = useState(null);
+// Utility: calculate attributes for a player as if they were playing in a different position
+function getPlayerWithPositionAttributes(player, newPosition) {
+    if (!player) return null;
+    // If already in that position, return as is
+    if (player.position === newPosition) return { ...player };
 
+    // Use the same weights as in calculateOverall for each position
+    // We'll recalculate overall, but also optionally adjust other attributes if needed
+    // For now, only overall is recalculated, but you can expand this if you want to simulate attribute drops/boosts
+
+    const { speed, shooting, passing, dribbling, physical, defending, goalkeeping, weakFoot } = player;
+    let overall = 0;
+    switch (newPosition) {
+        case "ST":
+            overall = Math.round(speed * 0.25 + shooting * 0.3 + passing * 0.1 + dribbling * 0.15 + physical * 0.1 + defending * 0.1 + weakFoot * 0.1);
+            break;
+        case "MF":
+            overall = Math.round(speed * 0.2 + shooting * 0.2 + passing * 0.25 + dribbling * 0.2 + physical * 0.1 + defending * 0.1 + weakFoot * 0.05);
+            break;
+        case "DF":
+            overall = Math.round(speed * 0.1 + shooting * 0.05 + passing * 0.15 + dribbling * 0.05 + physical * 0.2 + defending * 0.45 + weakFoot * 0.03);
+            break;
+        case "GK":
+            overall = Math.round(speed * 0.03 + passing * 0.02 + physical * 0.05 + goalkeeping * 0.9 + weakFoot * 0.02);
+            break;
+        default:
+            overall = 0;
+    }
+    // Return a new player object with the new position and recalculated overall
+    return { ...player, position: newPosition, overall };
+}
+
+function DroppableTeam({
+    id,
+    label,
+    players,
+    formation,
+    onPlayerDrop,
+    allPlayers,
+    onFormationChange,
+    globalActiveSlot,
+    setGlobalActiveSlot,
+    playerSelectModal, // new prop
+    setPlayerSelectModal, // new prop
+}) {
     const formationMap = {
         "4-4-1": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST"],
         "4-3-2": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
@@ -195,116 +319,187 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
         "3-3-3": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST", "ST"],
         "3-4-2": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST", "ST"],
         "3-5-1": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "MF", "ST"],
-        "3-2-4": ["GK", "DF", "DF", "DF", "MF", "MF", "ST", "ST", "ST", "ST"]
+        "3-2-4": ["GK", "DF", "DF", "DF", "MF", "MF", "ST", "ST", "ST", "ST"],
     };
 
     const formationPositions = formationMap[formation] || formationMap["3-3-3"];
 
-    const isPositionCompatible = (slotPos, playerPos) => {
+    // Allow any player to be dragged to any position except: 
+    // - Only allow GK in GK slot
+    // - Do not allow GK to be placed in non-GK slots
+    function isPositionCompatible(slotPos, playerPos) {
         if (slotPos === "GK") return playerPos === "GK";
-        if (slotPos === "DF") return playerPos === "DF";
-        if (slotPos === "MF") return playerPos === "MF";
-        if (slotPos === "ST") return playerPos === "ST";
-        return false;
-    };
+        if (playerPos === "GK") return false; // Prevent GK in non-GK slots
+        return true; // Allow any other player in any other slot
+    }
 
-    const compatiblePlayers = (pos) =>
+    // Returns eligible players for a given slot position (for the popup list)
+    const eligiblePlayersForSlot = (slotPos) =>
         allPlayers.filter(
             (p) =>
-                isPositionCompatible(pos, p.position) &&
+                isPositionCompatible(slotPos, p.position) &&
                 !players.some((pl) => pl && pl.name === p.name)
         );
 
     const handlePlayerSelect = (slotIdx, player) => {
+        const slotPos = formationPositions[slotIdx];
+        const playerForSlot = getPlayerWithPositionAttributes(player, slotPos);
         onPlayerDrop({
             toTeam: id,
             toIndex: slotIdx,
             fromTeam: null,
             fromIndex: null,
-            player,
+            player: playerForSlot,
         });
-        setActiveSlot(null);
+        setGlobalActiveSlot(null);
+        setPlayerSelectModal({ open: false });
     };
 
-    const lineup = formationPositions.map((pos, i) => {
-        const player = players[i];
-        return (
-            <div
-                key={i}
-                className="border rounded p-2 text-xs text-center min-h-[72px] bg-white relative"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                    const data = JSON.parse(e.dataTransfer.getData("application/json"));
-                    if (isPositionCompatible(pos, data.player.position)) {
-                        onPlayerDrop({
-                            toTeam: id,
-                            toIndex: i,
-                            fromTeam: data.fromTeam,
-                            fromIndex: data.fromIndex,
-                            player: data.player,
-                        });
-                    }
-                }}
-            >
-                {player ? (
-                    <>
-                        <button
-                            onClick={() => onPlayerDrop({
-                                toTeam: id,
-                                toIndex: i,
-                                fromTeam: id,
-                                fromIndex: i,
-                                player: null,
-                                remove: true
-                            })}
-                            className="absolute top-1 right-1 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white border border-gray-300 text-xl font-bold text-red-500 hover:bg-red-100 hover:text-red-700 transition"
-                            title="Remove"
-                            tabIndex={0}
-                            aria-label="Remove player"
-                            type="button"
-                        >
-                            ×
-                        </button>
-                        <DraggablePlayer player={player} fromTeam={id} fromIndex={i} small assigned />
-                    </>
-                ) : (
-                    <div
-                        className="w-full h-full flex items-center justify-center text-muted-foreground italic cursor-pointer"
-                        onClick={() => setActiveSlot(i)}
-                        style={{ minHeight: 56 }}
-                    >
-                        {pos}
-                        {activeSlot === i && (
-                            <div className="absolute left-0 top-full mt-2 w-full z-20 bg-white border rounded shadow max-h-48 overflow-auto">
-                                {compatiblePlayers(pos).length === 0 ? (
-                                    <div className="p-2 text-xs text-gray-400">No available players</div>
-                                ) : (
-                                    compatiblePlayers(pos).map((p) => (
-                                        <div
-                                            key={p.name}
-                                            className="p-2 hover:bg-blue-100 cursor-pointer text-left text-xs"
-                                            onClick={() => handlePlayerSelect(i, p)}
-                                        >
-                                            <span className="font-semibold">{p.name}</span> <span className="text-gray-500">({p.position})</span> <span className="text-gray-400">OVR: {p.overall}</span>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
-        );
-    });
+    // Map slot index to pitch coordinates (percentages)
+    // These are rough, but visually pleasing for 10 players (1 GK, 3-5 DF, 2-5 MF, 1-4 ST)
+    function getSlotStyle(pos, idx) {
+        // For each formation, define a layout (row, col) for each slot
+        // We'll use a normalized pitch: 0% (top, own goal) to 100% (bottom, opponent goal)
+        // Left to right: 0% to 100%
+        // We'll use a map of arrays for each formation
+        // If not found, fallback to a default
+        const layouts = {
+            "3-3-3": [
+                // GK, 3 DF, 3 MF, 3 ST
+                { top: "92%", left: "50%" }, // GK
+                { top: "75%", left: "20%" },
+                { top: "75%", left: "50%" },
+                { top: "75%", left: "80%" },
+                { top: "55%", left: "20%" },
+                { top: "55%", left: "50%" },
+                { top: "55%", left: "80%" },
+                { top: "30%", left: "20%" },
+                { top: "30%", left: "50%" },
+                { top: "30%", left: "80%" },
+            ],
+            "4-4-1": [
+                { top: "92%", left: "50%" }, // GK
+                { top: "75%", left: "15%" },
+                { top: "75%", left: "38%" },
+                { top: "75%", left: "62%" },
+                { top: "75%", left: "85%" },
+                { top: "55%", left: "15%" },
+                { top: "55%", left: "38%" },
+                { top: "55%", left: "62%" },
+                { top: "55%", left: "85%" },
+                { top: "30%", left: "50%" },
+            ],
+            "4-3-2": [
+                { top: "92%", left: "50%" }, // GK
+                { top: "75%", left: "15%" },
+                { top: "75%", left: "38%" },
+                { top: "75%", left: "62%" },
+                { top: "75%", left: "85%" },
+                { top: "55%", left: "25%" },
+                { top: "55%", left: "50%" },
+                { top: "55%", left: "75%" },
+                { top: "35%", left: "35%" },
+                { top: "35%", left: "65%" },
+            ],
+            "4-2-3": [
+                { top: "92%", left: "50%" }, // GK
+                { top: "75%", left: "15%" },
+                { top: "75%", left: "38%" },
+                { top: "75%", left: "62%" },
+                { top: "75%", left: "85%" },
+                { top: "55%", left: "30%" },
+                { top: "55%", left: "70%" },
+                { top: "35%", left: "25%" },
+                { top: "35%", left: "50%" },
+                { top: "35%", left: "75%" },
+            ],
+            "5-2-2": [
+                { top: "92%", left: "50%" }, // GK
+                { top: "80%", left: "10%" },
+                { top: "80%", left: "30%" },
+                { top: "80%", left: "50%" },
+                { top: "80%", left: "70%" },
+                { top: "80%", left: "90%" },
+                { top: "60%", left: "35%" },
+                { top: "60%", left: "65%" },
+                { top: "35%", left: "35%" },
+                { top: "35%", left: "65%" },
+            ],
+            "5-3-1": [
+                { top: "92%", left: "50%" }, // GK
+                { top: "80%", left: "10%" },
+                { top: "80%", left: "30%" },
+                { top: "80%", left: "50%" },
+                { top: "80%", left: "70%" },
+                { top: "80%", left: "90%" },
+                { top: "60%", left: "25%" },
+                { top: "60%", left: "50%" },
+                { top: "60%", left: "75%" },
+                { top: "35%", left: "50%" },
+            ],
+            "3-4-2": [
+                { top: "92%", left: "50%" }, // GK
+                { top: "75%", left: "20%" },
+                { top: "75%", left: "50%" },
+                { top: "75%", left: "80%" },
+                { top: "55%", left: "15%" },
+                { top: "55%", left: "38%" },
+                { top: "55%", left: "62%" },
+                { top: "55%", left: "85%" },
+                { top: "30%", left: "35%" },
+                { top: "30%", left: "65%" },
+            ],
+            "3-5-1": [
+                { top: "92%", left: "50%" }, // GK
+                { top: "75%", left: "20%" },
+                { top: "75%", left: "50%" },
+                { top: "75%", left: "80%" },
+                { top: "55%", left: "10%" },
+                { top: "55%", left: "30%" },
+                { top: "55%", left: "50%" },
+                { top: "55%", left: "70%" },
+                { top: "55%", left: "90%" },
+                { top: "30%", left: "50%" },
+            ],
+            "3-2-4": [
+                { top: "92%", left: "50%" }, // GK
+                { top: "75%", left: "20%" },
+                { top: "75%", left: "50%" },
+                { top: "75%", left: "80%" },
+                { top: "55%", left: "30%" },
+                { top: "55%", left: "70%" },
+                { top: "30%", left: "15%" },
+                { top: "30%", left: "38%" },
+                { top: "30%", left: "62%" },
+                { top: "30%", left: "85%" },
+            ],
+        };
+        const layout = layouts[formation] || layouts["3-3-3"];
+        return layout[idx] || { top: "50%", left: "50%" };
+    }
 
+    // Pitch background and player positions
     return (
-        <div className="bg-muted p-4 rounded-xl min-h-[300px]">
-            <div className="flex items-center gap-2 mb-4">
-                <h3 className="font-bold text-lg">{label} ({players.filter(Boolean).length}/10)</h3>
+        <div className="relative bg-gradient-to-b from-green-600 to-green-800 rounded-2xl min-h-[420px] md:min-h-[520px] overflow-hidden shadow-2xl border-2 border-green-900">
+            {/* Pitch Markings */}
+            <div className="absolute inset-0 pointer-events-none">
+                {/* Outer lines */}
+                <div className="absolute border-4 border-white rounded-2xl w-[96%] h-[96%] left-[2%] top-[2%]" />
+                {/* Center circle */}
+                <div className="absolute left-1/2 top-[50%] -translate-x-1/2 -translate-y-1/2 border-2 border-white rounded-full w-24 h-24" />
+                {/* Halfway line */}
+                <div className="absolute left-0 top-1/2 w-full h-0.5 bg-white opacity-80" />
+                {/* Penalty box (bottom) */}
+                <div className="absolute left-1/2 bottom-0 -translate-x-1/2 border-2 border-white w-[40%] h-[16%] rounded-b-lg" style={{ borderTop: "none" }} />
+                {/* Penalty box (top) */}
+                <div className="absolute left-1/2 top-0 -translate-x-1/2 border-2 border-white w-[40%] h-[16%] rounded-t-lg" style={{ borderBottom: "none" }} />
+            </div>
+            <div className="absolute left-4 top-4 flex items-center gap-2 z-10">
+                <h3 className="font-bold text-lg text-white drop-shadow">{label} <span className="text-green-200">({players.filter(Boolean).length}/10)</span></h3>
                 <select
                     value={formation}
                     onChange={(e) => onFormationChange(e.target.value)}
-                    className="border p-1 rounded text-sm"
+                    className="border p-1 rounded text-sm bg-white/90 shadow"
                 >
                     {[
                         "3-3-3", "3-4-2", "3-5-1", "3-2-4",
@@ -315,8 +510,102 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
                     ))}
                 </select>
             </div>
-            <div className="grid grid-cols-3 gap-2 mb-4">
-                {lineup}
+            {/* Players on pitch */}
+            <div className="w-full h-full absolute inset-0">
+                {formationPositions.map((pos, i) => {
+                    const player = players[i];
+                    const slotKey = `${id}-${i}`;
+                    const style = {
+                        position: "absolute",
+                        ...getSlotStyle(pos, i),
+                        transform: "translate(-50%, -50%)",
+                        zIndex: 10,
+                        minWidth: 64,
+                        maxWidth: 120,
+                    };
+                    return (
+                        <div
+                            key={i}
+                            style={style}
+                            onDragOver={(e) => e.preventDefault()}
+                            onDrop={(e) => {
+                                const data = JSON.parse(e.dataTransfer.getData("application/json"));
+                                if (!data.player) return;
+                                if (!isPositionCompatible(pos, data.player.position)) return;
+                                // Recalculate attributes for the slot's position
+                                const playerForSlot = getPlayerWithPositionAttributes(data.player, pos);
+
+                                if (player && (data.fromTeam === id) && typeof data.fromIndex === "number" && data.fromIndex !== i) {
+                                    // Swap: recalculate both
+                                    const swapWith = getPlayerWithPositionAttributes(players[data.fromIndex], pos);
+                                    onPlayerDrop({
+                                        toTeam: id,
+                                        toIndex: i,
+                                        fromTeam: id,
+                                        fromIndex: data.fromIndex,
+                                        player: swapWith,
+                                        swapWith: playerForSlot,
+                                    });
+                                } else {
+                                    onPlayerDrop({
+                                        toTeam: id,
+                                        toIndex: i,
+                                        fromTeam: data.fromTeam,
+                                        fromIndex: data.fromIndex,
+                                        player: playerForSlot,
+                                    });
+                                }
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (!player) {
+                                    setPlayerSelectModal({
+                                        open: true,
+                                        slotIdx: i,
+                                        slotLabel: pos,
+                                        eligiblePlayers: eligiblePlayersForSlot(pos),
+                                        onSelect: (p) => handlePlayerSelect(i, p),
+                                    });
+                                }
+                            }}
+                            onDoubleClick={(e) => {
+                                e.stopPropagation();
+                                if (!player) setGlobalActiveSlot(null);
+                            }}
+                        >
+                            {player ? (
+                                <div
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onPlayerDrop({
+                                            toTeam: id,
+                                            toIndex: i,
+                                            fromTeam: id,
+                                            fromIndex: i,
+                                            player: null,
+                                            remove: true,
+                                        });
+                                    }}
+                                    className="cursor-pointer group"
+                                    title="Remove player"
+                                    tabIndex={0}
+                                    style={{ outline: "none" }}
+                                >
+                                    <div className={`rounded-full border-2 border-white shadow-lg bg-gradient-to-br from-green-200/80 to-green-100/80 p-0.5 transition group-hover:scale-105`}>
+                                        <DraggablePlayer player={player} fromTeam={id} fromIndex={i} small assigned />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div
+                                    className="w-full h-full flex items-center justify-center text-white/80 italic cursor-pointer bg-green-900/40 rounded-full border-2 border-dashed border-white"
+                                    style={{ minHeight: 56, minWidth: 56, height: 56, width: 56 }}
+                                >
+                                    {pos}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
@@ -326,10 +615,11 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
     return (
         <Card
             className={
-                "border border-gray-300 cursor-move space-y-1 " +
-                (assigned ? "bg-green-50 border-green-400 " : "") +
-                (selected ? "bg-blue-100 border-blue-400 " : "") +
-                (small ? "p-1 text-xs min-h-0" : "p-4 text-sm")
+                "border cursor-move space-y-1 transition-all duration-150 " +
+                (assigned ? "bg-green-100/80 border-green-400 shadow-green-200 " : "") +
+                (selected ? "bg-blue-100/80 border-blue-400 shadow-blue-200 " : "") +
+                (small ? "p-1 text-xs min-h-0" : "p-4 text-sm") +
+                " rounded-xl shadow"
             }
             draggable
             onDragStart={(e) => {
@@ -340,7 +630,7 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
                 }));
             }}
         >
-            <div className={small ? "font-semibold text-xs" : "font-semibold text-base"}>{player.name}</div>
+            <div className={small ? "font-semibold text-xs truncate" : "font-semibold text-base truncate"}>{player.name}</div>
             <div className={small ? "text-[10px] text-muted-foreground" : "text-xs text-muted-foreground"}>{player.position}</div>
             {!small && (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
@@ -369,7 +659,13 @@ export default function App() {
     const [sortBy, setSortBy] = useState("overall");
     const [teamA, setTeamA] = useState(Array(10).fill(null));
     const [teamB, setTeamB] = useState(Array(10).fill(null));
-    const [hideSelected, setHideSelected] = useState(false); // <-- NEW
+    const [hideSelected, setHideSelected] = useState(false);
+    const [showComparison, setShowComparison] = useState(true);
+
+    const [globalActiveSlot, setGlobalActiveSlot] = useState(null);
+
+    // Modal state for player selection
+    const [playerSelectModal, setPlayerSelectModal] = useState({ open: false });
 
     const assignedNames = [
         ...teamA.filter(Boolean).map(p => p.name),
@@ -430,25 +726,40 @@ export default function App() {
         }
     };
 
-    // Handles moving/removing players between/within teams
-    const handlePlayerDrop = ({ toTeam, toIndex, fromTeam, fromIndex, player, remove }) => {
+    const handlePlayerDrop = ({
+        toTeam,
+        toIndex,
+        fromTeam,
+        fromIndex,
+        player,
+        remove,
+        swapWith,
+    }) => {
         let newTeamA = [...teamA];
         let newTeamB = [...teamB];
 
-        // Remove player
         if (remove) {
             if (toTeam === "teamA") newTeamA[toIndex] = null;
             if (toTeam === "teamB") newTeamB[toIndex] = null;
+        } else if (swapWith && fromTeam === toTeam && typeof fromIndex === "number") {
+            // Swap players within the same team
+            if (toTeam === "teamA") {
+                const temp = newTeamA[toIndex];
+                newTeamA[toIndex] = swapWith;
+                newTeamA[fromIndex] = temp;
+            }
+            if (toTeam === "teamB") {
+                const temp = newTeamB[toIndex];
+                newTeamB[toIndex] = swapWith;
+                newTeamB[fromIndex] = temp;
+            }
         } else {
-            // Remove from previous slot if present
             if (fromTeam === "teamA" && typeof fromIndex === "number") newTeamA[fromIndex] = null;
             if (fromTeam === "teamB" && typeof fromIndex === "number") newTeamB[fromIndex] = null;
 
-            // Remove duplicate in target team
             if (toTeam === "teamA") newTeamA = newTeamA.map((p, idx) => (p && p.name === player.name && idx !== toIndex ? null : p));
             if (toTeam === "teamB") newTeamB = newTeamB.map((p, idx) => (p && p.name === player.name && idx !== toIndex ? null : p));
 
-            // Place in new slot
             if (toTeam === "teamA") newTeamA[toIndex] = player;
             if (toTeam === "teamB") newTeamB[toIndex] = player;
         }
@@ -457,97 +768,139 @@ export default function App() {
         setTeamB(newTeamB);
     };
 
-    // --- Filter out selected players if toggle is on ---
     const availablePlayers = hideSelected
         ? filtered.filter(p => !assignedNames.includes(p.name))
         : filtered;
 
+    const mainRef = useRef(null);
+    useEffect(() => {
+        const handleClick = (e) => {
+            if (mainRef.current && !mainRef.current.contains(e.target)) {
+                setGlobalActiveSlot(null);
+            }
+        };
+        if (globalActiveSlot !== null) {
+            document.addEventListener("mousedown", handleClick);
+        } else {
+            document.removeEventListener("mousedown", handleClick);
+        }
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, [globalActiveSlot]);
+
     return (
-        <div className="p-4 max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold mb-4 text-center">Lineup Creator A</h1>
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-                <Input type="text" placeholder="Search players..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full md:w-1/2" />
-                <div className="flex gap-2">
-                    {["All", "ST", "MF", "DF", "GK"].map((pos) => (
-                        <button
-                            key={pos}
-                            className={`px-3 py-1 rounded ${positionFilter === pos ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-                            onClick={() => setPositionFilter(pos)}
-                        >
-                            {pos}
-                        </button>
-                    ))}
+        <div className="p-4 max-w-7xl mx-auto" ref={mainRef}>
+            <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
+            <div className="flex flex-col md:flex-row gap-6">
+                {/* Main content */}
+                <div className="flex-1">
+                    <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-4 ${glass}`}>
+                        <Input type="text" placeholder="Search players..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full md:w-1/2" />
+                        <div className="flex gap-2">
+                            {["All", "ST", "MF", "DF", "GK"].map((pos) => (
+                                <button
+                                    key={pos}
+                                    className={`px-3 py-1 rounded font-semibold transition ${positionFilter === pos ? "bg-blue-500 text-white shadow" : "bg-gray-200 hover:bg-blue-100"}`}
+                                    onClick={() => setPositionFilter(pos)}
+                                >
+                                    {pos}
+                                </button>
+                            ))}
+                        </div>
+                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border p-2 rounded-md bg-white/90 shadow">
+                            {["overall", "speed", "shooting", "passing", "dribbling", "physical", "defending"].map(key => (
+                                <option key={key} value={key}>Sort by {key.charAt(0).toUpperCase() + key.slice(1)}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <DndContext collisionDetection={closestCenter}>
+                        {/* Show button for attribute comparison */}
+                        {!showComparison && (
+                            <div className="flex justify-center mb-4">
+                                <button
+                                    onClick={() => setShowComparison(true)}
+                                    className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
+                                    type="button"
+                                >
+                                    Show Attribute Comparison
+                                </button>
+                            </div>
+                        )}
+
+                        {showComparison && (
+                            <MirroredTeamAttributesBarChart
+                                teamAPlayers={teamA}
+                                teamBPlayers={teamB}
+                                teamALabel="Team A"
+                                teamBLabel="Team B"
+                                onHide={() => setShowComparison(false)}
+                            />
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <DroppableTeam
+                                id="teamA"
+                                label="Team A"
+                                players={teamA}
+                                onPlayerDrop={handlePlayerDrop}
+                                formation={formationA}
+                                onFormationChange={setFormationA}
+                                allPlayers={players}
+                                globalActiveSlot={globalActiveSlot}
+                                setGlobalActiveSlot={setGlobalActiveSlot}
+                                playerSelectModal={playerSelectModal}
+                                setPlayerSelectModal={setPlayerSelectModal}
+                            />
+                            <DroppableTeam
+                                id="teamB"
+                                label="Team B"
+                                players={teamB}
+                                onPlayerDrop={handlePlayerDrop}
+                                formation={formationB}
+                                onFormationChange={setFormationB}
+                                allPlayers={players}
+                                globalActiveSlot={globalActiveSlot}
+                                setGlobalActiveSlot={setGlobalActiveSlot}
+                                playerSelectModal={playerSelectModal}
+                                setPlayerSelectModal={setPlayerSelectModal}
+                            />
+                        </div>
+
+                        <PlayerSelectModal
+                            open={playerSelectModal.open}
+                            onClose={() => setPlayerSelectModal({ open: false })}
+                            players={playerSelectModal.eligiblePlayers || []}
+                            onSelect={playerSelectModal.onSelect || (() => {})}
+                            slotLabel={playerSelectModal.slotLabel}
+                        />
+
+                        <div className={`flex items-center mb-2 gap-2 ${glass}`}>
+                            <h2 className="text-xl font-semibold text-green-900">Available Players</h2>
+                            <label className="flex items-center gap-1 text-sm font-normal cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={hideSelected}
+                                    onChange={e => setHideSelected(e.target.checked)}
+                                    className="accent-blue-500"
+                                />
+                                Hide selected
+                            </label>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                            {availablePlayers.map((p) => (
+                                <DraggablePlayer
+                                    key={p.name}
+                                    player={p}
+                                    fromTeam={null}
+                                    fromIndex={null}
+                                    selected={assignedNames.includes(p.name)}
+                                />
+                            ))}
+                        </div>
+                    </DndContext>
                 </div>
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border p-2 rounded-md">
-                    {["overall", "speed", "shooting", "passing", "dribbling", "physical", "defending"].map(key => (
-                        <option key={key} value={key}>Sort by {key.charAt(0).toUpperCase() + key.slice(1)}</option>
-                    ))}
-                </select>
             </div>
-
-            <DndContext collisionDetection={closestCenter}>
-                {/* Place the comparison chart above the lineups */}
-                <MirroredTeamAttributesBarChart
-                    teamAPlayers={teamA}
-                    teamBPlayers={teamB}
-                    teamALabel="Team A"
-                    teamBLabel="Team B"
-                />
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    {/* Team A */}
-                    <div>
-                        <DroppableTeam
-                            id="teamA"
-                            label="Team A"
-                            players={teamA}
-                            onPlayerDrop={handlePlayerDrop}
-                            formation={formationA}
-                            onFormationChange={setFormationA}
-                            allPlayers={players}
-                        />
-                    </div>
-                    {/* Team B */}
-                    <div>
-                        <DroppableTeam
-                            id="teamB"
-                            label="Team B"
-                            players={teamB}
-                            onPlayerDrop={handlePlayerDrop}
-                            formation={formationB}
-                            onFormationChange={setFormationB}
-                            allPlayers={players}
-                        />
-                    </div>
-                </div>
-
-                <div className="flex items-center mb-2 gap-2">
-                    <h2 className="text-xl font-semibold">Available Players</h2>
-                    <label className="flex items-center gap-1 text-sm font-normal cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={hideSelected}
-                            onChange={e => setHideSelected(e.target.checked)}
-                            className="accent-blue-500"
-                        />
-                        Hide selected
-                    </label>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                    {availablePlayers.map((p) => (
-                        <DraggablePlayer
-                            key={p.name}
-                            player={p}
-                            fromTeam={null}
-                            fromIndex={null}
-                            selected={assignedNames.includes(p.name)}
-                        />
-                    ))}
-                </div>
-            </DndContext>
         </div>
     );
-
-
 }
 
