@@ -28,7 +28,16 @@ function TeamAttributesBarChart({ players }) {
             avgs[attr.key] = gks.length
                 ? Math.round(gks.reduce((sum, p) => sum + (p.goalkeeping || 0), 0) / gks.length)
                 : 0;
+        } else if (
+            ["speed", "shooting", "passing", "dribbling", "physical", "defending"].includes(attr.key)
+        ) {
+            // Exclude GKs from these attributes
+            const nonGKs = filled.filter(p => p.position !== "GK");
+            avgs[attr.key] = nonGKs.length
+                ? Math.round(nonGKs.reduce((sum, p) => sum + (p[attr.key] || 0), 0) / nonGKs.length)
+                : 0;
         } else {
+            // overall and weakFoot: include all
             avgs[attr.key] = Math.round(
                 filled.reduce((sum, p) => sum + (p[attr.key] || 0), 0) / filled.length
             );
@@ -104,7 +113,15 @@ function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel
                 ? Math.round(gks.reduce((sum, p) => sum + (p.goalkeeping || 0), 0) / gks.length)
                 : 0;
         }
+        if (["speed", "shooting", "passing", "dribbling", "physical", "defending"].includes(key)) {
+            // Exclude GKs from these attributes
+            const nonGKs = filled.filter(p => p.position !== "GK");
+            return nonGKs.length
+                ? Math.round(nonGKs.reduce((sum, p) => sum + (p[key] || 0), 0) / nonGKs.length)
+                : 0;
+        }
         if (!filled.length) return 0;
+        // overall and weakFoot: include all
         return Math.round(filled.reduce((sum, p) => sum + (p[key] || 0), 0) / filled.length);
     }
 
@@ -164,13 +181,13 @@ function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel
     );
 }
 
-function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers }) {
+function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers, onFormationChange }) {
     const [activeSlot, setActiveSlot] = useState(null);
 
     const formationMap = {
         "4-4-1": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST"],
         "4-3-2": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
-        "4-2-3": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
+        "4-2-3": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "ST", "ST", "ST"],
         "5-2-2": ["GK", "DF", "DF", "DF", "DF", "DF", "MF", "MF", "ST", "ST"],
         "5-3-1": ["GK", "DF", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST"],
         "3-3-3": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST", "ST"],
@@ -279,7 +296,22 @@ function DroppableTeam({ id, label, players, formation, onPlayerDrop, allPlayers
 
     return (
         <div className="bg-muted p-4 rounded-xl min-h-[300px]">
-            <h3 className="font-bold text-lg mb-4">{label} ({players.filter(Boolean).length}/10)</h3>
+            <div className="flex items-center gap-2 mb-4">
+                <h3 className="font-bold text-lg">{label} ({players.filter(Boolean).length}/10)</h3>
+                <select
+                    value={formation}
+                    onChange={(e) => onFormationChange(e.target.value)}
+                    className="border p-1 rounded text-sm"
+                >
+                    {[
+                        "3-3-3", "3-4-2", "3-5-1", "3-2-4",
+                        "4-4-1", "4-3-2", "4-2-3",
+                        "5-2-2", "5-3-1"
+                    ].map(f => (
+                        <option key={f} value={f}>{f}</option>
+                    ))}
+                </select>
+            </div>
             <div className="grid grid-cols-3 gap-2 mb-4">
                 {lineup}
             </div>
@@ -334,6 +366,7 @@ export default function App() {
     const [sortBy, setSortBy] = useState("overall");
     const [teamA, setTeamA] = useState(Array(10).fill(null));
     const [teamB, setTeamB] = useState(Array(10).fill(null));
+    const [hideSelected, setHideSelected] = useState(false); // <-- NEW
 
     const assignedNames = [
         ...teamA.filter(Boolean).map(p => p.name),
@@ -421,6 +454,11 @@ export default function App() {
         setTeamB(newTeamB);
     };
 
+    // --- Filter out selected players if toggle is on ---
+    const availablePlayers = hideSelected
+        ? filtered.filter(p => !assignedNames.includes(p.name))
+        : filtered;
+
     return (
         <div className="p-4 max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold mb-4 text-center">Lineup Creator A</h1>
@@ -454,27 +492,46 @@ export default function App() {
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <DroppableTeam
-                        id="teamA"
-                        label="Team A"
-                        players={teamA}
-                        onPlayerDrop={handlePlayerDrop}
-                        formation={formationA}
-                        allPlayers={players}
-                    />
-                    <DroppableTeam
-                        id="teamB"
-                        label="Team B"
-                        players={teamB}
-                        onPlayerDrop={handlePlayerDrop}
-                        formation={formationB}
-                        allPlayers={players}
-                    />
+                    {/* Team A */}
+                    <div>
+                        <DroppableTeam
+                            id="teamA"
+                            label="Team A"
+                            players={teamA}
+                            onPlayerDrop={handlePlayerDrop}
+                            formation={formationA}
+                            onFormationChange={setFormationA}
+                            allPlayers={players}
+                        />
+                    </div>
+                    {/* Team B */}
+                    <div>
+                        <DroppableTeam
+                            id="teamB"
+                            label="Team B"
+                            players={teamB}
+                            onPlayerDrop={handlePlayerDrop}
+                            formation={formationB}
+                            onFormationChange={setFormationB}
+                            allPlayers={players}
+                        />
+                    </div>
                 </div>
 
-                <h2 className="text-xl font-semibold mb-2">Available Players</h2>
+                <div className="flex items-center mb-2 gap-2">
+                    <h2 className="text-xl font-semibold">Available Players</h2>
+                    <label className="flex items-center gap-1 text-sm font-normal cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={hideSelected}
+                            onChange={e => setHideSelected(e.target.checked)}
+                            className="accent-blue-500"
+                        />
+                        Hide selected
+                    </label>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                    {filtered.map((p) => (
+                    {availablePlayers.map((p) => (
                         <DraggablePlayer
                             key={p.name}
                             player={p}
