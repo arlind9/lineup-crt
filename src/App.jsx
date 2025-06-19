@@ -1,7 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import {
+    DndContext,
+    closestCenter,
+    PointerSensor,
+    TouchSensor,
+    useSensor,
+    useSensors,
+    DragOverlay,
+} from '@dnd-kit/core';
 
 // --- Helper for nice glass effect ---
 const glass = "backdrop-blur-md bg-white/80 shadow-lg border border-gray-200";
@@ -622,9 +630,36 @@ function DroppableTeam({
     );
 }
 
-function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selected }) {
+function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selected, onDragStart, onDragEnd }) {
+    // Add touch event handlers for mobile fallback
+    const dragRef = useRef(null);
+
+    useEffect(() => {
+        const node = dragRef.current;
+        if (!node) return;
+
+        let touchStart = null;
+
+        function handleTouchStart(e) {
+            touchStart = e;
+            if (onDragStart) onDragStart(player, fromTeam, fromIndex);
+        }
+        function handleTouchEnd(e) {
+            if (onDragEnd) onDragEnd();
+        }
+
+        node.addEventListener("touchstart", handleTouchStart, { passive: true });
+        node.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+        return () => {
+            node.removeEventListener("touchstart", handleTouchStart);
+            node.removeEventListener("touchend", handleTouchEnd);
+        };
+    }, [player, fromTeam, fromIndex, onDragStart, onDragEnd]);
+
     return (
         <Card
+            ref={dragRef}
             className={
                 "border cursor-move space-y-1 transition-all duration-150 " +
                 (assigned ? "bg-green-100/80 border-green-400 shadow-green-200 " : "") +
@@ -639,7 +674,9 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
                     fromTeam,
                     fromIndex
                 }));
+                if (onDragStart) onDragStart(player, fromTeam, fromIndex);
             }}
+            onDragEnd={onDragEnd}
         >
             <div className={small ? "font-semibold text-xs truncate" : "font-semibold text-base truncate"}>{player.name}</div>
             <div className={small ? "text-[10px] text-muted-foreground" : "text-xs text-muted-foreground"}>{player.position}</div>
@@ -804,6 +841,17 @@ export default function App() {
         useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } })
     );
 
+    // Drag overlay state for mobile visual feedback
+    const [activeDrag, setActiveDrag] = useState(null);
+
+    // Handler for drag start (for mobile fallback)
+    const handleDragStart = (player, fromTeam, fromIndex) => {
+        setActiveDrag({ player, fromTeam, fromIndex });
+    };
+    const handleDragEnd = () => {
+        setActiveDrag(null);
+    };
+
     return (
         <div className="p-4 max-w-7xl mx-auto" ref={mainRef}>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
@@ -832,8 +880,22 @@ export default function App() {
 
                     <DndContext
                         collisionDetection={closestCenter}
-                        sensors={sensors} // <-- Add sensors for mobile support
+                        sensors={sensors}
                     >
+                        {/* Drag overlay for mobile visual feedback */}
+                        <DragOverlay>
+                            {activeDrag ? (
+                                <DraggablePlayer
+                                    player={activeDrag.player}
+                                    fromTeam={activeDrag.fromTeam}
+                                    fromIndex={activeDrag.fromIndex}
+                                    small
+                                    assigned={false}
+                                    selected={false}
+                                />
+                            ) : null}
+                        </DragOverlay>
+
                         {/* Show button for attribute comparison */}
                         {!showComparison && (
                             <div className="flex justify-center mb-4">
@@ -907,13 +969,15 @@ export default function App() {
                             </label>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                            {availablePlayers.map((p) => (
+                            {availablePlayers.map((p, idx) => (
                                 <DraggablePlayer
                                     key={p.name}
                                     player={p}
                                     fromTeam={null}
                                     fromIndex={null}
                                     selected={assignedNames.includes(p.name)}
+                                    onDragStart={handleDragStart}
+                                    onDragEnd={handleDragEnd}
                                 />
                             ))}
                         </div>
