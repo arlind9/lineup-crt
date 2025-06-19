@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { DndContext, closestCenter } from '@dnd-kit/core';
+import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 
 // --- Helper for nice glass effect ---
 const glass = "backdrop-blur-md bg-white/80 shadow-lg border border-gray-200";
@@ -798,6 +798,12 @@ export default function App() {
         return () => document.removeEventListener("mousedown", handleClick);
     }, [globalActiveSlot]);
 
+    // Enable both mouse and touch sensors for drag and drop (mobile support)
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } })
+    );
+
     return (
         <div className="p-4 max-w-7xl mx-auto" ref={mainRef}>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
@@ -824,7 +830,10 @@ export default function App() {
                         </select>
                     </div>
 
-                    <DndContext collisionDetection={closestCenter}>
+                    <DndContext
+                        collisionDetection={closestCenter}
+                        sensors={sensors} // <-- Add sensors for mobile support
+                    >
                         {/* Show button for attribute comparison */}
                         {!showComparison && (
                             <div className="flex justify-center mb-4">
