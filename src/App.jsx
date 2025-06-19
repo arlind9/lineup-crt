@@ -17,6 +17,7 @@ const glass = "backdrop-blur-md bg-white/80 shadow-lg border border-gray-200";
 // --- PlayerSelectModal: Modal for picking a player with search ---
 function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
     const [search, setSearch] = useState("");
+    const [showAll, setShowAll] = useState(false);
     const modalRef = useRef(null);
 
     // Close on outside click or Escape
@@ -34,23 +35,32 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
         };
     }, [open, onClose]);
 
+    useEffect(() => {
+        // Reset showAll and search when modal opens
+        if (open) {
+            setShowAll(false);
+            setSearch("");
+        }
+    }, [open]);
+
     if (!open) return null;
 
     // Sort: first players with the same position as slotLabel, then others, both by highest overall
     const sortedPlayers = [...players].sort((a, b) => {
-        // slotLabel is "GK", "DF", "MF", or "ST"
         const aMatch = a.position === slotLabel;
         const bMatch = b.position === slotLabel;
         if (aMatch && !bMatch) return -1;
         if (!aMatch && bMatch) return 1;
-        // If both match or both don't, sort by overall descending
         return b.overall - a.overall;
     });
 
     const filtered = sortedPlayers.filter(
-        p =>
-            p.name.toLowerCase().includes(search.toLowerCase())
+        p => p.name.toLowerCase().includes(search.toLowerCase())
     );
+
+    // Only show top 9 unless showAll is true or search is active
+    const showLimited = !showAll && search.trim() === "";
+    const visiblePlayers = showLimited ? filtered.slice(0, 9) : filtered;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
@@ -72,10 +82,10 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
                     className="mb-3"
                 />
                 <div className="max-h-64 overflow-y-auto">
-                    {filtered.length === 0 ? (
+                    {visiblePlayers.length === 0 ? (
                         <div className="text-xs text-gray-400 p-2 text-center">No available players</div>
                     ) : (
-                        filtered.map(p => (
+                        visiblePlayers.map(p => (
                             <div
                                 key={p.name}
                                 className="p-2 rounded hover:bg-blue-100 cursor-pointer flex justify-between items-center"
@@ -88,6 +98,28 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
                                 <span className="text-gray-400 text-xs">OVR: {p.overall}</span>
                             </div>
                         ))
+                    )}
+                    {showLimited && filtered.length > 9 && (
+                        <div className="flex justify-center mt-2">
+                            <button
+                                className="px-3 py-1 rounded bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 transition"
+                                onClick={() => setShowAll(true)}
+                                type="button"
+                            >
+                                Show all ({filtered.length})
+                            </button>
+                        </div>
+                    )}
+                    {!showLimited && filtered.length > 9 && (
+                        <div className="flex justify-center mt-2">
+                            <button
+                                className="px-3 py-1 rounded bg-gray-300 text-gray-800 text-xs font-semibold hover:bg-gray-400 transition"
+                                onClick={() => setShowAll(false)}
+                                type="button"
+                            >
+                                Show less
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
@@ -709,6 +741,7 @@ export default function App() {
     const [teamB, setTeamB] = useState(Array(10).fill(null));
     const [hideSelected, setHideSelected] = useState(false);
     const [showComparison, setShowComparison] = useState(true);
+    const [showAllAvailable, setShowAllAvailable] = useState(false);
 
     const [globalActiveSlot, setGlobalActiveSlot] = useState(null);
 
@@ -819,6 +852,12 @@ export default function App() {
     const availablePlayers = hideSelected
         ? filtered.filter(p => !assignedNames.includes(p.name))
         : filtered;
+
+    const sortedAvailablePlayers = availablePlayers.sort((a, b) => b.overall - a.overall);
+
+    // Show only top 12 unless showAllAvailable is true
+    const visibleAvailablePlayers =
+        showAllAvailable ? sortedAvailablePlayers : sortedAvailablePlayers.slice(0, 12);
 
     const mainRef = useRef(null);
     useEffect(() => {
@@ -952,7 +991,7 @@ export default function App() {
                             open={playerSelectModal.open}
                             onClose={() => setPlayerSelectModal({ open: false })}
                             players={playerSelectModal.eligiblePlayers || []}
-                            onSelect={playerSelectModal.onSelect || (() => {})}
+                            onSelect={playerSelectModal.onSelect || (() => { })}
                             slotLabel={playerSelectModal.slotLabel}
                         />
 
@@ -969,7 +1008,7 @@ export default function App() {
                             </label>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                            {availablePlayers.map((p, idx) => (
+                            {visibleAvailablePlayers.map((p, idx) => (
                                 <DraggablePlayer
                                     key={p.name}
                                     player={p}
@@ -981,6 +1020,17 @@ export default function App() {
                                 />
                             ))}
                         </div>
+                        {!showAllAvailable && sortedAvailablePlayers.length > 12 && (
+                            <div className="flex justify-center mt-2">
+                                <button
+                                    className="px-3 py-1 rounded bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 transition"
+                                    onClick={() => setShowAllAvailable(true)}
+                                    type="button"
+                                >
+                                    Show all ({sortedAvailablePlayers.length})
+                                </button>
+                            </div>
+                        )}
                     </DndContext>
                 </div>
             </div>
