@@ -1066,33 +1066,41 @@ function Home() {
                 {/* Left: Shortcuts */}
                 <div className="flex flex-col items-center gap-8">
                     <div className="w-full max-w-md">
-                        <div className="bg-green-100 border-2 border-green-300 rounded-xl shadow p-4 sm:p-6 flex flex-col items-center">
+                        <div
+                            className="bg-green-100 border-2 border-green-300 rounded-xl shadow p-4 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition"
+                            onClick={() => goTo("lineup")}
+                            tabIndex={0}
+                            role="button"
+                            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") goTo("lineup"); }}
+                            aria-label="Go to Lineup Creator"
+                        >
                             <span className="text-2xl sm:text-3xl mb-2">⚽</span>
                             <h3 className="text-lg sm:text-xl font-bold mb-1 text-green-900">Lineup Creator</h3>
                             <p className="text-gray-700 text-center text-sm sm:text-base mb-2">
                                 Build and compare two football teams. Drag and drop players, see team averages, and compare lineups visually.
                             </p>
-                            <button
-                                onClick={() => goTo("lineup")}
-                                className="text-blue-700 font-semibold underline text-xs sm:text-sm"
-                            >
+                            <span className="text-blue-700 font-semibold underline text-xs sm:text-sm mt-1">
                                 Go to Lineup Creator
-                            </button>
+                            </span>
                         </div>
                     </div>
                     <div className="w-full max-w-md">
-                        <div className="bg-blue-100 border-2 border-blue-300 rounded-xl shadow p-4 sm:p-6 flex flex-col items-center">
+                        <div
+                            className="bg-blue-100 border-2 border-blue-300 rounded-xl shadow p-4 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition"
+                            onClick={() => goTo("database")}
+                            tabIndex={0}
+                            role="button"
+                            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") goTo("database"); }}
+                            aria-label="Go to Player Database"
+                        >
                             <span className="text-2xl sm:text-3xl mb-2">📋</span>
                             <h3 className="text-lg sm:text-xl font-bold mb-1 text-blue-900">Player Database</h3>
                             <p className="text-gray-700 text-center text-sm sm:text-base mb-2">
                                 Browse all players, filter and sort, and compare up to 3 players on a radar chart.
                             </p>
-                            <button
-                                onClick={() => goTo("database")}
-                                className="text-blue-700 font-semibold underline text-xs sm:text-sm"
-                            >
+                            <span className="text-blue-700 font-semibold underline text-xs sm:text-sm mt-1">
                                 Go to Player Database
-                            </button>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -1855,33 +1863,6 @@ function LineupCreator() {
                 </button>
             </div>
 
-            {/* Player view mode selector */}
-            <div className="flex justify-end mb-2">
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-700">View:</span>
-                    <button
-                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "list" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                        onClick={() => setViewMode("list")}
-                        type="button"
-                    >
-                        List
-                    </button>
-                    <button
-                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                        onClick={() => setViewMode("small")}
-                        type="button"
-                    >
-                        Small Cards
-                    </button>
-                    <button
-                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                        onClick={() => setViewMode("big")}
-                        type="button"
-                    >
-                        Big Cards
-                    </button>
-                </div>
-            </div>
 
             {/* Only hide/show the lineups and attribute comparison */}
             {showLineups && (
@@ -2008,7 +1989,7 @@ function LineupCreator() {
                             type="button"
                             aria-label="List view"
                         >
-                            <span role="img" aria-label="List">📋</span>
+                            <span role="img" aria-label="List">List</span>
                         </button>
                         <button
                             className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
@@ -2016,7 +1997,7 @@ function LineupCreator() {
                             type="button"
                             aria-label="Small cards"
                         >
-                            <span role="img" aria-label="Small cards">🃏</span>
+                            <span role="img" aria-label="Small cards">Card</span>
                         </button>
                         <button
                             className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
@@ -2024,7 +2005,7 @@ function LineupCreator() {
                             type="button"
                             aria-label="Big cards"
                         >
-                            <span role="img" aria-label="Big cards">🗂️</span>
+                            <span role="img" aria-label="Big cards"></span>
                         </button>
                     </div>
                 </div>
