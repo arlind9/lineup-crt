@@ -1067,16 +1067,16 @@ function Home() {
                 <div className="flex flex-col items-center gap-4 sm:gap-8 w-full">
                     <div className="w-full max-w-md">
                         <div
-                            className="bg-green-100 border-2 border-green-300 rounded-xl shadow p-4 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition"
+                            className="bg-green-100 border-2 border-green-300 rounded-xl shadow p-3 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition min-h-[120px]"
                             onClick={() => goTo("lineup")}
                             tabIndex={0}
                             role="button"
                             onKeyDown={e => { if (e.key === "Enter" || e.key === " ") goTo("lineup"); }}
                             aria-label="Go to Lineup Creator"
                         >
-                            <span className="text-2xl sm:text-3xl mb-2">⚽</span>
-                            <h3 className="text-lg sm:text-xl font-bold mb-1 text-green-900">Lineup Creator</h3>
-                            <p className="text-gray-700 text-center text-sm sm:text-base mb-2">
+                            <span className="text-xl sm:text-3xl mb-1 sm:mb-2">⚽</span>
+                            <h3 className="text-base sm:text-xl font-bold mb-1 text-green-900 text-center">Lineup Creator</h3>
+                            <p className="text-gray-700 text-center text-xs sm:text-base mb-2">
                                 Build and compare two football teams. Drag and drop players, see team averages, and compare lineups visually.
                             </p>
                             <span className="text-blue-700 font-semibold underline text-xs sm:text-sm mt-1">
@@ -1086,16 +1086,16 @@ function Home() {
                     </div>
                     <div className="w-full max-w-md">
                         <div
-                            className="bg-blue-100 border-2 border-blue-300 rounded-xl shadow p-4 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition"
+                            className="bg-blue-100 border-2 border-blue-300 rounded-xl shadow p-3 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition min-h-[120px]"
                             onClick={() => goTo("database")}
                             tabIndex={0}
                             role="button"
                             onKeyDown={e => { if (e.key === "Enter" || e.key === " ") goTo("database"); }}
                             aria-label="Go to Player Database"
                         >
-                            <span className="text-2xl sm:text-3xl mb-2">📋</span>
-                            <h3 className="text-lg sm:text-xl font-bold mb-1 text-blue-900">Player Database</h3>
-                            <p className="text-gray-700 text-center text-sm sm:text-base mb-2">
+                            <span className="text-xl sm:text-3xl mb-1 sm:mb-2">📋</span>
+                            <h3 className="text-base sm:text-xl font-bold mb-1 text-blue-900 text-center">Player Database</h3>
+                            <p className="text-gray-700 text-center text-xs sm:text-base mb-2">
                                 Browse all players, filter and sort, and compare up to 3 players on a radar chart.
                             </p>
                             <span className="text-blue-700 font-semibold underline text-xs sm:text-sm mt-1">
@@ -1133,7 +1133,7 @@ function Home() {
                 {/* Right: MOTM and Top Earners */}
                 <div className="flex flex-col gap-4 sm:gap-8 items-center w-full">
                     <div className="w-full max-w-md">
-                        <h2 className="text-lg sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
                         <div className="overflow-x-auto">
                             <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
                                 <thead className="bg-blue-600 text-white text-xs">
@@ -1163,7 +1163,7 @@ function Home() {
                         )}
                     </div>
                     <div className="w-full max-w-md">
-                        <h2 className="text-lg sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
                         <div className="overflow-x-auto">
                             <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
                                 <thead className="bg-blue-600 text-white text-xs">
@@ -1684,6 +1684,12 @@ export default function App() {
                         >
                             Player Database
                         </button>
+                        <button
+                            className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`}
+                            onClick={() => setView("motm")}
+                        >
+                            MOTM
+                        </button>
                     </div>
                 </nav>
             </header>
@@ -1691,6 +1697,7 @@ export default function App() {
                 {view === "home" && <Home />}
                 {view === "lineup" && <LineupCreator />}
                 {view === "database" && <PlayerDatabase />}
+                {view === "motm" && <MOTMPage />}
             </main>
         </div>
     );
@@ -1864,7 +1871,7 @@ function LineupCreator() {
     return (
         <div className="p-4 max-w-7xl mx-auto" ref={mainRef}>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
-            
+
             {/* Show/Hide Lineups and Attribute Comparison button */}
             <div className="flex justify-center mb-4">
                 <button
@@ -2083,4 +2090,126 @@ function LineupCreator() {
         </div>
     );
 }
- 
+
+function MOTMPage() {
+    const [data, setData] = React.useState([]);
+    const [topEarners, setTopEarners] = React.useState([]);
+    const [showAll, setShowAll] = React.useState(false);
+    const [showAllEarners, setShowAllEarners] = React.useState(false);
+    const [loading, setLoading] = React.useState(true);
+
+    const formatDate = (input) => {
+        const date = new Date(input);
+        if (isNaN(date)) return input;
+        return date.toLocaleDateString('en-GB');
+    };
+
+    React.useEffect(() => {
+        setLoading(true);
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1g9WWrlzTIwr2bZFyw9fqNpMTDpMzpk2ROC3UAWqofuA/gviz/tq?tqx=out:csv';
+        fetch(sheetUrl)
+            .then(res => res.text())
+            .then(csv => {
+                Papa.parse(csv, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: results => {
+                        const keys = Object.keys(results.data[0] || {});
+                        const trimmed = results.data
+                            .map(row => ({ [keys[0]]: row[keys[0]], [keys[1]]: row[keys[1]] }))
+                            .filter(row => row[keys[1]]?.trim());
+
+                        setData(trimmed.slice().reverse());
+
+                        const counts = {};
+                        trimmed.forEach(row => {
+                            const player = row[keys[1]];
+                            counts[player] = (counts[player] || 0) + 1;
+                        });
+                        const sorted = Object.entries(counts)
+                            .sort((a, b) => b[1] - a[1])
+                            .map(([player, count], index) => ({ Rank: index + 1, Player: player, Awards: count }));
+
+                        setTopEarners(sorted);
+                        setLoading(false);
+                    }
+                });
+            })
+            .catch(() => setLoading(false));
+    }, []);
+
+    const visibleData = showAll ? data : data.slice(0, 10);
+    const visibleEarners = showAllEarners ? topEarners : topEarners.slice(0, 10);
+
+    if (loading) return <LoadingSpinner />;
+
+    return (
+        <div className="w-full flex flex-col items-center">
+            <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Man of the Match (MOTM)</h1>
+            <div className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Last Winners Table */}
+                <div>
+                    <h2 className="text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
+                            <thead className="bg-blue-600 text-white text-xs">
+                                <tr>
+                                    {visibleData.length > 0 && Object.keys(visibleData[0]).map((col, i) => (
+                                        <th key={i} className="border p-2 text-left font-medium">{col}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {visibleData.map((row, i) => (
+                                    <tr key={i} className="odd:bg-white even:bg-gray-100">
+                                        {Object.entries(row).map(([key, val], j) => (
+                                            <td key={j} className="border p-2 text-xs">{j === 0 ? formatDate(val) : val}</td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {data.length > 10 && (
+                        <div className="mt-2 text-center">
+                            <button className="text-blue-600 underline hover:text-blue-800 text-xs" onClick={() => setShowAll(!showAll)}>
+                                {showAll ? 'Show Less' : 'Show All'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+                {/* Top Earners Table */}
+                <div>
+                    <h2 className="text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
+                            <thead className="bg-blue-600 text-white text-xs">
+                                <tr>
+                                    <th className="border p-2 text-left font-medium">Rank</th>
+                                    <th className="border p-2 text-left font-medium">Player</th>
+                                    <th className="border p-2 text-left font-medium">Awards</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {visibleEarners.map((row, i) => (
+                                    <tr key={i} className="odd:bg-white even:bg-gray-100">
+                                        <td className="border p-2 text-xs">{row.Rank}</td>
+                                        <td className="border p-2 text-xs">{row.Player}</td>
+                                        <td className="border p-2 text-xs">{row.Awards}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {topEarners.length > 10 && (
+                        <div className="mt-2 text-center">
+                            <button className="text-blue-600 underline hover:text-blue-800 text-xs" onClick={() => setShowAllEarners(!showAllEarners)}>
+                                {showAllEarners ? 'Show Less' : 'Show All'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
