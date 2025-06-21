@@ -1062,9 +1062,9 @@ function Home() {
 
     return (
         <div className="w-full flex flex-col items-center">
-            <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
                 {/* Left: Shortcuts */}
-                <div className="flex flex-col items-center gap-8">
+                <div className="flex flex-col items-center gap-4 sm:gap-8 w-full">
                     <div className="w-full max-w-md">
                         <div
                             className="bg-green-100 border-2 border-green-300 rounded-xl shadow p-4 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition"
@@ -1105,22 +1105,22 @@ function Home() {
                     </div>
                 </div>
                 {/* Center: Next Match Table */}
-                <div className="flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center justify-center w-full">
                     <div className="w-full max-w-md">
-                        <div className="relative mb-8">
+                        <div className="relative mb-4 sm:mb-8 mt-4 sm:mt-6">
                             <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-10">
-                                <span className="bg-yellow-400 text-yellow-900 px-4 py-1 rounded-full font-bold shadow text-sm sm:text-base border-2 border-yellow-300 animate-pulse">
+                                <span className="bg-yellow-400 text-yellow-900 px-3 sm:px-4 py-1 rounded-full font-bold shadow text-xs sm:text-base border-2 border-yellow-300 animate-pulse">
                                     NDESHJA E RADHËS
                                 </span>
                             </div>
                             <table className="w-full shadow-2xl rounded-2xl overflow-hidden border-4 border-yellow-300 bg-yellow-50/80">
                                 <tbody>
                                     <tr>
-                                        <td className="p-4 sm:p-8 text-center font-bold text-yellow-900 text-base sm:text-lg tracking-wide">
+                                        <td className="p-3 sm:p-8 text-center font-bold text-yellow-900 text-sm sm:text-lg tracking-wide">
                                             Ndeshja e radhës do të luhet të mërkurën e ardhshme<br />
                                             në datë <span className="text-blue-700 underline">{getNextWednesday()}</span><br />
                                             në orën <span className="text-blue-700 underline">20:30</span><br />
-                                            <span className="block mt-2 text-base font-semibold text-yellow-800">
+                                            <span className="block mt-2 text-sm sm:text-base font-semibold text-yellow-800">
                                                 Lokacioni: <span className="text-blue-700 underline">Laprake</span>
                                             </span>
                                         </td>
@@ -1131,7 +1131,7 @@ function Home() {
                     </div>
                 </div>
                 {/* Right: MOTM and Top Earners */}
-                <div className="flex flex-col gap-8 items-center">
+                <div className="flex flex-col gap-4 sm:gap-8 items-center w-full">
                     <div className="w-full max-w-md">
                         <h2 className="text-lg sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
                         <div className="overflow-x-auto">
@@ -1194,6 +1194,19 @@ function Home() {
                     </div>
                 </div>
             </div>
+            {/* Mobile stacking: show all blocks in a single column on small screens */}
+            <style>{`
+                @media (max-width: 640px) {
+                    .grid-cols-1.lg\\:grid-cols-3 {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        gap: 1rem !important;
+                    }
+                    .max-w-md {
+                        max-width: 100vw !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }
@@ -2005,7 +2018,7 @@ function LineupCreator() {
                             type="button"
                             aria-label="Big cards"
                         >
-                            <span role="img" aria-label="Big cards">Attributes</span>
+                            <span role="img" aria-label="Big cards"></span>
                         </button>
                     </div>
                 </div>
@@ -2070,3 +2083,4 @@ function LineupCreator() {
         </div>
     );
 }
+ 
