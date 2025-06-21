@@ -1619,6 +1619,7 @@ function PlayerDatabase() {
 export default function App() {
     const [view, setView] = useState("home"); // "home", "lineup", "database"
     const [scrolled, setScrolled] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // Listen for scroll to shrink the header
     useEffect(() => {
@@ -1637,6 +1638,11 @@ export default function App() {
         return () => window.removeEventListener("setView", handler);
     }, []);
 
+    // Close mobile menu on view change
+    useEffect(() => {
+        setMobileMenuOpen(false);
+    }, [view]);
+
     return (
         <div className="min-h-screen bg-gray-50 text-gray-800">
             <header
@@ -1651,7 +1657,7 @@ export default function App() {
                     backdropFilter: scrolled ? "blur(4px)" : undefined,
                 }}
             >
-                <nav className="container mx-auto flex justify-between items-center transition-all duration-300">
+                <nav className="container mx-auto flex justify-between items-center transition-all duration-300 relative">
                     <h1
                         className={
                             "font-bold transition-all duration-300 " +
@@ -1665,7 +1671,8 @@ export default function App() {
                     >
                         Grupi i Futbollit
                     </h1>
-                    <div className="flex gap-4 text-lg">
+                    {/* Desktop nav */}
+                    <div className="hidden sm:flex gap-4 text-lg">
                         <button
                             className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`}
                             onClick={() => setView("home")}
@@ -1690,6 +1697,53 @@ export default function App() {
                         >
                             MOTM
                         </button>
+                    </div>
+                    {/* Mobile hamburger */}
+                    <div className="sm:hidden flex items-center">
+                        <button
+                            className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            onClick={() => setMobileMenuOpen((v) => !v)}
+                            aria-label="Open menu"
+                        >
+                            <svg
+                                className="w-7 h-7 text-blue-700"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                        {/* Mobile menu dropdown */}
+                        {mobileMenuOpen && (
+                            <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50 flex flex-col animate-fade-in">
+                                <button
+                                    className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "home" ? "font-bold text-blue-700" : ""}`}
+                                    onClick={() => setView("home")}
+                                >
+                                    Home
+                                </button>
+                                <button
+                                    className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "lineup" ? "font-bold text-blue-700" : ""}`}
+                                    onClick={() => setView("lineup")}
+                                >
+                                    Lineup Creator
+                                </button>
+                                <button
+                                    className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "database" ? "font-bold text-blue-700" : ""}`}
+                                    onClick={() => setView("database")}
+                                >
+                                    Player Database
+                                </button>
+                                <button
+                                    className={`text-left px-4 py-3 hover:bg-blue-50 ${view === "motm" ? "font-bold text-blue-700" : ""}`}
+                                    onClick={() => setView("motm")}
+                                >
+                                    MOTM
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </nav>
             </header>
