@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import Papa from "papaparse";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,16 +12,26 @@ import {
     DragOverlay,
 } from '@dnd-kit/core';
 
-// --- Helper for nice glass effect ---
 const glass = "backdrop-blur-md bg-white/80 shadow-lg border border-gray-200";
 
-// --- PlayerSelectModal: Modal for picking a player with search ---
+// Simple loading spinner component
+function LoadingSpinner({ className = "" }) {
+    return (
+        <div className={`flex justify-center items-center py-8 ${className}`}>
+            <svg className="animate-spin h-8 w-8 text-blue-500" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+            </svg>
+            <span className="ml-3 text-blue-700 font-semibold text-lg">Loading...</span>
+        </div>
+    );
+}
+
 function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
     const [search, setSearch] = useState("");
     const [showAll, setShowAll] = useState(false);
     const modalRef = useRef(null);
 
-    // Close on outside click or Escape
     useEffect(() => {
         if (!open) return;
         function handle(e) {
@@ -36,7 +47,6 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
     }, [open, onClose]);
 
     useEffect(() => {
-        // Reset showAll and search when modal opens
         if (open) {
             setShowAll(false);
             setSearch("");
@@ -45,7 +55,6 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
 
     if (!open) return null;
 
-    // Sort: first players with the same position as slotLabel, then others, both by highest overall
     const sortedPlayers = [...players].sort((a, b) => {
         const aMatch = a.position === slotLabel;
         const bMatch = b.position === slotLabel;
@@ -58,7 +67,6 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
         p => p.name.toLowerCase().includes(search.toLowerCase())
     );
 
-    // Only show top 9 unless showAll is true or search is active
     const showLimited = !showAll && search.trim() === "";
     const visiblePlayers = showLimited ? filtered.slice(0, 9) : filtered;
 
@@ -311,6 +319,206 @@ function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel
                         </div>
                     );
                 })}
+            </div>
+        </div>
+    );
+}
+
+// Circular (Radar) Comparison
+function RadarCompare({ players }) {
+    if (players.length < 2) return null;
+
+    // Determine if all selected are outfield (not GK)
+    const allOutfield = players.every(p => p.position !== "GK");
+    // Attributes to compare
+    const attrs = allOutfield
+        ? [
+            { key: "overall", label: "Overall", max: 100 },
+            { key: "speed", label: "Speed", max: 100 },
+            { key: "shooting", label: "Shooting", max: 100 },
+            { key: "passing", label: "Passing", max: 100 },
+            { key: "dribbling", label: "Dribbling", max: 100 },
+            { key: "physical", label: "Physical", max: 100 },
+            { key: "defending", label: "Defending", max: 100 },
+            { key: "weakFoot", label: "Weak Foot", max: 50 }
+        ]
+        : [
+            { key: "overall", label: "Overall", max: 100 },
+            { key: "speed", label: "Speed", max: 100 },
+            { key: "shooting", label: "Shooting", max: 100 },
+            { key: "passing", label: "Passing", max: 100 },
+            { key: "dribbling", label: "Dribbling", max: 100 },
+            { key: "physical", label: "Physical", max: 100 },
+            { key: "defending", label: "Defending", max: 100 },
+            { key: "goalkeeping", label: "Goalkeeping", max: 100 },
+            { key: "weakFoot", label: "Weak Foot", max: 50 }
+        ];
+
+    // Colors for up to 3 players
+    const colors = [
+        "#3b82f6", // blue
+        "#ef4444", // red
+        "#f59e42"  // orange
+    ];
+
+    // Make the radar chart wider for better label spacing
+    const size = 420; // was 320
+    const center = size / 2;
+    const radius = size / 2 - 60; // slightly more margin for labels
+    const angleStep = (2 * Math.PI) / attrs.length;
+
+    // Helper: get points for a player
+    function getPoints(player, idx) {
+        return attrs.map((attr, i) => {
+            const value = player[attr.key] || 0;
+            const r = (value / attr.max) * radius;
+            const angle = i * angleStep - Math.PI / 2;
+            return [
+                center + r * Math.cos(angle),
+                center + r * Math.sin(angle)
+            ];
+        });
+    }
+
+    // Helper: get polygon string
+    function pointsToString(points) {
+        return points.map(([x, y]) => `${x},${y}`).join(" ");
+    }
+
+    // Draw attribute axes and labels
+    const axes = attrs.map((attr, i) => {
+        const angle = i * angleStep - Math.PI / 2;
+        const x = center + radius * Math.cos(angle);
+        const y = center + radius * Math.sin(angle);
+        // Move label further out for better visibility
+        const labelX = center + (radius + 38) * Math.cos(angle);
+        const labelY = center + (radius + 38) * Math.sin(angle);
+        return (
+            <g key={attr.key}>
+                <line
+                    x1={center}
+                    y1={center}
+                    x2={x}
+                    y2={y}
+                    stroke="#d1d5db"
+                    strokeWidth="1"
+                />
+                <text
+                    x={labelX}
+                    y={labelY}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize="14"
+                    fill="#374151"
+                    style={{
+                        pointerEvents: "none",
+                        fontWeight: 600,
+                        background: "white"
+                    }}
+                >
+                    {attr.label}
+                </text>
+            </g>
+        );
+    });
+
+    // Draw grid (concentric polygons)
+    const gridLevels = 4;
+    const grid = [];
+    for (let level = 1; level <= gridLevels; level++) {
+        const r = (radius * level) / gridLevels;
+        const points = attrs.map((attr, i) => {
+            const angle = i * angleStep - Math.PI / 2;
+            return [
+                center + r * Math.cos(angle),
+                center + r * Math.sin(angle)
+            ];
+        });
+        grid.push(
+            <polygon
+                key={level}
+                points={pointsToString(points)}
+                fill="none"
+                stroke="#e5e7eb"
+                strokeWidth="1"
+            />
+        );
+    }
+
+    // Draw player polygons
+    const polygons = players.map((player, idx) => {
+        const points = getPoints(player, idx);
+        return (
+            <polygon
+                key={player.name}
+                points={pointsToString(points)}
+                fill={colors[idx] + "33"}
+                stroke={colors[idx]}
+                strokeWidth="2"
+            />
+        );
+    });
+
+    // Draw player dots
+    const dots = players.map((player, idx) => {
+        const points = getPoints(player, idx);
+        return points.map(([x, y], i) => (
+            <circle
+                key={player.name + "-dot-" + i}
+                cx={x}
+                cy={y}
+                r={4}
+                fill={colors[idx]}
+                stroke="#fff"
+                strokeWidth="1"
+            />
+        ));
+    });
+
+    // Legend
+    const legend = (
+        <div className="flex justify-center gap-4 mt-2 mb-2">
+            {players.map((p, idx) => (
+                <div key={p.name} className="flex items-center gap-2">
+                    <span style={{
+                        display: "inline-block",
+                        width: 16,
+                        height: 16,
+                        borderRadius: "50%",
+                        background: colors[idx],
+                        border: "2px solid #fff"
+                    }} />
+                    <span className="font-semibold text-sm">{p.name}</span>
+                    <button
+                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
+                        onClick={() => removeFromCompare(p.name)}
+                        title="Remove from comparison"
+                    >×</button>
+                </div>
+            ))}
+        </div>
+    );
+
+    return (
+        <div className="max-w-5xl mx-auto mb-8 bg-white rounded-xl shadow p-4 border">
+            <div className="text-center font-bold text-lg mb-2">Player Attribute Comparison</div>
+            {legend}
+            <div className="flex flex-col md:flex-row gap-6 justify-center items-start">
+                <div>
+                    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+                        {/* Grid */}
+                        {grid}
+                        {/* Axes and labels */}
+                        {axes}
+                        {/* Player polygons */}
+                        {polygons}
+                        {/* Dots */}
+                        {dots}
+                        {/* Center dot */}
+                        <circle cx={center} cy={center} r={3} fill="#6b7280" />
+                    </svg>
+                </div>
+                <TopEarnersCompare selected={players} />
             </div>
         </div>
     );
@@ -729,7 +937,739 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
     );
 }
 
+// Add a simple ListPlayer component for list view
+function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragStart, onDragEnd }) {
+    const dragRef = useRef(null);
+
+    useEffect(() => {
+        const node = dragRef.current;
+        if (!node) return;
+        function handleTouchStart(e) {
+            if (onDragStart) onDragStart(player, fromTeam, fromIndex);
+        }
+        function handleTouchEnd(e) {
+            if (onDragEnd) onDragEnd();
+        }
+        node.addEventListener("touchstart", handleTouchStart, { passive: true });
+        node.addEventListener("touchend", handleTouchEnd, { passive: true });
+        return () => {
+            node.removeEventListener("touchstart", handleTouchStart);
+            node.removeEventListener("touchend", handleTouchEnd);
+        };
+    }, [player, fromTeam, fromIndex, onDragStart, onDragEnd]);
+
+    return (
+        <div
+            ref={dragRef}
+            className={
+                "flex items-center border-b last:border-b-0 px-2 py-2 cursor-move transition-all duration-150 " +
+                (assigned ? "bg-green-100/80 " : "") +
+                (selected ? "bg-blue-100/80 " : "") +
+                "hover:bg-blue-50"
+            }
+            draggable
+            onDragStart={e => {
+                e.dataTransfer.setData("application/json", JSON.stringify({
+                    player,
+                    fromTeam,
+                    fromIndex
+                }));
+                if (onDragStart) onDragStart(player, fromTeam, fromIndex);
+            }}
+            onDragEnd={onDragEnd}
+            style={{ minHeight: 36 }}
+        >
+            <span className="font-semibold flex-1 truncate">{player.name}</span>
+            <span className="text-xs text-gray-500 w-10 text-center">{player.position}</span>
+            <span className="text-xs w-12 text-center">OVR: {player.overall}</span>
+            <span className="text-xs w-10 text-center">Spd: {player.speed}</span>
+            <span className="text-xs w-10 text-center">Sht: {player.shooting}</span>
+            <span className="text-xs w-10 text-center">Pas: {player.passing}</span>
+        </div>
+    );
+}
+
+// Helper to get next Wednesday's date as dd/mm/yyyy
+function getNextWednesday() {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, ..., 3=Wednesday
+    const daysUntilNextWednesday = (3 - dayOfWeek + 7) % 7 || 7;
+    const nextWednesday = new Date(today);
+    nextWednesday.setDate(today.getDate() + daysUntilNextWednesday);
+    const dd = String(nextWednesday.getDate()).padStart(2, '0');
+    const mm = String(nextWednesday.getMonth() + 1).padStart(2, '0');
+    const yyyy = nextWednesday.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+}
+
+// Home component
+function Home() {
+    const [data, setData] = useState([]);
+    const [topEarners, setTopEarners] = useState([]);
+    const [showAll, setShowAll] = useState(false);
+    const [showAllEarners, setShowAllEarners] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    const formatDate = (input) => {
+        const date = new Date(input);
+        if (isNaN(date)) return input;
+        return date.toLocaleDateString('en-GB');
+    };
+
+    useEffect(() => {
+        setLoading(true);
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1g9WWrlzTIwr2bZFyw9fqNpMTDpMzpk2ROC3UAWqofuA/gviz/tq?tqx=out:csv';
+        fetch(sheetUrl)
+            .then(res => res.text())
+            .then(csv => {
+                Papa.parse(csv, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: results => {
+                        const keys = Object.keys(results.data[0] || {});
+                        const trimmed = results.data
+                            .map(row => ({ [keys[0]]: row[keys[0]], [keys[1]]: row[keys[1]] }))
+                            .filter(row => row[keys[1]]?.trim());
+
+                        setData(trimmed.slice().reverse());
+
+                        const counts = {};
+                        trimmed.forEach(row => {
+                            const player = row[keys[1]];
+                            counts[player] = (counts[player] || 0) + 1;
+                        });
+                        const sorted = Object.entries(counts)
+                            .sort((a, b) => b[1] - a[1])
+                            .map(([player, count], index) => ({ Rank: index + 1, Player: player, Awards: count }));
+
+                        setTopEarners(sorted);
+                        setLoading(false);
+                    }
+                });
+            })
+            .catch(() => setLoading(false));
+    }, []);
+
+    const visibleData = showAll ? data : data.slice(0, 3);
+    const visibleEarners = showAllEarners ? topEarners : topEarners.slice(0, 3);
+
+    function goTo(view) {
+        const event = new CustomEvent("setView", { detail: view });
+        window.dispatchEvent(event);
+    }
+
+    if (loading) return <LoadingSpinner />;
+
+    return (
+        <div className="w-full flex flex-col items-center">
+            <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left: Shortcuts */}
+                <div className="flex flex-col items-center gap-8">
+                    <div className="w-full max-w-md">
+                        <div className="bg-green-100 border-2 border-green-300 rounded-xl shadow p-6 flex flex-col items-center">
+                            <span className="text-3xl mb-2">⚽</span>
+                            <h3 className="text-xl font-bold mb-1 text-green-900">Lineup Creator</h3>
+                            <p className="text-gray-700 text-center text-base mb-2">
+                                Build and compare two football teams. Drag and drop players, see team averages, and compare lineups visually.
+                            </p>
+                            <button
+                                onClick={() => goTo("lineup")}
+                                className="text-blue-700 font-semibold underline text-sm"
+                            >
+                                Go to Lineup Creator
+                            </button>
+                        </div>
+                    </div>
+                    <div className="w-full max-w-md">
+                        <div className="bg-blue-100 border-2 border-blue-300 rounded-xl shadow p-6 flex flex-col items-center">
+                            <span className="text-3xl mb-2">📋</span>
+                            <h3 className="text-xl font-bold mb-1 text-blue-900">Player Database</h3>
+                            <p className="text-gray-700 text-center text-base mb-2">
+                                Browse all players, filter and sort, and compare up to 3 players on a radar chart.
+                            </p>
+                            <button
+                                onClick={() => goTo("database")}
+                                className="text-blue-700 font-semibold underline text-sm"
+                            >
+                                Go to Player Database
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {/* Center: Next Match Table */}
+                <div className="flex flex-col items-center justify-center">
+                    <div className="w-full max-w-md">
+                        <div className="relative mb-8">
+                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-10">
+                                <span className="bg-yellow-400 text-yellow-900 px-4 py-1 rounded-full font-bold shadow text-base border-2 border-yellow-300 animate-pulse">
+                                    NDESHJA E RADHËS
+                                </span>
+                            </div>
+                            <table className="w-full shadow-2xl rounded-2xl overflow-hidden border-4 border-yellow-300 bg-yellow-50/80">
+                                <tbody>
+                                    <tr>
+                                        <td className="p-8 text-center font-bold text-yellow-900 text-lg tracking-wide">
+                                            Ndeshja e radhës do të luhet të mërkurën e ardhshme<br />
+                                            në datë <span className="text-blue-700 underline">{getNextWednesday()}</span><br />
+                                            në orën <span className="text-blue-700 underline">20:30</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {/* Right: MOTM and Top Earners */}
+                <div className="flex flex-col gap-8 items-center">
+                    <div className="w-full max-w-md">
+                        <h2 className="text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+                        <table className="w-full text-sm shadow-md rounded-lg overflow-hidden">
+                            <thead className="bg-blue-600 text-white text-xs">
+                                <tr>
+                                    {visibleData.length > 0 && Object.keys(visibleData[0]).map((col, i) => (
+                                        <th key={i} className="border p-2 text-left font-medium">{col}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {visibleData.map((row, i) => (
+                                    <tr key={i} className="odd:bg-white even:bg-gray-100">
+                                        {Object.entries(row).map(([key, val], j) => (
+                                            <td key={j} className="border p-2 text-xs">{j === 0 ? formatDate(val) : val}</td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {data.length > 3 && (
+                            <div className="mt-2 text-center">
+                                <button className="text-blue-600 underline hover:text-blue-800 text-xs" onClick={() => setShowAll(!showAll)}>
+                                    {showAll ? 'Show Less' : 'Show All'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                    <div className="w-full max-w-md">
+                        <h2 className="text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+                        <table className="w-full text-sm shadow-md rounded-lg overflow-hidden">
+                            <thead className="bg-blue-600 text-white text-xs">
+                                <tr>
+                                    <th className="border p-2 text-left font-medium">Rank</th>
+                                    <th className="border p-2 text-left font-medium">Player</th>
+                                    <th className="border p-2 text-left font-medium">Awards</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {visibleEarners.map((row, i) => (
+                                    <tr key={i} className="odd:bg-white even:bg-gray-100">
+                                        <td className="border p-2 text-xs">{row.Rank}</td>
+                                        <td className="border p-2 text-xs">{row.Player}</td>
+                                        <td className="border p-2 text-xs">{row.Awards}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        {topEarners.length > 3 && (
+                            <div className="mt-2 text-center">
+                                <button className="text-blue-600 underline hover:text-blue-800 text-xs" onClick={() => setShowAllEarners(!showAllEarners)}>
+                                    {showAllEarners ? 'Show Less' : 'Show All'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// PlayerDatabase component with 3-way circular visual compare function and top earners table
+function PlayerDatabase() {
+    const [players, setPlayers] = useState([]);
+    const [search, setSearch] = useState("");
+    const [positionFilter, setPositionFilter] = useState("All");
+    const [sortBy, setSortBy] = useState("overall");
+    const [selected, setSelected] = useState([]); // up to 3 for compare
+    const [topEarners, setTopEarners] = useState([]);
+
+    // Fetch player stats
+    useEffect(() => {
+        fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
+            .then((res) => res.text())
+            .then((text) => {
+                const json = JSON.parse(text.substring(47).slice(0, -2));
+                const rows = json.table.rows.map((row) => {
+                    const cells = row.c;
+                    const player = {
+                        name: cells[0]?.v,
+                        position: cells[1]?.v,
+                        speed: Number(cells[2]?.v),
+                        shooting: Number(cells[3]?.v),
+                        passing: Number(cells[4]?.v),
+                        dribbling: Number(cells[5]?.v),
+                        physical: Number(cells[6]?.v),
+                        defending: Number(cells[7]?.v),
+                        goalkeeping: Number(cells[8]?.v || 0),
+                        weakFoot: !isNaN(Number(cells[10]?.v)) ? Number(cells[10].v) : 0,
+                    };
+                    player.overall = calculateOverall(player);
+                    return player;
+                });
+                setPlayers(rows);
+            });
+    }, []);
+
+    // Fetch top earners
+    useEffect(() => {
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1g9WWrlzTIwr2bZFyw9fqNpMTDpMzpk2ROC3UAWqofuA/gviz/tq?tqx=out:csv';
+        fetch(sheetUrl)
+            .then(res => res.text())
+            .then(csv => {
+                Papa.parse(csv, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: results => {
+                        const keys = Object.keys(results.data[0] || {});
+                        const trimmed = results.data
+                            .map(row => ({ [keys[0]]: row[keys[0]], [keys[1]]: row[keys[1]] }))
+                            .filter(row => row[keys[1]]?.trim());
+
+                        const counts = {};
+                        trimmed.forEach(row => {
+                            const player = row[keys[1]];
+                            counts[player] = (counts[player] || 0) + 1;
+                        });
+                        const sorted = Object.entries(counts)
+                            .sort((a, b) => b[1] - a[1])
+                            .map(([player, count], index) => ({ Rank: index + 1, Player: player, Awards: count }));
+
+                        setTopEarners(sorted);
+                    }
+                });
+            });
+    }, []);
+
+    function calculateOverall(p) {
+        const { speed, shooting, passing, dribbling, physical, defending, goalkeeping, weakFoot } = p;
+        switch (p.position) {
+            case "ST":
+                return Math.round(speed * 0.25 + shooting * 0.3 + passing * 0.1 + dribbling * 0.15 + physical * 0.1 + defending * 0.1 + weakFoot * 0.1);
+            case "MF":
+                return Math.round(speed * 0.2 + shooting * 0.2 + passing * 0.25 + dribbling * 0.2 + physical * 0.1 + defending * 0.1 + weakFoot * 0.05);
+            case "DF":
+                return Math.round(speed * 0.1 + shooting * 0.05 + passing * 0.15 + dribbling * 0.05 + physical * 0.2 + defending * 0.45 + weakFoot * 0.03);
+            case "GK":
+                return Math.round(speed * 0.03 + passing * 0.02 + physical * 0.05 + goalkeeping * 0.9 + weakFoot * 0.02);
+            default:
+                return 0;
+        }
+    }
+
+    const filtered = players
+        .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+        .filter((p) => positionFilter === "All" || p.position === positionFilter)
+        .sort((a, b) => b[sortBy] - a[sortBy]);
+
+    function toggleSelect(player) {
+        setSelected((prev) => {
+            if (prev.some((p) => p.name === player.name)) {
+                return prev.filter((p) => p.name !== player.name);
+            }
+            if (prev.length >= 3) {
+                // Remove the first and add the new one
+                return [...prev.slice(1), player];
+            }
+            return [...prev, player];
+        });
+    }
+
+    function removeFromCompare(name) {
+        setSelected((prev) => prev.filter((p) => p.name !== name));
+    }
+
+    // Top Earners Comparison Table
+    function TopEarnersCompare({ selected }) {
+        if (!selected.length) return null;
+        // Find top earners for selected players
+        const selectedEarners = selected.map(sel => {
+            const found = topEarners.find(e => e.Player === sel.name);
+            return {
+                name: sel.name,
+                awards: found ? found.Awards : 0,
+                rank: found ? found.Rank : "-"
+            };
+        });
+        return (
+            <div className="bg-white rounded-xl shadow p-4 border max-w-xs w-full">
+                <div className="text-center font-bold text-lg mb-2">Top Earners Comparison</div>
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr>
+                            <th className="p-2 text-left font-medium">Player</th>
+                            <th className="p-2 text-center font-medium">Rank</th>
+                            <th className="p-2 text-center font-medium">Awards</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {selectedEarners.map((e, i) => (
+                            <tr key={e.name} className="odd:bg-white even:bg-gray-100">
+                                <td className="p-2 font-semibold">{e.name}</td>
+                                <td className="p-2 text-center">{e.rank}</td>
+                                <td className="p-2 text-center">{e.awards}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        );
+    }
+
+    // Circular (Radar) Comparison
+    function RadarCompare({ players }) {
+        if (players.length < 2) return null;
+
+        // Determine if all selected are outfield (not GK)
+        const allOutfield = players.every(p => p.position !== "GK");
+        // Attributes to compare
+        const attrs = allOutfield
+            ? [
+                { key: "overall", label: "Overall", max: 100 },
+                { key: "speed", label: "Speed", max: 100 },
+                { key: "shooting", label: "Shooting", max: 100 },
+                { key: "passing", label: "Passing", max: 100 },
+                { key: "dribbling", label: "Dribbling", max: 100 },
+                { key: "physical", label: "Physical", max: 100 },
+                { key: "defending", label: "Defending", max: 100 },
+                { key: "weakFoot", label: "Weak Foot", max: 50 }
+            ]
+            : [
+                { key: "overall", label: "Overall", max: 100 },
+                { key: "speed", label: "Speed", max: 100 },
+                { key: "shooting", label: "Shooting", max: 100 },
+                { key: "passing", label: "Passing", max: 100 },
+                { key: "dribbling", label: "Dribbling", max: 100 },
+                { key: "physical", label: "Physical", max: 100 },
+                { key: "defending", label: "Defending", max: 100 },
+                { key: "goalkeeping", label: "Goalkeeping", max: 100 },
+                { key: "weakFoot", label: "Weak Foot", max: 50 }
+            ];
+
+        // Colors for up to 3 players
+        const colors = [
+            "#3b82f6", // blue
+            "#ef4444", // red
+            "#f59e42"  // orange
+        ];
+
+        // Radar chart dimensions
+        const size = 320;
+        const center = size / 2;
+        const radius = size / 2 - 40;
+        const angleStep = (2 * Math.PI) / attrs.length;
+
+        // Helper: get points for a player
+        function getPoints(player, idx) {
+            return attrs.map((attr, i) => {
+                const value = player[attr.key] || 0;
+                const r = (value / attr.max) * radius;
+                const angle = i * angleStep - Math.PI / 2;
+                return [
+                    center + r * Math.cos(angle),
+                    center + r * Math.sin(angle)
+                ];
+            });
+        }
+
+        // Helper: get polygon string
+        function pointsToString(points) {
+            return points.map(([x, y]) => `${x},${y}`).join(" ");
+        }
+
+        // Draw attribute axes and labels
+        const axes = attrs.map((attr, i) => {
+            const angle = i * angleStep - Math.PI / 2;
+            const x = center + radius * Math.cos(angle);
+            const y = center + radius * Math.sin(angle);
+            const labelX = center + (radius + 18) * Math.cos(angle);
+            const labelY = center + (radius + 18) * Math.sin(angle);
+            return (
+                <g key={attr.key}>
+                    <line
+                        x1={center}
+                        y1={center}
+                        x2={x}
+                        y2={y}
+                        stroke="#d1d5db"
+                        strokeWidth="1"
+                    />
+                    <text
+                        x={labelX}
+                        y={labelY}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        fontSize="12"
+                        fill="#374151"
+                        style={{ pointerEvents: "none", fontWeight: 500 }}
+                    >
+                        {attr.label}
+                    </text>
+                </g>
+            );
+        });
+
+        // Draw grid (concentric polygons)
+        const gridLevels = 4;
+        const grid = [];
+        for (let level = 1; level <= gridLevels; level++) {
+            const r = (radius * level) / gridLevels;
+            const points = attrs.map((attr, i) => {
+                const angle = i * angleStep - Math.PI / 2;
+                return [
+                    center + r * Math.cos(angle),
+                    center + r * Math.sin(angle)
+                ];
+            });
+            grid.push(
+                <polygon
+                    key={level}
+                    points={pointsToString(points)}
+                    fill="none"
+                    stroke="#e5e7eb"
+                    strokeWidth="1"
+                />
+            );
+        }
+
+        // Draw player polygons
+        const polygons = players.map((player, idx) => {
+            const points = getPoints(player, idx);
+            return (
+                <polygon
+                    key={player.name}
+                    points={pointsToString(points)}
+                    fill={colors[idx] + "33"}
+                    stroke={colors[idx]}
+                    strokeWidth="2"
+                />
+            );
+        });
+
+        // Draw player dots
+        const dots = players.map((player, idx) => {
+            const points = getPoints(player, idx);
+            return points.map(([x, y], i) => (
+                <circle
+                    key={player.name + "-dot-" + i}
+                    cx={x}
+                    cy={y}
+                    r={4}
+                    fill={colors[idx]}
+                    stroke="#fff"
+                    strokeWidth="1"
+                />
+            ));
+        });
+
+        // Legend
+        const legend = (
+            <div className="flex justify-center gap-4 mt-2 mb-2">
+                {players.map((p, idx) => (
+                    <div key={p.name} className="flex items-center gap-2">
+                        <span style={{
+                            display: "inline-block",
+                            width: 16,
+                            height: 16,
+                            borderRadius: "50%",
+                            background: colors[idx],
+                            border: "2px solid #fff"
+                        }} />
+                        <span className="font-semibold text-sm">{p.name}</span>
+                        <button
+                            className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
+                            onClick={() => removeFromCompare(p.name)}
+                            title="Remove from comparison"
+                        >×</button>
+                    </div>
+                ))}
+            </div>
+        );
+
+        return (
+            <div className="max-w-2xl mx-auto mb-8 bg-white rounded-xl shadow p-4 border">
+                <div className="text-center font-bold text-lg mb-2">Player Attribute Comparison</div>
+                {legend}
+                <div className="flex flex-col md:flex-row gap-6 justify-center items-start">
+                    <div>
+                        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+                            {/* Grid */}
+                            {grid}
+                            {/* Axes and labels */}
+                            {axes}
+                            {/* Player polygons */}
+                            {polygons}
+                            {/* Dots */}
+                            {dots}
+                            {/* Center dot */}
+                            <circle cx={center} cy={center} r={3} fill="#6b7280" />
+                        </svg>
+                    </div>
+                    <TopEarnersCompare selected={players} />
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div>
+            <h1 className="text-3xl font-bold mb-4 text-center text-green-900">Player Database</h1>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                <Input
+                    type="text"
+                    placeholder="Search players..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="w-full md:w-1/2"
+                />
+                <div className="flex gap-2">
+                    {["All", "ST", "MF", "DF", "GK"].map((pos) => (
+                        <button
+                            key={pos}
+                            className={`px-3 py-1 rounded font-semibold transition ${positionFilter === pos ? "bg-blue-500 text-white shadow" : "bg-gray-200 hover:bg-blue-100"}`}
+                            onClick={() => setPositionFilter(pos)}
+                        >
+                            {pos}
+                        </button>
+                    ))}
+                </div>
+                <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="border p-2 rounded-md bg-white/90 shadow">
+                    {["overall", "speed", "shooting", "passing", "dribbling", "physical", "defending"].map(key => (
+                        <option key={key} value={key}>Sort by {key.charAt(0).toUpperCase() + key.slice(1)}</option>
+                    ))}
+                </select>
+            </div>
+            <RadarCompare players={selected} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {filtered.map((p) => (
+                    <div
+                        key={p.name}
+                        className={`border rounded-xl shadow p-4 cursor-pointer transition-all duration-150 ${selected.some(sel => sel.name === p.name) ? "bg-blue-100 border-blue-400" : "bg-white hover:bg-blue-50"}`}
+                        onClick={() => toggleSelect(p)}
+                    >
+                        <div className="flex items-center justify-between">
+                            <div className="font-semibold text-base truncate">{p.name}</div>
+                            {selected.some(sel => sel.name === p.name) && (
+                                <button
+                                    className="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
+                                    onClick={e => { e.stopPropagation(); removeFromCompare(p.name); }}
+                                    title="Remove from comparison"
+                                >×</button>
+                            )}
+                        </div>
+                        <div className="text-xs text-muted-foreground mb-2">{p.position}</div>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2">
+                            <span>Speed: {p.speed}</span>
+                            <span>Shooting: {p.shooting}</span>
+                            <span>Passing: {p.passing}</span>
+                            <span>Dribbling: {p.dribbling}</span>
+                            <span>Physical: {p.physical}</span>
+                            <span>Defending: {p.defending}</span>
+                            <span>Weak Foot: {p.weakFoot}</span>
+                            <span>Goalkeeping: {p.goalkeeping}</span>
+                        </div>
+                        <div className="text-sm font-bold">Overall: {p.overall}</div>
+                        {selected.some(sel => sel.name === p.name) && (
+                            <div className="text-xs text-blue-700 font-semibold mt-1">Selected</div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// Main App with view switching
 export default function App() {
+    const [view, setView] = useState("home"); // "home", "lineup", "database"
+    const [scrolled, setScrolled] = useState(false);
+
+    // Listen for scroll to shrink the header
+    useEffect(() => {
+        function onScroll() {
+            setScrolled(window.scrollY > 24);
+        }
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
+    useEffect(() => {
+        function handler(e) {
+            setView(e.detail);
+        }
+        window.addEventListener("setView", handler);
+        return () => window.removeEventListener("setView", handler);
+    }, []);
+
+    return (
+        <div className="min-h-screen bg-gray-50 text-gray-800">
+            <header
+                className={
+                    "z-50 sticky top-0 left-0 w-full transition-all duration-300 bg-white shadow " +
+                    (scrolled
+                        ? "py-1 shadow-md border-b border-gray-200"
+                        : "py-4")
+                }
+                style={{
+                    // Optional: add a little blur when scrolled
+                    backdropFilter: scrolled ? "blur(4px)" : undefined,
+                }}
+            >
+                <nav className="container mx-auto flex justify-between items-center transition-all duration-300">
+                    <h1
+                        className={
+                            "font-bold transition-all duration-300 " +
+                            (scrolled
+                                ? "text-lg"
+                                : "text-xl")
+                        }
+                        style={{
+                            letterSpacing: scrolled ? "0.01em" : "0.02em",
+                        }}
+                    >
+                        Grupi i Futbollit
+                    </h1>
+                    <div className="flex gap-4 text-lg">
+                        <button
+                            className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`}
+                            onClick={() => setView("home")}
+                        >
+                            Home
+                        </button>
+                        <button
+                            className={`hover:underline ${view === "lineup" ? "font-bold text-blue-700" : ""}`}
+                            onClick={() => setView("lineup")}
+                        >
+                            Lineup Creator
+                        </button>
+                        <button
+                            className={`hover:underline ${view === "database" ? "font-bold text-blue-700" : ""}`}
+                            onClick={() => setView("database")}
+                        >
+                            Player Database
+                        </button>
+                    </div>
+                </nav>
+            </header>
+            <main className="container mx-auto p-4">
+                {view === "home" && <Home />}
+                {view === "lineup" && <LineupCreator />}
+                {view === "database" && <PlayerDatabase />}
+            </main>
+        </div>
+    );
+}
+
+// The LineupCreator component is your current App code
+function LineupCreator() {
     const [formationA, setFormationA] = useState("3-3-3");
     const [formationB, setFormationB] = useState("3-3-3");
     const [players, setPlayers] = useState([]);
@@ -740,8 +1680,10 @@ export default function App() {
     const [teamA, setTeamA] = useState(Array(10).fill(null));
     const [teamB, setTeamB] = useState(Array(10).fill(null));
     const [hideSelected, setHideSelected] = useState(false);
-    const [showComparison, setShowComparison] = useState(true);
+    const [showComparison, setShowComparison] = useState(false);
     const [showAllAvailable, setShowAllAvailable] = useState(false);
+    const [showLineups, setShowLineups] = useState(true);
+    const [viewMode, setViewMode] = useState("big"); // "big", "small", "list"
 
     const [globalActiveSlot, setGlobalActiveSlot] = useState(null);
 
@@ -894,147 +1836,249 @@ export default function App() {
     return (
         <div className="p-4 max-w-7xl mx-auto" ref={mainRef}>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
-            <div className="flex flex-col md:flex-row gap-6">
-                {/* Main content */}
-                <div className="flex-1">
-                    <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-4 ${glass}`}>
-                        <Input type="text" placeholder="Search players..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full md:w-1/2" />
-                        <div className="flex gap-2">
-                            {["All", "ST", "MF", "DF", "GK"].map((pos) => (
-                                <button
-                                    key={pos}
-                                    className={`px-3 py-1 rounded font-semibold transition ${positionFilter === pos ? "bg-blue-500 text-white shadow" : "bg-gray-200 hover:bg-blue-100"}`}
-                                    onClick={() => setPositionFilter(pos)}
-                                >
-                                    {pos}
-                                </button>
-                            ))}
-                        </div>
-                        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border p-2 rounded-md bg-white/90 shadow">
-                            {["overall", "speed", "shooting", "passing", "dribbling", "physical", "defending"].map(key => (
-                                <option key={key} value={key}>Sort by {key.charAt(0).toUpperCase() + key.slice(1)}</option>
-                            ))}
-                        </select>
-                    </div>
+            
+            {/* Show/Hide Lineups and Attribute Comparison button */}
+            <div className="flex justify-center mb-4">
+                <button
+                    onClick={() => setShowLineups(v => !v)}
+                    className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
+                    type="button"
+                >
+                    {showLineups ? "Hide Lineups & Comparison" : "Show Lineups & Comparison"}
+                </button>
+            </div>
 
-                    <DndContext
-                        collisionDetection={closestCenter}
-                        sensors={sensors}
+            {/* Player view mode selector */}
+            <div className="flex justify-end mb-2">
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-700">View:</span>
+                    <button
+                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "list" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                        onClick={() => setViewMode("list")}
+                        type="button"
                     >
-                        {/* Drag overlay for mobile visual feedback */}
-                        <DragOverlay>
-                            {activeDrag ? (
-                                <DraggablePlayer
-                                    player={activeDrag.player}
-                                    fromTeam={activeDrag.fromTeam}
-                                    fromIndex={activeDrag.fromIndex}
-                                    small
-                                    assigned={false}
-                                    selected={false}
-                                />
-                            ) : null}
-                        </DragOverlay>
-
-                        {/* Show button for attribute comparison */}
-                        {!showComparison && (
-                            <div className="flex justify-center mb-4">
-                                <button
-                                    onClick={() => setShowComparison(true)}
-                                    className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
-                                    type="button"
-                                >
-                                    Show Attribute Comparison
-                                </button>
-                            </div>
-                        )}
-
-                        {showComparison && (
-                            <MirroredTeamAttributesBarChart
-                                teamAPlayers={teamA}
-                                teamBPlayers={teamB}
-                                teamALabel="Team A"
-                                teamBLabel="Team B"
-                                onHide={() => setShowComparison(false)}
-                            />
-                        )}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                            <DroppableTeam
-                                id="teamA"
-                                label="Team A"
-                                players={teamA}
-                                onPlayerDrop={handlePlayerDrop}
-                                formation={formationA}
-                                onFormationChange={setFormationA}
-                                allPlayers={players}
-                                globalActiveSlot={globalActiveSlot}
-                                setGlobalActiveSlot={setGlobalActiveSlot}
-                                playerSelectModal={playerSelectModal}
-                                setPlayerSelectModal={setPlayerSelectModal}
-                            />
-                            <DroppableTeam
-                                id="teamB"
-                                label="Team B"
-                                players={teamB}
-                                onPlayerDrop={handlePlayerDrop}
-                                formation={formationB}
-                                onFormationChange={setFormationB}
-                                allPlayers={players}
-                                globalActiveSlot={globalActiveSlot}
-                                setGlobalActiveSlot={setGlobalActiveSlot}
-                                playerSelectModal={playerSelectModal}
-                                setPlayerSelectModal={setPlayerSelectModal}
-                            />
-                        </div>
-
-                        <PlayerSelectModal
-                            open={playerSelectModal.open}
-                            onClose={() => setPlayerSelectModal({ open: false })}
-                            players={playerSelectModal.eligiblePlayers || []}
-                            onSelect={playerSelectModal.onSelect || (() => { })}
-                            slotLabel={playerSelectModal.slotLabel}
-                        />
-
-                        <div className={`flex items-center mb-2 gap-2 ${glass}`}>
-                            <h2 className="text-xl font-semibold text-green-900">Available Players</h2>
-                            <label className="flex items-center gap-1 text-sm font-normal cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={hideSelected}
-                                    onChange={e => setHideSelected(e.target.checked)}
-                                    className="accent-blue-500"
-                                />
-                                Hide selected
-                            </label>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                            {visibleAvailablePlayers.map((p, idx) => (
-                                <DraggablePlayer
-                                    key={p.name}
-                                    player={p}
-                                    fromTeam={null}
-                                    fromIndex={null}
-                                    selected={assignedNames.includes(p.name)}
-                                    onDragStart={handleDragStart}
-                                    onDragEnd={handleDragEnd}
-                                />
-                            ))}
-                        </div>
-                        {!showAllAvailable && sortedAvailablePlayers.length > 12 && (
-                            <div className="flex justify-center mt-2">
-                                <button
-                                    className="px-3 py-1 rounded bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 transition"
-                                    onClick={() => setShowAllAvailable(true)}
-                                    type="button"
-                                >
-                                    Show all ({sortedAvailablePlayers.length})
-                                </button>
-                            </div>
-                        )}
-                    </DndContext>
+                        List
+                    </button>
+                    <button
+                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                        onClick={() => setViewMode("small")}
+                        type="button"
+                    >
+                        Small Cards
+                    </button>
+                    <button
+                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                        onClick={() => setViewMode("big")}
+                        type="button"
+                    >
+                        Big Cards
+                    </button>
                 </div>
             </div>
+
+            {/* Only hide/show the lineups and attribute comparison */}
+            {showLineups && (
+                <>
+                    {/* Attribute Comparison */}
+                    {!showComparison && (
+                        <div className="flex justify-center mb-4">
+                            <button
+                                onClick={() => setShowComparison(true)}
+                                className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
+                                type="button"
+                            >
+                                Show Attribute Comparison
+                            </button>
+                        </div>
+                    )}
+
+                    {showComparison && (
+                        <MirroredTeamAttributesBarChart
+                            teamAPlayers={teamA}
+                            teamBPlayers={teamB}
+                            teamALabel="Team A"
+                            teamBLabel="Team B"
+                            onHide={() => setShowComparison(false)}
+                        />
+                    )}
+
+                    {/* Lineups */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <DroppableTeam
+                            id="teamA"
+                            label="Team A"
+                            players={teamA}
+                            onPlayerDrop={handlePlayerDrop}
+                            formation={formationA}
+                            onFormationChange={setFormationA}
+                            allPlayers={players}
+                            globalActiveSlot={globalActiveSlot}
+                            setGlobalActiveSlot={setGlobalActiveSlot}
+                            playerSelectModal={playerSelectModal}
+                            setPlayerSelectModal={setPlayerSelectModal}
+                        />
+                        <DroppableTeam
+                            id="teamB"
+                            label="Team B"
+                            players={teamB}
+                            onPlayerDrop={handlePlayerDrop}
+                            formation={formationB}
+                            onFormationChange={setFormationB}
+                            allPlayers={players}
+                            globalActiveSlot={globalActiveSlot}
+                            setGlobalActiveSlot={setGlobalActiveSlot}
+                            playerSelectModal={playerSelectModal}
+                            setPlayerSelectModal={setPlayerSelectModal}
+                        />
+                    </div>
+                </>
+            )}
+
+            {/* The rest (search, available players) is always visible */}
+            <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-4 ${glass}`}>
+                <Input type="text" placeholder="Search players..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full md:w-1/2" />
+                <div className="flex gap-2">
+                    {["All", "ST", "MF", "DF", "GK"].map((pos) => (
+                        <button
+                            key={pos}
+                            className={`px-3 py-1 rounded font-semibold transition ${positionFilter === pos ? "bg-blue-500 text-white shadow" : "bg-gray-200 hover:bg-blue-100"}`}
+                            onClick={() => setPositionFilter(pos)}
+                        >
+                            {pos}
+                        </button>
+                    ))}
+                </div>
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border p-2 rounded-md bg-white/90 shadow">
+                    {["overall", "speed", "shooting", "passing", "dribbling", "physical", "defending"].map(key => (
+                        <option key={key} value={key}>Sort by {key.charAt(0).toUpperCase() + key.slice(1)}</option>
+                    ))}
+                </select>
+            </div>
+
+            <DndContext
+                collisionDetection={closestCenter}
+                sensors={sensors}
+            >
+                {/* Drag overlay for mobile visual feedback */}
+                <DragOverlay>
+                    {activeDrag ? (
+                        <DraggablePlayer
+                            player={activeDrag.player}
+                            fromTeam={activeDrag.fromTeam}
+                            fromIndex={activeDrag.fromIndex}
+                            small={viewMode === "small"}
+                            assigned={false}
+                            selected={false}
+                        />
+                    ) : null}
+                </DragOverlay>
+
+                <PlayerSelectModal
+                    open={playerSelectModal.open}
+                    onClose={() => setPlayerSelectModal({ open: false })}
+                    players={playerSelectModal.eligiblePlayers || []}
+                    onSelect={playerSelectModal.onSelect || (() => { })}
+                    slotLabel={playerSelectModal.slotLabel}
+                />
+
+                <div className={`flex items-center mb-2 gap-2 ${glass}`}>
+                    <h2 className="text-xl font-semibold text-green-900">Available Players</h2>
+                    <label className="flex items-center gap-1 text-sm font-normal cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={hideSelected}
+                            onChange={e => setHideSelected(e.target.checked)}
+                            className="accent-blue-500"
+                        />
+                        Hide selected
+                    </label>
+                    {/* View mode selector beside Available Players */}
+                    <div className="flex items-center gap-1 ml-4">
+                        <span className="text-xs text-gray-600">View:</span>
+                        <button
+                            className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "list" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                            onClick={() => setViewMode("list")}
+                            type="button"
+                            aria-label="List view"
+                        >
+                            <span role="img" aria-label="List">📋</span>
+                        </button>
+                        <button
+                            className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                            onClick={() => setViewMode("small")}
+                            type="button"
+                            aria-label="Small cards"
+                        >
+                            <span role="img" aria-label="Small cards">🃏</span>
+                        </button>
+                        <button
+                            className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                            onClick={() => setViewMode("big")}
+                            type="button"
+                            aria-label="Big cards"
+                        >
+                            <span role="img" aria-label="Big cards">🗂️</span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* Player display modes */}
+                {viewMode === "list" ? (
+                    <div className="bg-white rounded-xl border shadow divide-y">
+                        {visibleAvailablePlayers.map((p, idx) => (
+                            <ListPlayer
+                                key={p.name}
+                                player={p}
+                                fromTeam={null}
+                                fromIndex={null}
+                                assigned={assignedNames.includes(p.name)}
+                                selected={assignedNames.includes(p.name)}
+                                onDragStart={handleDragStart}
+                                onDragEnd={handleDragEnd}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className={`grid grid-cols-1 ${viewMode === "small" ? "sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} gap-3`}>
+                        {visibleAvailablePlayers.map((p, idx) => (
+                            <DraggablePlayer
+                                key={p.name}
+                                player={p}
+                                fromTeam={null}
+                                fromIndex={null}
+                                small={viewMode === "small"}
+                                assigned={assignedNames.includes(p.name)}
+                                selected={assignedNames.includes(p.name)}
+                                onDragStart={handleDragStart}
+                                onDragEnd={handleDragEnd}
+                            />
+                        ))}
+                    </div>
+                )}
+
+                {!showAllAvailable && sortedAvailablePlayers.length > 12 && (
+                    <div className="flex justify-center mt-2">
+                        <button
+                            className="px-3 py-1 rounded bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 transition"
+                            onClick={() => setShowAllAvailable(true)}
+                            type="button"
+                        >
+                            Show all ({sortedAvailablePlayers.length})
+                        </button>
+                    </div>
+                )}
+                {showAllAvailable && sortedAvailablePlayers.length > 12 && (
+                    <div className="flex justify-center mt-2">
+                        <button
+                            className="px-3 py-1 rounded bg-gray-300 text-gray-800 text-xs font-semibold hover:bg-gray-400 transition"
+                            onClick={() => setShowAllAvailable(false)}
+                            type="button"
+                        >
+                            Show less
+                        </button>
+                    </div>
+                )}
+            </DndContext>
         </div>
     );
 }
-
