@@ -1074,9 +1074,21 @@ function Home() {
                             onKeyDown={e => { if (e.key === "Enter" || e.key === " ") goTo("lineup"); }}
                             aria-label="Go to Lineup Creator"
                         >
+<<<<<<<<< Temporary merge branch 1
+<<<<<<< HEAD
                             <span className="text-xl sm:text-3xl mb-1 sm:mb-2">⚽</span>
                             <h3 className="text-base sm:text-xl font-bold mb-1 text-green-900 text-center">Lineup Creator</h3>
                             <p className="text-gray-700 text-center text-xs sm:text-base mb-2">
+=======
+                            <span className="text-2xl sm:text-3xl mb-2">⚽</span>
+                            <h3 className="text-lg sm:text-xl font-bold mb-1 text-green-900">Lineup Creator</h3>
+                            <p className="text-gray-700 text-center text-sm sm:text-base mb-2">
+>>>>>>> f3cb76c5edecfba65711c8a30a65b56296d84732
+=========
+                            <span className="text-2xl sm:text-3xl mb-2">⚽</span>
+                            <h3 className="text-lg sm:text-xl font-bold mb-1 text-green-900">Lineup Creator</h3>
+                            <p className="text-gray-700 text-center text-sm sm:text-base mb-2">
+>>>>>>>>> Temporary merge branch 2
                                 Build and compare two football teams. Drag and drop players, see team averages, and compare lineups visually.
                             </p>
                             <span className="text-blue-700 font-semibold underline text-xs sm:text-sm mt-1">
@@ -1086,16 +1098,36 @@ function Home() {
                     </div>
                     <div className="w-full max-w-md">
                         <div
+<<<<<<<<< Temporary merge branch 1
+<<<<<<< HEAD
                             className="bg-blue-100 border-2 border-blue-300 rounded-xl shadow p-3 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition min-h-[120px]"
+=======
+                            className="bg-blue-100 border-2 border-blue-300 rounded-xl shadow p-4 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition"
+>>>>>>> f3cb76c5edecfba65711c8a30a65b56296d84732
+=========
+                            className="bg-blue-100 border-2 border-blue-300 rounded-xl shadow p-4 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition"
+>>>>>>>>> Temporary merge branch 2
                             onClick={() => goTo("database")}
                             tabIndex={0}
                             role="button"
                             onKeyDown={e => { if (e.key === "Enter" || e.key === " ") goTo("database"); }}
                             aria-label="Go to Player Database"
                         >
+<<<<<<<<< Temporary merge branch 1
+<<<<<<< HEAD
                             <span className="text-xl sm:text-3xl mb-1 sm:mb-2">📋</span>
                             <h3 className="text-base sm:text-xl font-bold mb-1 text-blue-900 text-center">Player Database</h3>
                             <p className="text-gray-700 text-center text-xs sm:text-base mb-2">
+=======
+                            <span className="text-2xl sm:text-3xl mb-2">📋</span>
+                            <h3 className="text-lg sm:text-xl font-bold mb-1 text-blue-900">Player Database</h3>
+                            <p className="text-gray-700 text-center text-sm sm:text-base mb-2">
+>>>>>>> f3cb76c5edecfba65711c8a30a65b56296d84732
+=========
+                            <span className="text-2xl sm:text-3xl mb-2">📋</span>
+                            <h3 className="text-lg sm:text-xl font-bold mb-1 text-blue-900">Player Database</h3>
+                            <p className="text-gray-700 text-center text-sm sm:text-base mb-2">
+>>>>>>>>> Temporary merge branch 2
                                 Browse all players, filter and sort, and compare up to 3 players on a radar chart.
                             </p>
                             <span className="text-blue-700 font-semibold underline text-xs sm:text-sm mt-1">
@@ -1109,18 +1141,40 @@ function Home() {
                     <div className="w-full max-w-md">
                         <div className="relative mb-4 sm:mb-8 mt-4 sm:mt-6">
                             <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-10">
+<<<<<<<<< Temporary merge branch 1
+<<<<<<< HEAD
                                 <span className="bg-yellow-400 text-yellow-900 px-3 sm:px-4 py-1 rounded-full font-bold shadow text-xs sm:text-base border-2 border-yellow-300 animate-pulse">
+=======
+                                <span className="bg-yellow-400 text-yellow-900 px-4 py-1 rounded-full font-bold shadow text-sm sm:text-base border-2 border-yellow-300 animate-pulse">
+>>>>>>> f3cb76c5edecfba65711c8a30a65b56296d84732
+=========
+                                <span className="bg-yellow-400 text-yellow-900 px-3 sm:px-4 py-1 rounded-full font-bold shadow text-xs sm:text-base border-2 border-yellow-300 animate-pulse">
+>>>>>>>>> Temporary merge branch 2
                                     NDESHJA E RADHËS
                                 </span>
                             </div>
                             <table className="w-full shadow-2xl rounded-2xl overflow-hidden border-4 border-yellow-300 bg-yellow-50/80">
                                 <tbody>
                                     <tr>
+<<<<<<<<< Temporary merge branch 1
+<<<<<<< HEAD
+=========
+>>>>>>>>> Temporary merge branch 2
                                         <td className="p-3 sm:p-8 text-center font-bold text-yellow-900 text-sm sm:text-lg tracking-wide">
                                             Ndeshja e radhës do të luhet të mërkurën e ardhshme<br />
                                             në datë <span className="text-blue-700 underline">{getNextWednesday()}</span><br />
                                             në orën <span className="text-blue-700 underline">20:30</span><br />
                                             <span className="block mt-2 text-sm sm:text-base font-semibold text-yellow-800">
+<<<<<<<<< Temporary merge branch 1
+=======
+                                        <td className="p-4 sm:p-8 text-center font-bold text-yellow-900 text-base sm:text-lg tracking-wide">
+                                            Ndeshja e radhës do të luhet të mërkurën e ardhshme<br />
+                                            në datë <span className="text-blue-700 underline">{getNextWednesday()}</span><br />
+                                            në orën <span className="text-blue-700 underline">20:30</span><br />
+                                            <span className="block mt-2 text-base font-semibold text-yellow-800">
+>>>>>>> f3cb76c5edecfba65711c8a30a65b56296d84732
+=========
+>>>>>>>>> Temporary merge branch 2
                                                 Lokacioni: <span className="text-blue-700 underline">Laprake</span>
                                             </span>
                                         </td>
@@ -1133,7 +1187,15 @@ function Home() {
                 {/* Right: MOTM and Top Earners */}
                 <div className="flex flex-col gap-4 sm:gap-8 items-center w-full">
                     <div className="w-full max-w-md">
+<<<<<<<<< Temporary merge branch 1
+<<<<<<< HEAD
                         <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+=======
+                        <h2 className="text-lg sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+>>>>>>> f3cb76c5edecfba65711c8a30a65b56296d84732
+=========
+                        <h2 className="text-lg sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+>>>>>>>>> Temporary merge branch 2
                         <div className="overflow-x-auto">
                             <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
                                 <thead className="bg-blue-600 text-white text-xs">
@@ -1163,7 +1225,15 @@ function Home() {
                         )}
                     </div>
                     <div className="w-full max-w-md">
+<<<<<<<<< Temporary merge branch 1
+<<<<<<< HEAD
                         <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+=======
+                        <h2 className="text-lg sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+>>>>>>> f3cb76c5edecfba65711c8a30a65b56296d84732
+=========
+                        <h2 className="text-lg sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+>>>>>>>>> Temporary merge branch 2
                         <div className="overflow-x-auto">
                             <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
                                 <thead className="bg-blue-600 text-white text-xs">
@@ -2090,126 +2160,11 @@ function LineupCreator() {
         </div>
     );
 }
-
-function MOTMPage() {
-    const [data, setData] = React.useState([]);
-    const [topEarners, setTopEarners] = React.useState([]);
-    const [showAll, setShowAll] = React.useState(false);
-    const [showAllEarners, setShowAllEarners] = React.useState(false);
-    const [loading, setLoading] = React.useState(true);
-
-    const formatDate = (input) => {
-        const date = new Date(input);
-        if (isNaN(date)) return input;
-        return date.toLocaleDateString('en-GB');
-    };
-
-    React.useEffect(() => {
-        setLoading(true);
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1g9WWrlzTIwr2bZFyw9fqNpMTDpMzpk2ROC3UAWqofuA/gviz/tq?tqx=out:csv';
-        fetch(sheetUrl)
-            .then(res => res.text())
-            .then(csv => {
-                Papa.parse(csv, {
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: results => {
-                        const keys = Object.keys(results.data[0] || {});
-                        const trimmed = results.data
-                            .map(row => ({ [keys[0]]: row[keys[0]], [keys[1]]: row[keys[1]] }))
-                            .filter(row => row[keys[1]]?.trim());
-
-                        setData(trimmed.slice().reverse());
-
-                        const counts = {};
-                        trimmed.forEach(row => {
-                            const player = row[keys[1]];
-                            counts[player] = (counts[player] || 0) + 1;
-                        });
-                        const sorted = Object.entries(counts)
-                            .sort((a, b) => b[1] - a[1])
-                            .map(([player, count], index) => ({ Rank: index + 1, Player: player, Awards: count }));
-
-                        setTopEarners(sorted);
-                        setLoading(false);
-                    }
-                });
-            })
-            .catch(() => setLoading(false));
-    }, []);
-
-    const visibleData = showAll ? data : data.slice(0, 10);
-    const visibleEarners = showAllEarners ? topEarners : topEarners.slice(0, 10);
-
-    if (loading) return <LoadingSpinner />;
-
-    return (
-        <div className="w-full flex flex-col items-center">
-            <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Man of the Match (MOTM)</h1>
-            <div className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Last Winners Table */}
-                <div>
-                    <h2 className="text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
-                            <thead className="bg-blue-600 text-white text-xs">
-                                <tr>
-                                    {visibleData.length > 0 && Object.keys(visibleData[0]).map((col, i) => (
-                                        <th key={i} className="border p-2 text-left font-medium">{col}</th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {visibleData.map((row, i) => (
-                                    <tr key={i} className="odd:bg-white even:bg-gray-100">
-                                        {Object.entries(row).map(([key, val], j) => (
-                                            <td key={j} className="border p-2 text-xs">{j === 0 ? formatDate(val) : val}</td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    {data.length > 10 && (
-                        <div className="mt-2 text-center">
-                            <button className="text-blue-600 underline hover:text-blue-800 text-xs" onClick={() => setShowAll(!showAll)}>
-                                {showAll ? 'Show Less' : 'Show All'}
-                            </button>
-                        </div>
-                    )}
-                </div>
-                {/* Top Earners Table */}
-                <div>
-                    <h2 className="text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
-                            <thead className="bg-blue-600 text-white text-xs">
-                                <tr>
-                                    <th className="border p-2 text-left font-medium">Rank</th>
-                                    <th className="border p-2 text-left font-medium">Player</th>
-                                    <th className="border p-2 text-left font-medium">Awards</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {visibleEarners.map((row, i) => (
-                                    <tr key={i} className="odd:bg-white even:bg-gray-100">
-                                        <td className="border p-2 text-xs">{row.Rank}</td>
-                                        <td className="border p-2 text-xs">{row.Player}</td>
-                                        <td className="border p-2 text-xs">{row.Awards}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    {topEarners.length > 10 && (
-                        <div className="mt-2 text-center">
-                            <button className="text-blue-600 underline hover:text-blue-800 text-xs" onClick={() => setShowAllEarners(!showAllEarners)}>
-                                {showAllEarners ? 'Show Less' : 'Show All'}
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-}
+<<<<<<<<< Temporary merge branch 1
+<<<<<<< HEAD
+ 
+=======
+>>>>>>> f3cb76c5edecfba65711c8a30a65b56296d84732
+=========
+ 
+>>>>>>>>> Temporary merge branch 2
