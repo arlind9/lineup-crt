@@ -1062,56 +1062,67 @@ function Home() {
 
     return (
         <div className="w-full flex flex-col items-center">
-            <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
                 {/* Left: Shortcuts */}
-                <div className="flex flex-col items-center gap-8">
+                <div className="flex flex-col items-center gap-4 sm:gap-8 w-full">
                     <div className="w-full max-w-md">
-                        <div className="bg-green-100 border-2 border-green-300 rounded-xl shadow p-6 flex flex-col items-center">
-                            <span className="text-3xl mb-2">⚽</span>
-                            <h3 className="text-xl font-bold mb-1 text-green-900">Lineup Creator</h3>
-                            <p className="text-gray-700 text-center text-base mb-2">
+                        <div
+                            className="bg-green-100 border-2 border-green-300 rounded-xl shadow p-3 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition min-h-[120px]"
+                            onClick={() => goTo("lineup")}
+                            tabIndex={0}
+                            role="button"
+                            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") goTo("lineup"); }}
+                            aria-label="Go to Lineup Creator"
+                        >
+                            <span className="text-xl sm:text-3xl mb-1 sm:mb-2">⚽</span>
+                            <h3 className="text-base sm:text-xl font-bold mb-1 text-green-900 text-center">Lineup Creator</h3>
+                            <p className="text-gray-700 text-center text-xs sm:text-base mb-2">
                                 Build and compare two football teams. Drag and drop players, see team averages, and compare lineups visually.
                             </p>
-                            <button
-                                onClick={() => goTo("lineup")}
-                                className="text-blue-700 font-semibold underline text-sm"
-                            >
+                            <span className="text-blue-700 font-semibold underline text-xs sm:text-sm mt-1">
                                 Go to Lineup Creator
-                            </button>
+                            </span>
                         </div>
                     </div>
                     <div className="w-full max-w-md">
-                        <div className="bg-blue-100 border-2 border-blue-300 rounded-xl shadow p-6 flex flex-col items-center">
-                            <span className="text-3xl mb-2">📋</span>
-                            <h3 className="text-xl font-bold mb-1 text-blue-900">Player Database</h3>
-                            <p className="text-gray-700 text-center text-base mb-2">
+                        <div
+                            className="bg-blue-100 border-2 border-blue-300 rounded-xl shadow p-3 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition min-h-[120px]"
+                            onClick={() => goTo("database")}
+                            tabIndex={0}
+                            role="button"
+                            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") goTo("database"); }}
+                            aria-label="Go to Player Database"
+                        >
+                            <span className="text-xl sm:text-3xl mb-1 sm:mb-2">📋</span>
+                            <h3 className="text-base sm:text-xl font-bold mb-1 text-blue-900 text-center">Player Database</h3>
+                            <p className="text-gray-700 text-center text-xs sm:text-base mb-2">
                                 Browse all players, filter and sort, and compare up to 3 players on a radar chart.
                             </p>
-                            <button
-                                onClick={() => goTo("database")}
-                                className="text-blue-700 font-semibold underline text-sm"
-                            >
+                            <span className="text-blue-700 font-semibold underline text-xs sm:text-sm mt-1">
                                 Go to Player Database
-                            </button>
+                            </span>
                         </div>
                     </div>
                 </div>
                 {/* Center: Next Match Table */}
-                <div className="flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center justify-center w-full">
                     <div className="w-full max-w-md">
-                        <div className="relative mb-8">
+                        <div className="relative mb-4 sm:mb-8">
                             <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-10">
-                                <span className="bg-yellow-400 text-yellow-900 px-4 py-1 rounded-full font-bold shadow text-base border-2 border-yellow-300 animate-pulse">
+                                <span className="bg-yellow-400 text-yellow-900 px-3 sm:px-4 py-1 rounded-full font-bold shadow text-xs sm:text-base border-2 border-yellow-300 animate-pulse">
                                     NDESHJA E RADHËS
                                 </span>
                             </div>
                             <table className="w-full shadow-2xl rounded-2xl overflow-hidden border-4 border-yellow-300 bg-yellow-50/80">
                                 <tbody>
                                     <tr>
-                                        <td className="p-8 text-center font-bold text-yellow-900 text-lg tracking-wide">
+                                        <td className="p-3 sm:p-8 text-center font-bold text-yellow-900 text-sm sm:text-lg tracking-wide">
                                             Ndeshja e radhës do të luhet të mërkurën e ardhshme<br />
                                             në datë <span className="text-blue-700 underline">{getNextWednesday()}</span><br />
-                                            në orën <span className="text-blue-700 underline">20:30</span>
+                                            në orën <span className="text-blue-700 underline">20:30</span><br />
+                                            <span className="block mt-2 text-sm sm:text-base font-semibold text-yellow-800">
+                                                Lokacioni: <span className="text-blue-700 underline">Laprake</span>
+                                            </span>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1120,27 +1131,29 @@ function Home() {
                     </div>
                 </div>
                 {/* Right: MOTM and Top Earners */}
-                <div className="flex flex-col gap-8 items-center">
+                <div className="flex flex-col gap-4 sm:gap-8 items-center w-full">
                     <div className="w-full max-w-md">
-                        <h2 className="text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
-                        <table className="w-full text-sm shadow-md rounded-lg overflow-hidden">
-                            <thead className="bg-blue-600 text-white text-xs">
-                                <tr>
-                                    {visibleData.length > 0 && Object.keys(visibleData[0]).map((col, i) => (
-                                        <th key={i} className="border p-2 text-left font-medium">{col}</th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {visibleData.map((row, i) => (
-                                    <tr key={i} className="odd:bg-white even:bg-gray-100">
-                                        {Object.entries(row).map(([key, val], j) => (
-                                            <td key={j} className="border p-2 text-xs">{j === 0 ? formatDate(val) : val}</td>
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
+                                <thead className="bg-blue-600 text-white text-xs">
+                                    <tr>
+                                        {visibleData.length > 0 && Object.keys(visibleData[0]).map((col, i) => (
+                                            <th key={i} className="border p-2 text-left font-medium">{col}</th>
                                         ))}
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {visibleData.map((row, i) => (
+                                        <tr key={i} className="odd:bg-white even:bg-gray-100">
+                                            {Object.entries(row).map(([key, val], j) => (
+                                                <td key={j} className="border p-2 text-xs">{j === 0 ? formatDate(val) : val}</td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                         {data.length > 3 && (
                             <div className="mt-2 text-center">
                                 <button className="text-blue-600 underline hover:text-blue-800 text-xs" onClick={() => setShowAll(!showAll)}>
@@ -1150,25 +1163,27 @@ function Home() {
                         )}
                     </div>
                     <div className="w-full max-w-md">
-                        <h2 className="text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
-                        <table className="w-full text-sm shadow-md rounded-lg overflow-hidden">
-                            <thead className="bg-blue-600 text-white text-xs">
-                                <tr>
-                                    <th className="border p-2 text-left font-medium">Rank</th>
-                                    <th className="border p-2 text-left font-medium">Player</th>
-                                    <th className="border p-2 text-left font-medium">Awards</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {visibleEarners.map((row, i) => (
-                                    <tr key={i} className="odd:bg-white even:bg-gray-100">
-                                        <td className="border p-2 text-xs">{row.Rank}</td>
-                                        <td className="border p-2 text-xs">{row.Player}</td>
-                                        <td className="border p-2 text-xs">{row.Awards}</td>
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
+                                <thead className="bg-blue-600 text-white text-xs">
+                                    <tr>
+                                        <th className="border p-2 text-left font-medium">Rank</th>
+                                        <th className="border p-2 text-left font-medium">Player</th>
+                                        <th className="border p-2 text-left font-medium">Awards</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {visibleEarners.map((row, i) => (
+                                        <tr key={i} className="odd:bg-white even:bg-gray-100">
+                                            <td className="border p-2 text-xs">{row.Rank}</td>
+                                            <td className="border p-2 text-xs">{row.Player}</td>
+                                            <td className="border p-2 text-xs">{row.Awards}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                         {topEarners.length > 3 && (
                             <div className="mt-2 text-center">
                                 <button className="text-blue-600 underline hover:text-blue-800 text-xs" onClick={() => setShowAllEarners(!showAllEarners)}>
@@ -1179,6 +1194,19 @@ function Home() {
                     </div>
                 </div>
             </div>
+            {/* Mobile stacking: show all blocks in a single column on small screens */}
+            <style>{`
+                @media (max-width: 640px) {
+                    .grid-cols-1.lg\\:grid-cols-3 {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        gap: 1rem !important;
+                    }
+                    .max-w-md {
+                        max-width: 100vw !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }
@@ -1848,33 +1876,6 @@ function LineupCreator() {
                 </button>
             </div>
 
-            {/* Player view mode selector */}
-            <div className="flex justify-end mb-2">
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-700">View:</span>
-                    <button
-                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "list" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                        onClick={() => setViewMode("list")}
-                        type="button"
-                    >
-                        List
-                    </button>
-                    <button
-                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                        onClick={() => setViewMode("small")}
-                        type="button"
-                    >
-                        Small Cards
-                    </button>
-                    <button
-                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                        onClick={() => setViewMode("big")}
-                        type="button"
-                    >
-                        Big Cards
-                    </button>
-                </div>
-            </div>
 
             {/* Only hide/show the lineups and attribute comparison */}
             {showLineups && (
@@ -2001,7 +2002,7 @@ function LineupCreator() {
                             type="button"
                             aria-label="List view"
                         >
-                            <span role="img" aria-label="List">📋</span>
+                            <span role="img" aria-label="List">List</span>
                         </button>
                         <button
                             className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
@@ -2009,7 +2010,7 @@ function LineupCreator() {
                             type="button"
                             aria-label="Small cards"
                         >
-                            <span role="img" aria-label="Small cards">🃏</span>
+                            <span role="img" aria-label="Small cards">Card</span>
                         </button>
                         <button
                             className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
@@ -2017,7 +2018,7 @@ function LineupCreator() {
                             type="button"
                             aria-label="Big cards"
                         >
-                            <span role="img" aria-label="Big cards">🗂️</span>
+                            <span role="img" aria-label="Big cards"></span>
                         </button>
                     </div>
                 </div>
@@ -2082,3 +2083,4 @@ function LineupCreator() {
         </div>
     );
 }
+ 
