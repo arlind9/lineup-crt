@@ -354,11 +354,13 @@ function RadarCompare({ players }) {
             { key: "weakFoot", label: "Weak Foot", max: 50 }
         ];
 
-    // Colors for up to 3 players
+    // Colors for up to 5 players
     const colors = [
         "#3b82f6", // blue
         "#ef4444", // red
-        "#f59e42"  // orange
+        "#f59e42", // orange
+        "#10b981", // green
+        "#a21caf"  // purple
     ];
 
     // Make the radar chart wider for better label spacing
@@ -1211,17 +1213,16 @@ function Home() {
     );
 }
 
-// PlayerDatabase component with 3-way circular visual compare function and top earners table
+// PlayerDatabase component with 5-way circular visual compare function and top earners table
 function PlayerDatabase() {
     const [players, setPlayers] = useState([]);
     const [search, setSearch] = useState("");
     const [positionFilter, setPositionFilter] = useState("All");
     const [sortBy, setSortBy] = useState("overall");
-    const [selected, setSelected] = useState([]); // up to 3 for compare
+    const [selected, setSelected] = useState([]); // up to 5 for compare
     const [topEarners, setTopEarners] = useState([]);
     const [viewMode, setViewMode] = useState("big"); // "list", "small", "big"
     const [modalPlayer, setModalPlayer] = useState(null);
-    const [showCompare, setShowCompare] = useState(false);
 
     // Fetch player stats
     useEffect(() => {
@@ -1306,7 +1307,7 @@ function PlayerDatabase() {
             if (prev.some((p) => p.name === player.name)) {
                 return prev.filter((p) => p.name !== player.name);
             }
-            if (prev.length >= 3) {
+            if (prev.length >= 5) { // <-- Allow up to 5
                 // Remove the first and add the new one
                 return [...prev.slice(1), player];
             }
@@ -1414,11 +1415,13 @@ function PlayerDatabase() {
                 { key: "weakFoot", label: "Weak Foot", max: 50 }
             ];
 
-        // Colors for up to 3 players
+        // Colors for up to 5 players
         const colors = [
             "#3b82f6", // blue
             "#ef4444", // red
-            "#f59e42"  // orange
+            "#f59e42", // orange
+            "#10b981", // green
+            "#a21caf"  // purple
         ];
 
         // Radar chart dimensions
@@ -1579,19 +1582,6 @@ function PlayerDatabase() {
         );
     }
 
-    // Handler for background click to show comparison
-    function handleBackgroundClick(e) {
-        // Only trigger if the click is on the container itself, not a child
-        if (e.target === e.currentTarget && selected.length >= 2) {
-            setShowCompare(true);
-        }
-    }
-
-    // Hide comparison handler
-    function handleHideCompare() {
-        setShowCompare(false);
-    }
-
     return (
         <div>
             <h1 className="text-3xl font-bold mb-4 text-center text-green-900">Player Database</h1>
@@ -1659,38 +1649,32 @@ function PlayerDatabase() {
                     </button>
                 </div>
             </div>
-            {showCompare && selected.length >= 2 && (
+            {selected.length >= 2 && (
                 <div className="mb-4">
                     <RadarCompare players={selected} />
-                    <div className="flex justify-center">
-                        <button
-                            className="px-3 py-1 rounded bg-gray-300 text-gray-800 text-xs font-semibold hover:bg-gray-400 transition"
-                            onClick={handleHideCompare}
-                            type="button"
-                        >
-                            Hide Comparison
-                        </button>
-                    </div>
                 </div>
             )}
             {viewMode === "list" ? (
                 <div
                     className="bg-white rounded-xl border shadow divide-y"
                     style={{ minHeight: 200 }}
-                    onClick={handleBackgroundClick}
                 >
                     {filtered.map((p) => (
                         <div
                             key={p.name}
-                            className="flex items-center px-4 py-3 cursor-pointer hover:bg-blue-50"
+                            className={`flex items-center px-4 py-3 cursor-pointer hover:bg-blue-50 ${selected.some(sel => sel.name === p.name) ? "bg-blue-100" : ""}`}
+                            onClick={() => toggleSelect(p)}
                         >
                             <span
-                                className="font-semibold text-base truncate text-blue-700 underline"
+                                className="font-semibold text-base truncate text-blue-700 underline flex-1"
                                 style={{ cursor: "pointer" }}
                                 onClick={e => { e.stopPropagation(); setModalPlayer(p); }}
                             >
                                 {p.name}
                             </span>
+                            {selected.some(sel => sel.name === p.name) && (
+                                <span className="ml-2 text-xs text-blue-700 font-semibold">Selected</span>
+                            )}
                         </div>
                     ))}
                     <PlayerModal player={modalPlayer} onClose={() => setModalPlayer(null)} />
@@ -1699,7 +1683,6 @@ function PlayerDatabase() {
                 <div
                     className={`grid grid-cols-1 ${viewMode === "small" ? "sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} gap-3`}
                     style={{ minHeight: 200 }}
-                    onClick={handleBackgroundClick}
                 >
                     {filtered.map((p) => (
                         <div
