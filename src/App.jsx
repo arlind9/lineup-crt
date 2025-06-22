@@ -43,6 +43,20 @@ function getCardBgByOverall(overall) {
     return "bg-gradient-to-br from-gray-200 via-gray-100 to-white border-gray-300"; // silver
 }
 
+// Add this helper function after getCardBgByOverall
+function getCardHighlight({ assigned, selected }) {
+    // assigned: selected for lineup, selected: selected for comparison
+    if (assigned) {
+        // Green highlight for lineup
+        return "ring-2 ring-green-400 ring-offset-2";
+    }
+    if (selected) {
+        // Blue highlight for comparison
+        return "ring-2 ring-blue-400 ring-offset-2";
+    }
+    return "";
+}
+
 function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
     const [search, setSearch] = useState("");
     const [showAll, setShowAll] = useState(false);
@@ -922,16 +936,19 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
 
     const imageUrl = player.photo ? player.photo : PLACEHOLDER_IMG;
     const cardBg = getCardBgByOverall(player.overall);
+    const cardHighlight = getCardHighlight({ assigned, selected });
 
     return (
         <Card
             ref={dragRef}
             className={
-                cardBg + " border cursor-move space-y-1 transition-all duration-150 " +
-                (assigned ? "bg-green-100/80 border-green-400 shadow-green-200 " : "") +
-                (selected ? "bg-blue-100/80 border-blue-400 shadow-blue-200 " : "") +
-                (small ? "p-1 text-xs min-h-0" : "p-4 text-sm") +
-                " rounded-xl shadow"
+                [
+                    cardBg,
+                    "border cursor-move space-y-1 transition-all duration-150",
+                    (small ? "p-1 text-xs min-h-0" : "p-4 text-sm"),
+                    "rounded-xl shadow",
+                    cardHighlight
+                ].join(" ")
             }
             draggable
             onDragStart={(e) => {
@@ -1799,10 +1816,18 @@ function PlayerDatabase() {
                 >
                     {filtered.map((p) => {
                         const cardBg = getCardBgByOverall(p.overall);
+                        const isSelected = selected.some(sel => sel.name === p.name);
+                        // In database, only "selected" (comparison) is relevant
+                        const cardHighlight = getCardHighlight({ assigned: false, selected: isSelected });
                         return (
                             <div
                                 key={p.name}
-                                className={`${cardBg} border rounded-xl shadow p-4 cursor-pointer transition-all duration-150 ${selected.some(sel => sel.name === p.name) ? "bg-blue-100 border-blue-400" : ""} hover:bg-blue-50`}
+                                className={[
+                                    cardBg,
+                                    "border rounded-xl shadow p-4 cursor-pointer transition-all duration-150",
+                                    isSelected ? "hover:bg-blue-50" : "hover:bg-blue-50",
+                                    cardHighlight
+                                ].join(" ")}
                                 onClick={e => { e.stopPropagation(); toggleSelect(p); }}
                             >
                                 {/* Player Image */}
@@ -1817,7 +1842,7 @@ function PlayerDatabase() {
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="font-semibold text-base truncate">{p.name}</div>
-                                    {selected.some(sel => sel.name === p.name) && (
+                                    {isSelected && (
                                         <button
                                             className="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
                                             onClick={e => { e.stopPropagation(); removeFromCompare(p.name); }}
@@ -1839,7 +1864,7 @@ function PlayerDatabase() {
                                     </div>
                                 )}
                                 <div className="text-sm font-bold">Overall: {p.overall}</div>
-                                {selected.some(sel => sel.name === p.name) && (
+                                {isSelected && (
                                     <div className="text-xs text-blue-700 font-semibold mt-1">Selected</div>
                                 )}
                             </div>
@@ -2517,4 +2542,4 @@ function MOTMPage() {
             </div>
         </div>
     );
-}   
+}
