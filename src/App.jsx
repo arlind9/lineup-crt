@@ -1221,6 +1221,7 @@ function PlayerDatabase() {
     const [topEarners, setTopEarners] = useState([]);
     const [viewMode, setViewMode] = useState("big"); // "list", "small", "big"
     const [modalPlayer, setModalPlayer] = useState(null);
+    const [showCompare, setShowCompare] = useState(false);
 
     // Fetch player stats
     useEffect(() => {
@@ -1578,6 +1579,19 @@ function PlayerDatabase() {
         );
     }
 
+    // Handler for background click to show comparison
+    function handleBackgroundClick(e) {
+        // Only trigger if the click is on the container itself, not a child
+        if (e.target === e.currentTarget && selected.length >= 2) {
+            setShowCompare(true);
+        }
+    }
+
+    // Hide comparison handler
+    function handleHideCompare() {
+        setShowCompare(false);
+    }
+
     return (
         <div>
             <h1 className="text-3xl font-bold mb-4 text-center text-green-900">Player Database</h1>
@@ -1606,10 +1620,8 @@ function PlayerDatabase() {
                     ))}
                 </select>
             </div>
-            {/* View mode selector */}
             <div className="flex items-center gap-2 mb-4">
                 <span className="text-xs text-gray-600">View:</span>
-                {/* Mobile: Dropdown */}
                 <select
                     className="block sm:hidden border p-1 rounded text-xs bg-white/90 shadow"
                     value={viewMode}
@@ -1620,7 +1632,6 @@ function PlayerDatabase() {
                     <option value="small">Card</option>
                     <option value="big">Attributes</option>
                 </select>
-                {/* Desktop: Button group */}
                 <div className="hidden sm:flex items-center gap-1">
                     <button
                         className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "list" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
@@ -1648,11 +1659,26 @@ function PlayerDatabase() {
                     </button>
                 </div>
             </div>
-            {/* RadarCompare and TopEarnersCompare (unchanged) */}
-            <RadarCompare players={selected} />
-            {/* Player display modes */}
+            {showCompare && selected.length >= 2 && (
+                <div className="mb-4">
+                    <RadarCompare players={selected} />
+                    <div className="flex justify-center">
+                        <button
+                            className="px-3 py-1 rounded bg-gray-300 text-gray-800 text-xs font-semibold hover:bg-gray-400 transition"
+                            onClick={handleHideCompare}
+                            type="button"
+                        >
+                            Hide Comparison
+                        </button>
+                    </div>
+                </div>
+            )}
             {viewMode === "list" ? (
-                <div className="bg-white rounded-xl border shadow divide-y">
+                <div
+                    className="bg-white rounded-xl border shadow divide-y"
+                    style={{ minHeight: 200 }}
+                    onClick={handleBackgroundClick}
+                >
                     {filtered.map((p) => (
                         <div
                             key={p.name}
@@ -1661,7 +1687,7 @@ function PlayerDatabase() {
                             <span
                                 className="font-semibold text-base truncate text-blue-700 underline"
                                 style={{ cursor: "pointer" }}
-                                onClick={() => setModalPlayer(p)}
+                                onClick={e => { e.stopPropagation(); setModalPlayer(p); }}
                             >
                                 {p.name}
                             </span>
@@ -1670,12 +1696,16 @@ function PlayerDatabase() {
                     <PlayerModal player={modalPlayer} onClose={() => setModalPlayer(null)} />
                 </div>
             ) : (
-                <div className={`grid grid-cols-1 ${viewMode === "small" ? "sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} gap-3`}>
+                <div
+                    className={`grid grid-cols-1 ${viewMode === "small" ? "sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} gap-3`}
+                    style={{ minHeight: 200 }}
+                    onClick={handleBackgroundClick}
+                >
                     {filtered.map((p) => (
                         <div
                             key={p.name}
                             className={`border rounded-xl shadow p-4 cursor-pointer transition-all duration-150 ${selected.some(sel => sel.name === p.name) ? "bg-blue-100 border-blue-400" : "bg-white hover:bg-blue-50"}`}
-                            onClick={() => toggleSelect(p)}
+                            onClick={e => { e.stopPropagation(); toggleSelect(p); }}
                         >
                             <div className="flex items-center justify-between">
                                 <div className="font-semibold text-base truncate">{p.name}</div>
