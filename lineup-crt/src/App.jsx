@@ -13,6 +13,7 @@ import {
 } from '@dnd-kit/core';
 
 const glass = "backdrop-blur-md bg-white/80 shadow-lg border border-gray-200";
+const PLACEHOLDER_IMG = "https://ui-avatars.com/api/?name=Player&background=eee&color=888&size=128&rounded=true";
 
 // Simple loading spinner component
 function LoadingSpinner({ className = "" }) {
@@ -25,6 +26,21 @@ function LoadingSpinner({ className = "" }) {
             <span className="ml-3 text-blue-700 font-semibold text-lg">Loading...</span>
         </div>
     );
+}
+
+// Helper to extract image URL from Google Sheets column M (index 12)
+function extractPhotoUrl(cellValue) {
+    if (!cellValue) return null;
+    // If the cell contains =IMAGE("url"), extract the url
+    const match = typeof cellValue === "string" && cellValue.match(/=IMAGE\("([^"]+)"\)/i);
+    return match ? match[1] : cellValue;
+}
+
+// Add this helper function near the top of your file (after imports)
+function getCardBgByOverall(overall) {
+    if (overall >= 90) return "bg-gradient-to-br from-[#e5e4e2] via-[#b3e0fc] to-[#f8fafc] border-blue-300"; // platinum
+    if (overall >= 80) return "bg-gradient-to-br from-yellow-200 via-yellow-100 to-white border-yellow-400"; // gold
+    return "bg-gradient-to-br from-gray-200 via-gray-100 to-white border-gray-300"; // silver
 }
 
 function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
@@ -879,7 +895,6 @@ function DroppableTeam({
 }
 
 function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selected, onDragStart, onDragEnd }) {
-    // Add touch event handlers for mobile fallback
     const dragRef = useRef(null);
 
     useEffect(() => {
@@ -905,11 +920,14 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
         };
     }, [player, fromTeam, fromIndex, onDragStart, onDragEnd]);
 
+    const imageUrl = player.photo ? player.photo : PLACEHOLDER_IMG;
+    const cardBg = getCardBgByOverall(player.overall);
+
     return (
         <Card
             ref={dragRef}
             className={
-                "border cursor-move space-y-1 transition-all duration-150 " +
+                cardBg + " border cursor-move space-y-1 transition-all duration-150 " +
                 (assigned ? "bg-green-100/80 border-green-400 shadow-green-200 " : "") +
                 (selected ? "bg-blue-100/80 border-blue-400 shadow-blue-200 " : "") +
                 (small ? "p-1 text-xs min-h-0" : "p-4 text-sm") +
@@ -926,6 +944,15 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
             }}
             onDragEnd={onDragEnd}
         >
+            <div className="flex justify-center mb-2">
+                <img
+                    src={imageUrl}
+                    alt={player.name}
+                    className={small ? "w-10 h-10 rounded-full object-cover border" : "w-16 h-16 rounded-full object-cover border"}
+                    style={{ background: "#eee" }}
+                    loading="lazy"
+                />
+            </div>
             <div className={small ? "font-semibold text-xs truncate" : "font-semibold text-base truncate"}>{player.name}</div>
             <div className={small ? "text-[10px] text-muted-foreground" : "text-xs text-muted-foreground"}>{player.position}</div>
             {!small && (
@@ -1250,6 +1277,7 @@ function PlayerDatabase() {
                         defending: Number(cells[7]?.v),
                         goalkeeping: Number(cells[8]?.v || 0),
                         weakFoot: !isNaN(Number(cells[10]?.v)) ? Number(cells[10].v) : 0,
+                        photo: extractPhotoUrl(cells[12]?.v) || null,
                     };
                     player.overall = calculateOverall(player);
                     return player;
@@ -1340,6 +1368,16 @@ function PlayerDatabase() {
                     >×</button>
                     <div className="font-bold text-xl mb-1 text-center">{player.name}</div>
                     <div className="text-center text-sm text-gray-500 mb-2">{player.position}</div>
+                    {/* --- Player Image --- */}
+                    <div className="flex justify-center mb-2">
+                        <img
+                            src={player.photo ? player.photo : PLACEHOLDER_IMG}
+                            alt={player.name}
+                            className="w-24 h-24 rounded-full object-cover border"
+                            style={{ background: "#eee" }}
+                            loading="lazy"
+                        />
+                    </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm mb-2">
                         <span>Speed: {player.speed}</span>
                         <span>Shooting: {player.shooting}</span>
@@ -1759,41 +1797,54 @@ function PlayerDatabase() {
                     className={`grid grid-cols-1 ${viewMode === "small" ? "sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} gap-3`}
                     style={{ minHeight: 200 }}
                 >
-                    {filtered.map((p) => (
-                        <div
-                            key={p.name}
-                            className={`border rounded-xl shadow p-4 cursor-pointer transition-all duration-150 ${selected.some(sel => sel.name === p.name) ? "bg-blue-100 border-blue-400" : "bg-white hover:bg-blue-50"}`}
-                            onClick={e => { e.stopPropagation(); toggleSelect(p); }}
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="font-semibold text-base truncate">{p.name}</div>
+                    {filtered.map((p) => {
+                        const cardBg = getCardBgByOverall(p.overall);
+                        return (
+                            <div
+                                key={p.name}
+                                className={`${cardBg} border rounded-xl shadow p-4 cursor-pointer transition-all duration-150 ${selected.some(sel => sel.name === p.name) ? "bg-blue-100 border-blue-400" : ""} hover:bg-blue-50`}
+                                onClick={e => { e.stopPropagation(); toggleSelect(p); }}
+                            >
+                                {/* Player Image */}
+                                <div className="flex justify-center mb-2">
+                                    <img
+                                        src={p.photo ? p.photo : PLACEHOLDER_IMG}
+                                        alt={p.name}
+                                        className={viewMode === "small" ? "w-12 h-12 rounded-full object-cover border" : "w-20 h-20 rounded-full object-cover border"}
+                                        style={{ background: "#eee" }}
+                                        loading="lazy"
+                                    />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="font-semibold text-base truncate">{p.name}</div>
+                                    {selected.some(sel => sel.name === p.name) && (
+                                        <button
+                                            className="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
+                                            onClick={e => { e.stopPropagation(); removeFromCompare(p.name); }}
+                                            title="Remove from comparison"
+                                        >×</button>
+                                    )}
+                                </div>
+                                <div className="text-xs text-muted-foreground mb-2">{p.position}</div>
+                                {viewMode === "big" && (
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2">
+                                        <span>Speed: {p.speed}</span>
+                                        <span>Shooting: {p.shooting}</span>
+                                        <span>Passing: {p.passing}</span>
+                                        <span>Dribbling: {p.dribbling}</span>
+                                        <span>Physical: {p.physical}</span>
+                                        <span>Defending: {p.defending}</span>
+                                        <span>Weak Foot: {p.weakFoot}</span>
+                                        <span>Goalkeeping: {p.goalkeeping}</span>
+                                    </div>
+                                )}
+                                <div className="text-sm font-bold">Overall: {p.overall}</div>
                                 {selected.some(sel => sel.name === p.name) && (
-                                    <button
-                                        className="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
-                                        onClick={e => { e.stopPropagation(); removeFromCompare(p.name); }}
-                                        title="Remove from comparison"
-                                    >×</button>
+                                    <div className="text-xs text-blue-700 font-semibold mt-1">Selected</div>
                                 )}
                             </div>
-                            <div className="text-xs text-muted-foreground mb-2">{p.position}</div>
-                            {viewMode === "big" && (
-                                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2">
-                                    <span>Speed: {p.speed}</span>
-                                    <span>Shooting: {p.shooting}</span>
-                                    <span>Passing: {p.passing}</span>
-                                    <span>Dribbling: {p.dribbling}</span>
-                                    <span>Physical: {p.physical}</span>
-                                    <span>Defending: {p.defending}</span>
-                                    <span>Weak Foot: {p.weakFoot}</span>
-                                    <span>Goalkeeping: {p.goalkeeping}</span>
-                                </div>
-                            )}
-                            <div className="text-sm font-bold">Overall: {p.overall}</div>
-                            {selected.some(sel => sel.name === p.name) && (
-                                <div className="text-xs text-blue-700 font-semibold mt-1">Selected</div>
-                            )}
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>
@@ -1987,6 +2038,7 @@ function LineupCreator() {
                         defending: Number(cells[7]?.v),
                         goalkeeping: Number(cells[8]?.v || 0),
                         weakFoot: !isNaN(Number(cells[10]?.v)) ? Number(cells[10].v) : 0,
+                        photo: extractPhotoUrl(cells[12]?.v) || null,
                     };
                     player.overall = calculateOverall(player);
                     return player;
