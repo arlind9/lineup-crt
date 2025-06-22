@@ -2057,30 +2057,44 @@ function LineupCreator() {
                     {/* View mode selector beside Available Players */}
                     <div className="flex items-center gap-1 ml-4">
                         <span className="text-xs text-gray-600">View:</span>
-                        <button
-                            className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "list" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                            onClick={() => setViewMode("list")}
-                            type="button"
-                            aria-label="List view"
+                        {/* Mobile: Dropdown */}
+                        <select
+                            className="block sm:hidden border p-1 rounded text-xs bg-white/90 shadow"
+                            value={viewMode}
+                            onChange={e => setViewMode(e.target.value)}
+                            aria-label="Select view mode"
                         >
-                            <span role="img" aria-label="List">List</span>
-                        </button>
-                        <button
-                            className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                            onClick={() => setViewMode("small")}
-                            type="button"
-                            aria-label="Small cards"
-                        >
-                            <span role="img" aria-label="Small cards">Card</span>
-                        </button>
-                        <button
-                            className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                            onClick={() => setViewMode("big")}
-                            type="button"
-                            aria-label="Big cards"
-                        >
-                            <span role="img" aria-label="Big cards"></span>
-                        </button>
+                            <option value="list">List</option>
+                            <option value="small">Card</option>
+                            <option value="big">Attributes</option>
+                        </select>
+                        {/* Desktop: Button group */}
+                        <div className="hidden sm:flex items-center gap-1">
+                            <button
+                                className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "list" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                                onClick={() => setViewMode("list")}
+                                type="button"
+                                aria-label="List view"
+                            >
+                                <span role="img" aria-label="List">List</span>
+                            </button>
+                            <button
+                                className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                                onClick={() => setViewMode("small")}
+                                type="button"
+                                aria-label="Small cards"
+                            >
+                                <span role="img" aria-label="Small cards">Card</span>
+                            </button>
+                            <button
+                                className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                                onClick={() => setViewMode("big")}
+                                type="button"
+                                aria-label="Big cards"
+                            >
+                                <span role="img" aria-label="Big cards">Attributes</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
