@@ -1219,6 +1219,8 @@ function PlayerDatabase() {
     const [sortBy, setSortBy] = useState("overall");
     const [selected, setSelected] = useState([]); // up to 3 for compare
     const [topEarners, setTopEarners] = useState([]);
+    const [viewMode, setViewMode] = useState("big"); // "list", "small", "big"
+    const [modalPlayer, setModalPlayer] = useState(null);
 
     // Fetch player stats
     useEffect(() => {
@@ -1315,10 +1317,39 @@ function PlayerDatabase() {
         setSelected((prev) => prev.filter((p) => p.name !== name));
     }
 
-    // Top Earners Comparison Table
+    // Modal for full player card
+    function PlayerModal({ player, onClose }) {
+        if (!player) return null;
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                <div className="bg-white rounded-xl shadow-2xl border p-6 max-w-xs w-full relative">
+                    <button
+                        className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg font-bold"
+                        onClick={onClose}
+                        aria-label="Close"
+                        type="button"
+                    >×</button>
+                    <div className="font-bold text-xl mb-1 text-center">{player.name}</div>
+                    <div className="text-center text-sm text-gray-500 mb-2">{player.position}</div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm mb-2">
+                        <span>Speed: {player.speed}</span>
+                        <span>Shooting: {player.shooting}</span>
+                        <span>Passing: {player.passing}</span>
+                        <span>Dribbling: {player.dribbling}</span>
+                        <span>Physical: {player.physical}</span>
+                        <span>Defending: {player.defending}</span>
+                        <span>Weak Foot: {player.weakFoot}</span>
+                        <span>Goalkeeping: {player.goalkeeping}</span>
+                    </div>
+                    <div className="text-base font-bold text-center">Overall: {player.overall}</div>
+                </div>
+            </div>
+        );
+    }
+
+    // Top Earners Comparison Table (unchanged)
     function TopEarnersCompare({ selected }) {
         if (!selected.length) return null;
-        // Find top earners for selected players
         const selectedEarners = selected.map(sel => {
             const found = topEarners.find(e => e.Player === sel.name);
             return {
@@ -1352,7 +1383,7 @@ function PlayerDatabase() {
         );
     }
 
-    // Circular (Radar) Comparison
+    // RadarCompare (unchanged)
     function RadarCompare({ players }) {
         if (players.length < 2) return null;
 
@@ -1575,42 +1606,108 @@ function PlayerDatabase() {
                     ))}
                 </select>
             </div>
-            <RadarCompare players={selected} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {filtered.map((p) => (
-                    <div
-                        key={p.name}
-                        className={`border rounded-xl shadow p-4 cursor-pointer transition-all duration-150 ${selected.some(sel => sel.name === p.name) ? "bg-blue-100 border-blue-400" : "bg-white hover:bg-blue-50"}`}
-                        onClick={() => toggleSelect(p)}
+            {/* View mode selector */}
+            <div className="flex items-center gap-2 mb-4">
+                <span className="text-xs text-gray-600">View:</span>
+                {/* Mobile: Dropdown */}
+                <select
+                    className="block sm:hidden border p-1 rounded text-xs bg-white/90 shadow"
+                    value={viewMode}
+                    onChange={e => setViewMode(e.target.value)}
+                    aria-label="Select view mode"
+                >
+                    <option value="list">List</option>
+                    <option value="small">Card</option>
+                    <option value="big">Attributes</option>
+                </select>
+                {/* Desktop: Button group */}
+                <div className="hidden sm:flex items-center gap-1">
+                    <button
+                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "list" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                        onClick={() => setViewMode("list")}
+                        type="button"
+                        aria-label="List view"
                     >
-                        <div className="flex items-center justify-between">
-                            <div className="font-semibold text-base truncate">{p.name}</div>
+                        <span role="img" aria-label="List">List</span>
+                    </button>
+                    <button
+                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                        onClick={() => setViewMode("small")}
+                        type="button"
+                        aria-label="Small cards"
+                    >
+                        <span role="img" aria-label="Small cards">Card</span>
+                    </button>
+                    <button
+                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
+                        onClick={() => setViewMode("big")}
+                        type="button"
+                        aria-label="Big cards"
+                    >
+                        <span role="img" aria-label="Big cards">Attributes</span>
+                    </button>
+                </div>
+            </div>
+            {/* RadarCompare and TopEarnersCompare (unchanged) */}
+            <RadarCompare players={selected} />
+            {/* Player display modes */}
+            {viewMode === "list" ? (
+                <div className="bg-white rounded-xl border shadow divide-y">
+                    {filtered.map((p) => (
+                        <div
+                            key={p.name}
+                            className="flex items-center px-4 py-3 cursor-pointer hover:bg-blue-50"
+                        >
+                            <span
+                                className="font-semibold text-base truncate text-blue-700 underline"
+                                style={{ cursor: "pointer" }}
+                                onClick={() => setModalPlayer(p)}
+                            >
+                                {p.name}
+                            </span>
+                        </div>
+                    ))}
+                    <PlayerModal player={modalPlayer} onClose={() => setModalPlayer(null)} />
+                </div>
+            ) : (
+                <div className={`grid grid-cols-1 ${viewMode === "small" ? "sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} gap-3`}>
+                    {filtered.map((p) => (
+                        <div
+                            key={p.name}
+                            className={`border rounded-xl shadow p-4 cursor-pointer transition-all duration-150 ${selected.some(sel => sel.name === p.name) ? "bg-blue-100 border-blue-400" : "bg-white hover:bg-blue-50"}`}
+                            onClick={() => toggleSelect(p)}
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="font-semibold text-base truncate">{p.name}</div>
+                                {selected.some(sel => sel.name === p.name) && (
+                                    <button
+                                        className="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
+                                        onClick={e => { e.stopPropagation(); removeFromCompare(p.name); }}
+                                        title="Remove from comparison"
+                                    >×</button>
+                                )}
+                            </div>
+                            <div className="text-xs text-muted-foreground mb-2">{p.position}</div>
+                            {viewMode === "big" && (
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2">
+                                    <span>Speed: {p.speed}</span>
+                                    <span>Shooting: {p.shooting}</span>
+                                    <span>Passing: {p.passing}</span>
+                                    <span>Dribbling: {p.dribbling}</span>
+                                    <span>Physical: {p.physical}</span>
+                                    <span>Defending: {p.defending}</span>
+                                    <span>Weak Foot: {p.weakFoot}</span>
+                                    <span>Goalkeeping: {p.goalkeeping}</span>
+                                </div>
+                            )}
+                            <div className="text-sm font-bold">Overall: {p.overall}</div>
                             {selected.some(sel => sel.name === p.name) && (
-                                <button
-                                    className="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
-                                    onClick={e => { e.stopPropagation(); removeFromCompare(p.name); }}
-                                    title="Remove from comparison"
-                                >×</button>
+                                <div className="text-xs text-blue-700 font-semibold mt-1">Selected</div>
                             )}
                         </div>
-                        <div className="text-xs text-muted-foreground mb-2">{p.position}</div>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2">
-                            <span>Speed: {p.speed}</span>
-                            <span>Shooting: {p.shooting}</span>
-                            <span>Passing: {p.passing}</span>
-                            <span>Dribbling: {p.dribbling}</span>
-                            <span>Physical: {p.physical}</span>
-                            <span>Defending: {p.defending}</span>
-                            <span>Weak Foot: {p.weakFoot}</span>
-                            <span>Goalkeeping: {p.goalkeeping}</span>
-                        </div>
-                        <div className="text-sm font-bold">Overall: {p.overall}</div>
-                        {selected.some(sel => sel.name === p.name) && (
-                            <div className="text-xs text-blue-700 font-semibold mt-1">Selected</div>
-                        )}
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
