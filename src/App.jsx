@@ -363,10 +363,10 @@ function RadarCompare({ players }) {
         "#a21caf"  // purple
     ];
 
-    // Make the radar chart wider for better label spacing
-    const size = 420; // was 320
+    // Radar chart dimensions
+    const size = 320;
     const center = size / 2;
-    const radius = size / 2 - 60; // slightly more margin for labels
+    const radius = size / 2 - 40;
     const angleStep = (2 * Math.PI) / attrs.length;
 
     // Helper: get points for a player
@@ -392,9 +392,8 @@ function RadarCompare({ players }) {
         const angle = i * angleStep - Math.PI / 2;
         const x = center + radius * Math.cos(angle);
         const y = center + radius * Math.sin(angle);
-        // Move label further out for better visibility
-        const labelX = center + (radius + 38) * Math.cos(angle);
-        const labelY = center + (radius + 38) * Math.sin(angle);
+        const labelX = center + (radius + 18) * Math.cos(angle);
+        const labelY = center + (radius + 18) * Math.sin(angle);
         return (
             <g key={attr.key}>
                 <line
@@ -410,13 +409,9 @@ function RadarCompare({ players }) {
                     y={labelY}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fontSize="14"
+                    fontSize="12"
                     fill="#374151"
-                    style={{
-                        pointerEvents: "none",
-                        fontWeight: 600,
-                        background: "white"
-                    }}
+                    style={{ pointerEvents: "none", fontWeight: 500 }}
                 >
                     {attr.label}
                 </text>
@@ -502,9 +497,20 @@ function RadarCompare({ players }) {
     );
 
     return (
-        <div className="max-w-5xl mx-auto mb-8 bg-white rounded-xl shadow p-4 border">
+        <div className="max-w-2xl mx-auto mb-8 bg-white rounded-xl shadow p-4 border">
             <div className="text-center font-bold text-lg mb-2">Player Attribute Comparison</div>
-            {legend}
+            <div className="flex justify-center gap-4 mt-2 mb-2">
+                {legend}
+                {players.length < 5 && (
+                    <button
+                        className="ml-2 px-3 py-1 rounded bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 transition"
+                        onClick={() => setAddCompareModalOpen(true)}
+                        type="button"
+                    >
+                        + Add Player
+                    </button>
+                )}
+            </div>
             <div className="flex flex-col md:flex-row gap-6 justify-center items-start">
                 <div>
                     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -1223,6 +1229,7 @@ function PlayerDatabase() {
     const [topEarners, setTopEarners] = useState([]);
     const [viewMode, setViewMode] = useState("big"); // "list", "small", "big"
     const [modalPlayer, setModalPlayer] = useState(null);
+    const [addCompareModalOpen, setAddCompareModalOpen] = useState(false); // Modal state
 
     // Fetch player stats
     useEffect(() => {
@@ -1349,6 +1356,56 @@ function PlayerDatabase() {
         );
     }
 
+    // Modal for adding a player to comparison
+    function AddPlayerToCompareModal({ open, onClose, players, alreadySelected, onSelect }) {
+        const [search, setSearch] = useState("");
+        if (!open) return null;
+        const filtered = players
+            .filter(p => !alreadySelected.some(sel => sel.name === p.name))
+            .filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                <div className="bg-white rounded-xl shadow-xl border p-4 max-w-xs w-full relative">
+                    <button
+                        className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg font-bold"
+                        onClick={onClose}
+                        aria-label="Close"
+                        type="button"
+                    >×</button>
+                    <div className="mb-2 text-base font-semibold text-center text-green-900">
+                        Add Player to Comparison
+                    </div>
+                    <Input
+                        autoFocus
+                        placeholder="Search players..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        className="mb-3"
+                    />
+                    <div className="max-h-64 overflow-y-auto">
+                        {filtered.length === 0 ? (
+                            <div className="text-xs text-gray-400 p-2 text-center">No available players</div>
+                        ) : (
+                            filtered.map(p => (
+                                <div
+                                    key={p.name}
+                                    className="p-2 rounded hover:bg-blue-100 cursor-pointer flex justify-between items-center"
+                                    onClick={() => { onSelect(p); onClose(); }}
+                                >
+                                    <span>
+                                        <span className="font-semibold">{p.name}</span>
+                                        <span className="text-gray-500 ml-1">({p.position})</span>
+                                    </span>
+                                    <span className="text-gray-400 text-xs">OVR: {p.overall}</span>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     // Top Earners Comparison Table (unchanged)
     function TopEarnersCompare({ selected }) {
         if (!selected.length) return null;
@@ -1385,7 +1442,7 @@ function PlayerDatabase() {
         );
     }
 
-    // RadarCompare (unchanged)
+    // RadarCompare (updated to include Add button)
     function RadarCompare({ players }) {
         if (players.length < 2) return null;
 
@@ -1560,7 +1617,18 @@ function PlayerDatabase() {
         return (
             <div className="max-w-2xl mx-auto mb-8 bg-white rounded-xl shadow p-4 border">
                 <div className="text-center font-bold text-lg mb-2">Player Attribute Comparison</div>
-                {legend}
+                <div className="flex justify-center gap-4 mt-2 mb-2">
+                    {legend}
+                    {players.length < 5 && (
+                        <button
+                            className="ml-2 px-3 py-1 rounded bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 transition"
+                            onClick={() => setAddCompareModalOpen(true)}
+                            type="button"
+                        >
+                            + Add Player
+                        </button>
+                    )}
+                </div>
                 <div className="flex flex-col md:flex-row gap-6 justify-center items-start">
                     <div>
                         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -1654,6 +1722,13 @@ function PlayerDatabase() {
                     <RadarCompare players={selected} />
                 </div>
             )}
+            <AddPlayerToCompareModal
+                open={addCompareModalOpen}
+                onClose={() => setAddCompareModalOpen(false)}
+                players={players}
+                alreadySelected={selected}
+                onSelect={p => toggleSelect(p)}
+            />
             {viewMode === "list" ? (
                 <div
                     className="bg-white rounded-xl border shadow divide-y"
@@ -2390,4 +2465,4 @@ function MOTMPage() {
             </div>
         </div>
     );
-}
+}   
