@@ -2156,25 +2156,36 @@ function LineupCreator() {
         setTeamB(Array(10).fill(null));
     }
 
-    // Helper: Randomize best matchups
+    // Helper: Randomize best matchups (with shuffling)
     function handleRandomize() {
-        // Get available players (not already assigned)
-        const available = [...players];
-        // Helper to pick best for a position
-        function pickBest(pos, taken) {
+        // Shuffle an array in-place (Fisher-Yates)
+        function shuffle(array) {
+            const arr = array.slice();
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Get a shuffled copy of all players
+        const shuffledPlayers = shuffle(players);
+
+        // Helper to pick best for a position from a pool
+        function pickBest(pos, pool, taken) {
             // Find all available for this position, not already taken
-            const candidates = available
+            const candidates = pool
                 .filter(p => p.position === pos && !taken.has(p.name))
                 .sort((a, b) => b.overall - a.overall);
             if (candidates.length > 0) return candidates[0];
             // If none, fallback to any available not taken and not GK for outfield
-            const fallback = available
+            const fallback = pool
                 .filter(p => !taken.has(p.name) && (pos === "GK" ? p.position === "GK" : p.position !== "GK"))
                 .sort((a, b) => b.overall - a.overall);
             return fallback[0] || null;
         }
 
-        // Assign best for each slot in both teams, alternating picks for fairness
+        // Assign best for each slot in both teams, alternating picks for fairness, but with shuffled order
         const taken = new Set();
         const formationAPos = formationMap[formationA];
         const formationBPos = formationMap[formationB];
@@ -2182,12 +2193,12 @@ function LineupCreator() {
         let newTeamB = [];
         for (let i = 0; i < 10; i++) {
             // Team A pick
-            const bestA = pickBest(formationAPos[i], taken);
+            const bestA = pickBest(formationAPos[i], shuffledPlayers, taken);
             newTeamA.push(bestA ? getPlayerWithPositionAttributes(bestA, formationAPos[i]) : null);
             if (bestA) taken.add(bestA.name);
 
             // Team B pick
-            const bestB = pickBest(formationBPos[i], taken);
+            const bestB = pickBest(formationBPos[i], shuffledPlayers, taken);
             newTeamB.push(bestB ? getPlayerWithPositionAttributes(bestB, formationBPos[i]) : null);
             if (bestB) taken.add(bestB.name);
         }
