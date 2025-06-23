@@ -1689,45 +1689,44 @@ function PlayerDatabase() {
     return (
         <div>
             <h1 className="text-3xl font-bold mb-4 text-center text-green-900">Player Database</h1>
-            <div className="flex items-center gap-2 mb-4">
-                <span className="text-xs text-gray-600">View:</span>
+            {/* --- Search and Filter Buttons --- */}
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+                <Input
+                    type="text"
+                    placeholder="Search players..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="w-48"
+                />
+                {/* Mobile: Dropdown */}
                 <select
-                    className="block sm:hidden border p-1 rounded text-xs bg-white/90 shadow"
-                    value={viewMode}
-                    onChange={e => setViewMode(e.target.value)}
-                    aria-label="Select view mode"
+                    className="block sm:hidden border rounded px-2 py-1 text-xs font-semibold"
+                    value={positionFilter}
+                    onChange={e => setPositionFilter(e.target.value)}
                 >
-                    <option value="list">List</option>
-                    <option value="small">Card</option>
-                    <option value="big">Attributes</option>
+                    {["All", "ST", "MF", "DF", "GK"].map(pos => (
+                        <option key={pos} value={pos}>{pos}</option>
+                    ))}
                 </select>
-                <div className="hidden sm:flex items-center gap-1">
-                    <button
-                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "list" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                        onClick={() => setViewMode("list")}
-                        type="button"
-                        aria-label="List view"
-                    >
-                        <span role="img" aria-label="List">List</span>
-                    </button>
-                    <button
-                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                        onClick={() => setViewMode("small")}
-                        type="button"
-                        aria-label="Small cards"
-                    >
-                        <span role="img" aria-label="Small cards">Card</span>
-                    </button>
-                    <button
-                        className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                        onClick={() => setViewMode("big")}
-                        type="button"
-                        aria-label="Big cards"
-                    >
-                        <span role="img" aria-label="Big cards">Attributes</span>
-                    </button>
+                {/* Desktop: Buttons */}
+                <div className="hidden sm:flex gap-1">
+                    {["All", "ST", "MF", "DF", "GK"].map(pos => (
+                        <button
+                            key={pos}
+                            className={`px-2 py-1 rounded text-xs font-semibold border transition ${
+                                positionFilter === pos
+                                    ? "bg-blue-500 text-white border-blue-500"
+                                    : "bg-white hover:bg-blue-100 border-gray-300"
+                            }`}
+                            onClick={() => setPositionFilter(pos)}
+                            type="button"
+                        >
+                            {pos}
+                        </button>
+                    ))}
                 </div>
             </div>
+            {/* --- Existing view mode and player grid/list code follows --- */}
             {selected.length >= 2 && (
                 <div className="mb-4">
                     <RadarCompare players={selected} />
@@ -1966,18 +1965,53 @@ export default function App() {
 }
 
 function LineupCreator() {
-    const [formationA, setFormationA] = useState("3-3-3");
-    const [formationB, setFormationB] = useState("3-3-3");
+    // Use unique keys for localStorage
+    const STORAGE_KEY = "lineupCreatorStateV1";
+
+    // Load from localStorage or use defaults
+    function getInitialState() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+            if (saved) {
+                return {
+                    formationA: saved.formationA || "3-3-3",
+                    formationB: saved.formationB || "3-3-3",
+                    teamA: Array.isArray(saved.teamA) ? saved.teamA : Array(10).fill(null),
+                    teamB: Array.isArray(saved.teamB) ? saved.teamB : Array(10).fill(null),
+                };
+            }
+        } catch {}
+        return {
+            formationA: "3-3-3",
+            formationB: "3-3-3",
+            teamA: Array(10).fill(null),
+            teamB: Array(10).fill(null),
+        };
+    }
+
     const [players, setPlayers] = useState([]);
-    const [teamA, setTeamA] = useState(Array(10).fill(null));
-    const [teamB, setTeamB] = useState(Array(10).fill(null));
     const [showComparison, setShowComparison] = useState(false);
-
     const [globalActiveSlot, setGlobalActiveSlot] = useState(null);
-
     const [playerSelectModal, setPlayerSelectModal] = useState({ open: false });
-
     const [compareHover, setCompareHover] = useState(null);
+    const [activeDrag, setActiveDrag] = useState(null);
+
+    // Persisted state
+    const [{ formationA, formationB, teamA, teamB }, setPersistedState] = useState(getInitialState);
+
+    // Add these lines:
+    const setTeamA = (newTeamA) => setPersistedState(s => ({ ...s, teamA: newTeamA }));
+    const setTeamB = (newTeamB) => setPersistedState(s => ({ ...s, teamB: newTeamB }));
+    const setFormationA = (f) => setPersistedState(s => ({ ...s, formationA: f }));
+    const setFormationB = (f) => setPersistedState(s => ({ ...s, formationB: f }));
+
+    // Save to localStorage on change
+    useEffect(() => {
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ formationA, formationB, teamA, teamB })
+        );
+    }, [formationA, formationB, teamA, teamB]);
 
     useEffect(() => {
         fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
@@ -2106,8 +2140,6 @@ function LineupCreator() {
         useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } })
     );
 
-    const [activeDrag, setActiveDrag] = useState(null);
-
     const handleDragStart = (player, fromTeam, fromIndex) => {
         setActiveDrag({ player, fromTeam, fromIndex });
         window.__draggedPlayer = player;
@@ -2118,32 +2150,56 @@ function LineupCreator() {
         setCompareHover(null);
     };
 
+    // Helper: Clear all lineups
+    function handleClearAll() {
+        setTeamA(Array(10).fill(null));
+        setTeamB(Array(10).fill(null));
+    }
+
+    // Helper: Randomize best matchups
+    function handleRandomize() {
+        // Get available players (not already assigned)
+        const available = [...players];
+        // Helper to pick best for a position
+        function pickBest(pos, taken) {
+            // Find all available for this position, not already taken
+            const candidates = available
+                .filter(p => p.position === pos && !taken.has(p.name))
+                .sort((a, b) => b.overall - a.overall);
+            if (candidates.length > 0) return candidates[0];
+            // If none, fallback to any available not taken and not GK for outfield
+            const fallback = available
+                .filter(p => !taken.has(p.name) && (pos === "GK" ? p.position === "GK" : p.position !== "GK"))
+                .sort((a, b) => b.overall - a.overall);
+            return fallback[0] || null;
+        }
+
+        // Assign best for each slot in both teams, alternating picks for fairness
+        const taken = new Set();
+        const formationAPos = formationMap[formationA];
+        const formationBPos = formationMap[formationB];
+        let newTeamA = [];
+        let newTeamB = [];
+        for (let i = 0; i < 10; i++) {
+            // Team A pick
+            const bestA = pickBest(formationAPos[i], taken);
+            newTeamA.push(bestA ? getPlayerWithPositionAttributes(bestA, formationAPos[i]) : null);
+            if (bestA) taken.add(bestA.name);
+
+            // Team B pick
+            const bestB = pickBest(formationBPos[i], taken);
+            newTeamB.push(bestB ? getPlayerWithPositionAttributes(bestB, formationBPos[i]) : null);
+            if (bestB) taken.add(bestB.name);
+        }
+        setTeamA(newTeamA);
+        setTeamB(newTeamB);
+    }
+
     return (
         <div className="p-4 max-w-7xl mx-auto" ref={mainRef}>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
 
-            {!showComparison && (
-                <div className="flex justify-center mb-4">
-                    <button
-                        onClick={() => setShowComparison(true)}
-                        className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
-                        type="button"
-                    >
-                        Show Attribute Comparison
-                    </button>
-                </div>
-            )}
-
-            {showComparison && (
-                <MirroredTeamAttributesBarChart
-                    teamAPlayers={teamA}
-                    teamBPlayers={teamB}
-                    teamALabel="Team A"
-                    teamBLabel="Team B"
-                    onHide={() => setShowComparison(false)}
-                />
-            )}
-
+            {/* Team selection fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <DroppableTeam
                     id="teamA"
@@ -2180,6 +2236,56 @@ function LineupCreator() {
                     handleDragEnd={handleDragEnd}
                 />
             </div>
+
+            {/* Add Clear All and Randomizer buttons */}
+            <div className="flex flex-wrap justify-center gap-4 mb-4">
+                <button
+                    onClick={handleClearAll}
+                    className="px-4 py-1 rounded text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold shadow transition"
+                    type="button"
+                >
+                    Clear All
+                </button>
+                <button
+                    onClick={handleRandomize}
+                    className="px-4 py-1 rounded text-sm bg-green-500 hover:bg-green-600 text-white font-semibold shadow transition"
+                    type="button"
+                >
+                    Randomizer (Best Matchups)
+                </button>
+            </div>
+
+            {/* Show Attribute Comparison button */}
+            {!showComparison && (
+                <div className="flex justify-center mb-4">
+                    <button
+                        onClick={() => setShowComparison(true)}
+                        className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
+                        type="button"
+                    >
+                        Show Attribute Comparison
+                    </button>
+                </div>
+            )}
+
+            {/* Comparison tables */}
+            {showComparison && (
+                <>
+                    <MirroredTeamAttributesBarChart
+                        teamAPlayers={teamA}
+                        teamBPlayers={teamB}
+                        teamALabel="Team A"
+                        teamBLabel="Team B"
+                        onHide={() => setShowComparison(false)}
+                    />
+                    <MirroredPositionOVRBarChart
+                        teamAPlayers={teamA}
+                        teamBPlayers={teamB}
+                        teamALabel="Team A"
+                        teamBLabel="Team B"
+                    />
+                </>
+            )}
 
             {compareHover && compareHover.draggedPlayer && compareHover.targetPlayer && (
                 <PlayerAttributeCompareTable
@@ -2340,6 +2446,70 @@ function PlayerAttributeCompareTable({ playerA, playerB, onClose }) {
                     ))}
                 </tbody>
             </table>
+        </div>
+    );
+}
+
+function MirroredPositionOVRBarChart({ teamAPlayers, teamBPlayers, teamALabel = "Team A", teamBLabel = "Team B" }) {
+    const positions = [
+        { key: "ST", label: "Attackers (ST)" },
+        { key: "MF", label: "Midfielders (MF)" },
+        { key: "DF", label: "Defenders (DF)" },
+        { key: "GK", label: "Goalkeepers (GK)" }
+    ];
+
+    function avg(players, pos) {
+        const filtered = players.filter(p => p && p.position === pos);
+        if (!filtered.length) return 0;
+        return Math.round(filtered.reduce((sum, p) => sum + (p.overall || 0), 0) / filtered.length);
+    }
+
+    return (
+        <div className="mb-6 max-w-2xl mx-auto bg-white rounded-xl shadow p-4 border">
+            <div className="text-base font-bold mb-2 text-center text-gray-700">OVR by Position</div>
+            <div className="flex justify-between text-xs font-semibold mb-2">
+                <span className="w-24 text-left text-blue-700">{teamALabel}</span>
+                <span className="w-24 text-right text-red-700">{teamBLabel}</span>
+            </div>
+            <div>
+                {positions.map(pos => {
+                    const ovrA = avg(teamAPlayers, pos.key);
+                    const ovrB = avg(teamBPlayers, pos.key);
+                    const percentA = (ovrA / 100) * 100;
+                    const percentB = (ovrB / 100) * 100;
+                    const aBold = ovrA > ovrB;
+                    const bBold = ovrB > ovrA;
+                    return (
+                        <div key={pos.key} className="flex items-center gap-2 w-full py-1 border-b last:border-b-0 border-gray-100">
+                            <span className={`w-8 text-right text-xs ${aBold ? "font-bold text-blue-800" : "text-blue-700"}`}>{ovrA || "-"}</span>
+                            <div className="flex-1 flex justify-end">
+                                <div
+                                    className="h-3 rounded-l"
+                                    style={{
+                                        width: `${percentA}%`,
+                                        minWidth: ovrA > 0 ? 12 : 0,
+                                        background: "linear-gradient(to left, #3b82f6, #60a5fa)",
+                                        transition: "width 0.3s"
+                                    }}
+                                />
+                            </div>
+                            <span className="w-32 text-xs text-gray-700 text-center font-medium">{pos.label}</span>
+                            <div className="flex-1 flex">
+                                <div
+                                    className="h-3 rounded-r"
+                                    style={{
+                                        width: `${percentB}%`,
+                                        minWidth: ovrB > 0 ? 12 : 0,
+                                        background: "linear-gradient(to right, #ef4444, #f87171)",
+                                        transition: "width 0.3s"
+                                    }}
+                                />
+                            </div>
+                            <span className={`w-8 text-left text-xs ${bBold ? "font-bold text-red-800" : "text-red-700"}`}>{ovrB || "-"}</span>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 }
