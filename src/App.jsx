@@ -832,16 +832,16 @@ function DroppableTeam({
                                 // Recalculate attributes for the slot's position
                                 const playerForSlot = getPlayerWithPositionAttributes(data.player, pos);
 
-                                if (player && (data.fromTeam === id) && typeof data.fromIndex === "number" && data.fromIndex !== i) {
+                                if (player && typeof data.fromIndex === "number" && data.fromIndex !== i) {
                                     // Swap: recalculate both
-                                    const swapWith = getPlayerWithPositionAttributes(players[data.fromIndex], pos);
+                                    const swapWith = getPlayerWithPositionAttributes(players[i], pos);
                                     onPlayerDrop({
                                         toTeam: id,
                                         toIndex: i,
-                                        fromTeam: id,
+                                        fromTeam: data.fromTeam,
                                         fromIndex: data.fromIndex,
-                                        player: swapWith,
-                                        swapWith: playerForSlot,
+                                        player: playerForSlot,
+                                        swapWith,
                                     });
                                 } else {
                                     onPlayerDrop({
@@ -2031,9 +2031,6 @@ function LineupCreator() {
     const [teamB, setTeamB] = useState(Array(10).fill(null));
     const [hideSelected, setHideSelected] = useState(false);
     const [showComparison, setShowComparison] = useState(false);
-    const [showAllAvailable, setShowAllAvailable] = useState(false);
-    const [showLineups, setShowLineups] = useState(true);
-    const [viewMode, setViewMode] = useState("big"); // "big", "small", "list"
 
     const [globalActiveSlot, setGlobalActiveSlot] = useState(null);
 
@@ -2115,8 +2112,19 @@ function LineupCreator() {
         if (remove) {
             if (toTeam === "teamA") newTeamA[toIndex] = null;
             if (toTeam === "teamB") newTeamB[toIndex] = null;
+        } else if (swapWith && typeof fromIndex === "number" && fromTeam && toTeam && fromTeam !== toTeam) {
+            // Swap between teams
+            if (toTeam === "teamA" && fromTeam === "teamB") {
+                const temp = newTeamA[toIndex];
+                newTeamA[toIndex] = player;
+                newTeamB[fromIndex] = swapWith;
+            } else if (toTeam === "teamB" && fromTeam === "teamA") {
+                const temp = newTeamB[toIndex];
+                newTeamB[toIndex] = player;
+                newTeamA[fromIndex] = swapWith;
+            }
         } else if (swapWith && fromTeam === toTeam && typeof fromIndex === "number") {
-            // Swap players within the same team
+            // Swap within the same team
             if (toTeam === "teamA") {
                 const temp = newTeamA[toIndex];
                 newTeamA[toIndex] = swapWith;
@@ -2147,10 +2155,6 @@ function LineupCreator() {
         : filtered;
 
     const sortedAvailablePlayers = availablePlayers.sort((a, b) => b[sortBy] - a[sortBy]);
-
-    // Show only top 12 unless showAllAvailable is true
-    const visibleAvailablePlayers =
-        showAllAvailable ? sortedAvailablePlayers : sortedAvailablePlayers.slice(0, 12);
 
     const mainRef = useRef(null);
     useEffect(() => {
@@ -2188,75 +2192,61 @@ function LineupCreator() {
         <div className="p-4 max-w-7xl mx-auto" ref={mainRef}>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
 
-            {/* Show/Hide Lineups and Attribute Comparison button */}
-            <div className="flex justify-center mb-4">
-                <button
-                    onClick={() => setShowLineups(v => !v)}
-                    className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
-                    type="button"
-                >
-                    {showLineups ? "Hide Lineups & Comparison" : "Show Lineups & Comparison"}
-                </button>
-            </div>
-
-
-            {/* Only hide/show the lineups and attribute comparison */}
-            {showLineups && (
-                <>
-                    {/* Attribute Comparison */}
-                    {!showComparison && (
-                        <div className="flex justify-center mb-4">
-                            <button
-                                onClick={() => setShowComparison(true)}
-                                className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
-                                type="button"
-                            >
-                                Show Attribute Comparison
-                            </button>
-                        </div>
-                    )}
-
-                    {showComparison && (
-                        <MirroredTeamAttributesBarChart
-                            teamAPlayers={teamA}
-                            teamBPlayers={teamB}
-                            teamALabel="Team A"
-                            teamBLabel="Team B"
-                            onHide={() => setShowComparison(false)}
-                        />
-                    )}
-
-                    {/* Lineups */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <DroppableTeam
-                            id="teamA"
-                            label="Team A"
-                            players={teamA}
-                            onPlayerDrop={handlePlayerDrop}
-                            formation={formationA}
-                            onFormationChange={setFormationA}
-                            allPlayers={players}
-                            globalActiveSlot={globalActiveSlot}
-                            setGlobalActiveSlot={setGlobalActiveSlot}
-                            playerSelectModal={playerSelectModal}
-                            setPlayerSelectModal={setPlayerSelectModal}
-                        />
-                        <DroppableTeam
-                            id="teamB"
-                            label="Team B"
-                            players={teamB}
-                            onPlayerDrop={handlePlayerDrop}
-                            formation={formationB}
-                            onFormationChange={setFormationB}
-                            allPlayers={players}
-                            globalActiveSlot={globalActiveSlot}
-                            setGlobalActiveSlot={setGlobalActiveSlot}
-                            playerSelectModal={playerSelectModal}
-                            setPlayerSelectModal={setPlayerSelectModal}
-                        />
+            {/* Always show the lineups and attribute comparison */}
+            <>
+                {/* Attribute Comparison */}
+                {!showComparison && (
+                    <div className="flex justify-center mb-4">
+                        <button
+                            onClick={() => setShowComparison(true)}
+                            className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
+                            type="button"
+                        >
+                            Show Attribute Comparison
+                        </button>
                     </div>
-                </>
-            )}
+                )}
+
+                {showComparison && (
+                    <MirroredTeamAttributesBarChart
+                        teamAPlayers={teamA}
+                        teamBPlayers={teamB}
+                        teamALabel="Team A"
+                        teamBLabel="Team B"
+                        onHide={() => setShowComparison(false)}
+                    />
+                )}
+
+                {/* Lineups */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <DroppableTeam
+                        id="teamA"
+                        label="Team A"
+                        players={teamA}
+                        onPlayerDrop={handlePlayerDrop}
+                        formation={formationA}
+                        onFormationChange={setFormationA}
+                        allPlayers={players}
+                        globalActiveSlot={globalActiveSlot}
+                        setGlobalActiveSlot={setGlobalActiveSlot}
+                        playerSelectModal={playerSelectModal}
+                        setPlayerSelectModal={setPlayerSelectModal}
+                    />
+                    <DroppableTeam
+                        id="teamB"
+                        label="Team B"
+                        players={teamB}
+                        onPlayerDrop={handlePlayerDrop}
+                        formation={formationB}
+                        onFormationChange={setFormationB}
+                        allPlayers={players}
+                        globalActiveSlot={globalActiveSlot}
+                        setGlobalActiveSlot={setGlobalActiveSlot}
+                        playerSelectModal={playerSelectModal}
+                        setPlayerSelectModal={setPlayerSelectModal}
+                    />
+                </div>
+            </>
 
             {/* The rest (search, available players) is always visible */}
             <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-4 ${glass}`}>
@@ -2290,7 +2280,7 @@ function LineupCreator() {
                             player={activeDrag.player}
                             fromTeam={activeDrag.fromTeam}
                             fromIndex={activeDrag.fromIndex}
-                            small={viewMode === "small"}
+                            small={false}
                             assigned={false}
                             selected={false}
                         />
@@ -2316,106 +2306,23 @@ function LineupCreator() {
                         />
                         Hide selected
                     </label>
-                    {/* View mode selector beside Available Players */}
-                    <div className="flex items-center gap-1 ml-4">
-                        <span className="text-xs text-gray-600">View:</span>
-                        {/* Mobile: Dropdown */}
-                        <select
-                            className="block sm:hidden border p-1 rounded text-xs bg-white/90 shadow"
-                            value={viewMode}
-                            onChange={e => setViewMode(e.target.value)}
-                            aria-label="Select view mode"
-                        >
-                            <option value="list">List</option>
-                            <option value="small">Card</option>
-                            <option value="big">Attributes</option>
-                        </select>
-                        {/* Desktop: Button group */}
-                        <div className="hidden sm:flex items-center gap-1">
-                            <button
-                                className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "list" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                                onClick={() => setViewMode("list")}
-                                type="button"
-                                aria-label="List view"
-                            >
-                                <span role="img" aria-label="List">List</span>
-                            </button>
-                            <button
-                                className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                                onClick={() => setViewMode("small")}
-                                type="button"
-                                aria-label="Small cards"
-                            >
-                                <span role="img" aria-label="Small cards">Card</span>
-                            </button>
-                            <button
-                                className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                                onClick={() => setViewMode("big")}
-                                type="button"
-                                aria-label="Big cards"
-                            >
-                                <span role="img" aria-label="Big cards">Attributes</span>
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
-                {/* Player display modes */}
-                {viewMode === "list" ? (
-                    <div className="bg-white rounded-xl border shadow divide-y">
-                        {visibleAvailablePlayers.map((p, idx) => (
-                            <ListPlayer
-                                key={p.name}
-                                player={p}
-                                fromTeam={null}
-                                fromIndex={null}
-                                assigned={assignedNames.includes(p.name)}
-                                selected={assignedNames.includes(p.name)}
-                                onDragStart={handleDragStart}
-                                onDragEnd={handleDragEnd}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <div className={`grid grid-cols-1 ${viewMode === "small" ? "sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} gap-3`}>
-                        {visibleAvailablePlayers.map((p, idx) => (
-                            <DraggablePlayer
-                                key={p.name}
-                                player={p}
-                                fromTeam={null}
-                                fromIndex={null}
-                                small={viewMode === "small"}
-                                assigned={assignedNames.includes(p.name)}
-                                selected={assignedNames.includes(p.name)}
-                                onDragStart={handleDragStart}
-                                onDragEnd={handleDragEnd}
-                            />
-                        ))}
-                    </div>
-                )}
-
-                {!showAllAvailable && sortedAvailablePlayers.length > 12 && (
-                    <div className="flex justify-center mt-2">
-                        <button
-                            className="px-3 py-1 rounded bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 transition"
-                            onClick={() => setShowAllAvailable(true)}
-                            type="button"
-                        >
-                            Show all ({sortedAvailablePlayers.length})
-                        </button>
-                    </div>
-                )}
-                {showAllAvailable && sortedAvailablePlayers.length > 12 && (
-                    <div className="flex justify-center mt-2">
-                        <button
-                            className="px-3 py-1 rounded bg-gray-300 text-gray-800 text-xs font-semibold hover:bg-gray-400 transition"
-                            onClick={() => setShowAllAvailable(false)}
-                            type="button"
-                        >
-                            Show less
-                        </button>
-                    </div>
-                )}
+                <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {sortedAvailablePlayers.map((p, idx) => (
+                        <DraggablePlayer
+                            key={p.name}
+                            player={p}
+                            fromTeam={null}
+                            fromIndex={null}
+                            small={false}
+                            assigned={assignedNames.includes(p.name)}
+                            selected={assignedNames.includes(p.name)}
+                            onDragStart={handleDragStart}
+                            onDragEnd={handleDragEnd}
+                        />
+                    ))}
+                </div>
             </DndContext>
         </div>
     );
