@@ -2146,7 +2146,7 @@ function LineupCreator() {
         ? filtered.filter(p => !assignedNames.includes(p.name))
         : filtered;
 
-    const sortedAvailablePlayers = availablePlayers.sort((a, b) => b.overall - a.overall);
+    const sortedAvailablePlayers = availablePlayers.sort((a, b) => b[sortBy] - a[sortBy]);
 
     // Show only top 12 unless showAllAvailable is true
     const visibleAvailablePlayers =
