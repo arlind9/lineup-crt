@@ -936,12 +936,22 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
 
     const imageUrl = player.photo ? player.photo : PLACEHOLDER_IMG;
     const cardBg = getCardBgByOverall(player.overall);
+<<<<<<<<< Temporary merge branch 1
+=========
     const cardHighlight = getCardHighlight({ assigned, selected });
+>>>>>>>>> Temporary merge branch 2
 
     return (
         <Card
             ref={dragRef}
             className={
+<<<<<<<<< Temporary merge branch 1
+                cardBg + " border cursor-move space-y-1 transition-all duration-150 " +
+                (assigned ? "bg-green-100/80 border-green-400 shadow-green-200 " : "") +
+                (selected ? "bg-blue-100/80 border-blue-400 shadow-blue-200 " : "") +
+                (small ? "p-1 text-xs min-h-0" : "p-4 text-sm") +
+                " rounded-xl shadow"
+=========
                 [
                     cardBg,
                     "border cursor-move space-y-1 transition-all duration-150",
@@ -949,6 +959,7 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
                     "rounded-xl shadow",
                     cardHighlight
                 ].join(" ")
+>>>>>>>>> Temporary merge branch 2
             }
             draggable
             onDragStart={(e) => {
@@ -1162,17 +1173,73 @@ function Home() {
                         <div className="relative mb-4 sm:mb-8 mt-4 sm:mt-6">
                             <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-10">
                                 <span className="bg-yellow-400 text-yellow-900 px-3 sm:px-4 py-1 rounded-full font-bold shadow text-xs sm:text-base border-2 border-yellow-300 animate-pulse">
+<<<<<<<<< Temporary merge branch 1
+=========
+<<<<<<<<< Temporary merge branch 1
+                                <span className="bg-yellow-400 text-yellow-900 px-4 py-1 rounded-full font-bold shadow text-sm sm:text-base border-2 border-yellow-300 animate-pulse">
+=========
+                                <span className="bg-yellow-400 text-yellow-900 px-3 sm:px-4 py-1 rounded-full font-bold shadow text-xs sm:text-base border-2 border-yellow-300 animate-pulse">
+>>>>>>>>> Temporary merge branch 2
+>>>>>>>>> Temporary merge branch 2
+=========
+                                <span className="bg-yellow-400 text-yellow-900 px-3 sm:px-4 py-1 rounded-full font-bold shadow text-xs sm:text-base border-2 border-yellow-300 animate-pulse">
+=========
+                                <span className="bg-yellow-400 text-yellow-900 px-3 sm:px-4 py-1 rounded-full font-bold shadow text-xs sm:text-base border-2 border-yellow-300 animate-pulse">
+>>>>>>>>> Temporary merge branch 2
+=========
+                                <span className="bg-yellow-400 text-yellow-900 px-3 sm:px-4 py-1 rounded-full font-bold shadow text-xs sm:text-base border-2 border-yellow-300 animate-pulse">
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
                                     NDESHJA E RADHËS
                                 </span>
                             </div>
                             <table className="w-full shadow-2xl rounded-2xl overflow-hidden border-4 border-yellow-300 bg-yellow-50/80">
                                 <tbody>
                                     <tr>
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+=========
+<<<<<<<<< Temporary merge branch 1
+                                        <td className="p-4 sm:p-8 text-center font-bold text-yellow-900 text-base sm:text-lg tracking-wide">
+                                            Ndeshja e radhës do të luhet të mërkurën e ardhshme<br />
+                                            në datë <span className="text-blue-700 underline">{getNextWednesday()}</span><br />
+                                            në orën <span className="text-blue-700 underline">20:30</span><br />
+                                            <span className="block mt-2 text-base font-semibold text-yellow-800">
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
                                         <td className="p-3 sm:p-8 text-center font-bold text-yellow-900 text-sm sm:text-lg tracking-wide">
                                             Ndeshja e radhës do të luhet të mërkurën e ardhshme<br />
                                             në datë <span className="text-blue-700 underline">{getNextWednesday()}</span><br />
                                             në orën <span className="text-blue-700 underline">20:30</span><br />
                                             <span className="block mt-2 text-sm sm:text-base font-semibold text-yellow-800">
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+=========
+>>>>>>>>> Temporary merge branch 2
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
                                                 Lokacioni: <span className="text-blue-700 underline">Laprake</span>
                                             </span>
                                         </td>
@@ -1185,6 +1252,28 @@ function Home() {
                 {/* Right: MOTM and Top Earners */}
                 <div className="flex flex-col gap-4 sm:gap-8 items-center w-full">
                     <div className="w-full max-w-md">
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+=========
+<<<<<<<<< Temporary merge branch 1
+                        <h2 className="text-lg sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+=========
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+>>>>>>>>> Temporary merge branch 2
+>>>>>>>>> Temporary merge branch 2
+=========
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+>>>>>>>>> Temporary merge branch 2
+=========
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
+>>>>>>>>> Temporary merge branch 2
+=========
+=========
+>>>>>>>>> Temporary merge branch 2
                         <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
                         <div className="overflow-x-auto">
                             <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
@@ -1215,6 +1304,28 @@ function Home() {
                         )}
                     </div>
                     <div className="w-full max-w-md">
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+=========
+<<<<<<<<< Temporary merge branch 1
+                        <h2 className="text-lg sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+=========
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+>>>>>>>>> Temporary merge branch 2
+>>>>>>>>> Temporary merge branch 2
+=========
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+>>>>>>>>> Temporary merge branch 2
+=========
+                        <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
+>>>>>>>>> Temporary merge branch 2
+=========
+=========
+>>>>>>>>> Temporary merge branch 2
                         <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Top Earners</h2>
                         <div className="overflow-x-auto">
                             <table className="w-full text-xs sm:text-sm shadow-md rounded-lg overflow-hidden">
@@ -1816,6 +1927,12 @@ function PlayerDatabase() {
                 >
                     {filtered.map((p) => {
                         const cardBg = getCardBgByOverall(p.overall);
+<<<<<<<<< Temporary merge branch 1
+                        return (
+                            <div
+                                key={p.name}
+                                className={`${cardBg} border rounded-xl shadow p-4 cursor-pointer transition-all duration-150 ${selected.some(sel => sel.name === p.name) ? "bg-blue-100 border-blue-400" : ""} hover:bg-blue-50`}
+=========
                         const isSelected = selected.some(sel => sel.name === p.name);
                         // In database, only "selected" (comparison) is relevant
                         const cardHighlight = getCardHighlight({ assigned: false, selected: isSelected });
@@ -1828,6 +1945,7 @@ function PlayerDatabase() {
                                     isSelected ? "hover:bg-blue-50" : "hover:bg-blue-50",
                                     cardHighlight
                                 ].join(" ")}
+>>>>>>>>> Temporary merge branch 2
                                 onClick={e => { e.stopPropagation(); toggleSelect(p); }}
                             >
                                 {/* Player Image */}
@@ -1842,7 +1960,11 @@ function PlayerDatabase() {
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="font-semibold text-base truncate">{p.name}</div>
+<<<<<<<<< Temporary merge branch 1
+                                    {selected.some(sel => sel.name === p.name) && (
+=========
                                     {isSelected && (
+>>>>>>>>> Temporary merge branch 2
                                         <button
                                             className="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
                                             onClick={e => { e.stopPropagation(); removeFromCompare(p.name); }}
@@ -1864,7 +1986,11 @@ function PlayerDatabase() {
                                     </div>
                                 )}
                                 <div className="text-sm font-bold">Overall: {p.overall}</div>
+<<<<<<<<< Temporary merge branch 1
+                                {selected.some(sel => sel.name === p.name) && (
+=========
                                 {isSelected && (
+>>>>>>>>> Temporary merge branch 2
                                     <div className="text-xs text-blue-700 font-semibold mt-1">Selected</div>
                                 )}
                             </div>
@@ -2029,11 +2155,6 @@ function LineupCreator() {
     const [sortBy, setSortBy] = useState("overall");
     const [teamA, setTeamA] = useState(Array(10).fill(null));
     const [teamB, setTeamB] = useState(Array(10).fill(null));
-    const [hideSelected, setHideSelected] = useState(false);
-    const [showComparison, setShowComparison] = useState(false);
-    const [showAllAvailable, setShowAllAvailable] = useState(false);
-    const [showLineups, setShowLineups] = useState(true);
-    const [viewMode, setViewMode] = useState("big"); // "big", "small", "list"
 
     const [globalActiveSlot, setGlobalActiveSlot] = useState(null);
 
@@ -2185,179 +2306,65 @@ function LineupCreator() {
     };
 
     return (
-        <div className="p-4 max-w-7xl mx-auto" ref={mainRef}>
-            <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
-
-            {/* Show/Hide Lineups and Attribute Comparison button */}
-            <div className="flex justify-center mb-4">
-                <button
-                    onClick={() => setShowLineups(v => !v)}
-                    className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
-                    type="button"
-                >
-                    {showLineups ? "Hide Lineups & Comparison" : "Show Lineups & Comparison"}
-                </button>
-            </div>
-
-
-            {/* Only hide/show the lineups and attribute comparison */}
-            {showLineups && (
-                <>
-                    {/* Attribute Comparison */}
-                    {!showComparison && (
-                        <div className="flex justify-center mb-4">
-                            <button
-                                onClick={() => setShowComparison(true)}
-                                className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
-                                type="button"
-                            >
-                                Show Attribute Comparison
-                            </button>
-                        </div>
-                    )}
-
-                    {showComparison && (
-                        <MirroredTeamAttributesBarChart
-                            teamAPlayers={teamA}
-                            teamBPlayers={teamB}
-                            teamALabel="Team A"
-                            teamBLabel="Team B"
-                            onHide={() => setShowComparison(false)}
-                        />
-                    )}
-
-                    {/* Lineups */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <DroppableTeam
-                            id="teamA"
-                            label="Team A"
-                            players={teamA}
-                            onPlayerDrop={handlePlayerDrop}
-                            formation={formationA}
-                            onFormationChange={setFormationA}
-                            allPlayers={players}
-                            globalActiveSlot={globalActiveSlot}
-                            setGlobalActiveSlot={setGlobalActiveSlot}
-                            playerSelectModal={playerSelectModal}
-                            setPlayerSelectModal={setPlayerSelectModal}
-                        />
-                        <DroppableTeam
-                            id="teamB"
-                            label="Team B"
-                            players={teamB}
-                            onPlayerDrop={handlePlayerDrop}
-                            formation={formationB}
-                            onFormationChange={setFormationB}
-                            allPlayers={players}
-                            globalActiveSlot={globalActiveSlot}
-                            setGlobalActiveSlot={setGlobalActiveSlot}
-                            playerSelectModal={playerSelectModal}
-                            setPlayerSelectModal={setPlayerSelectModal}
-                        />
-                    </div>
-                </>
-            )}
-
-            {/* The rest (search, available players) is always visible */}
-            <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-4 ${glass}`}>
+        <div className="p-4 max-w-7xl mx-auto">
+            <h1 className="text-3xl font-bold mb-4 text-center">Lineup Creator A</h1>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
                 <Input type="text" placeholder="Search players..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full md:w-1/2" />
                 <div className="flex gap-2">
                     {["All", "ST", "MF", "DF", "GK"].map((pos) => (
                         <button
                             key={pos}
-                            className={`px-3 py-1 rounded font-semibold transition ${positionFilter === pos ? "bg-blue-500 text-white shadow" : "bg-gray-200 hover:bg-blue-100"}`}
+                            className={`px-3 py-1 rounded ${positionFilter === pos ? "bg-blue-500 text-white" : "bg-gray-200"}`}
                             onClick={() => setPositionFilter(pos)}
                         >
                             {pos}
                         </button>
                     ))}
                 </div>
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border p-2 rounded-md bg-white/90 shadow">
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border p-2 rounded-md">
                     {["overall", "speed", "shooting", "passing", "dribbling", "physical", "defending"].map(key => (
                         <option key={key} value={key}>Sort by {key.charAt(0).toUpperCase() + key.slice(1)}</option>
                     ))}
                 </select>
             </div>
 
-            <DndContext
-                collisionDetection={closestCenter}
-                sensors={sensors}
-            >
-                {/* Drag overlay for mobile visual feedback */}
-                <DragOverlay>
-                    {activeDrag ? (
-                        <DraggablePlayer
-                            player={activeDrag.player}
-                            fromTeam={activeDrag.fromTeam}
-                            fromIndex={activeDrag.fromIndex}
-                            small={viewMode === "small"}
-                            assigned={false}
-                            selected={false}
-                        />
-                    ) : null}
-                </DragOverlay>
+            <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                    <label className="mr-2 font-medium">Team A Formation:</label>
+                    <select value={formationA} onChange={(e) => setFormationA(e.target.value)} className="border p-2 rounded-md">
+                        {["4-4-1", "4-3-2", "4-2-3", "5-2-2", "5-3-1", "3-3-3", "3-4-2", "3-5-1", "3-2-4"].map(f => (
+                            <option key={f} value={f}>{f}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="flex-1">
+                    <label className="mr-2 font-medium">Team B Formation:</label>
+                    <select value={formationB} onChange={(e) => setFormationB(e.target.value)} className="border p-2 rounded-md">
+                        {["4-4-1", "4-3-2", "4-2-3", "5-2-2", "5-3-1", "3-3-3", "3-4-2", "3-5-1", "3-2-4"].map(f => (
+                            <option key={f} value={f}>{f}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
 
-                <PlayerSelectModal
-                    open={playerSelectModal.open}
-                    onClose={() => setPlayerSelectModal({ open: false })}
-                    players={playerSelectModal.eligiblePlayers || []}
-                    onSelect={playerSelectModal.onSelect || (() => { })}
-                    slotLabel={playerSelectModal.slotLabel}
-                />
-
-                <div className={`flex items-center mb-2 gap-2 ${glass}`}>
-                    <h2 className="text-xl font-semibold text-green-900">Available Players</h2>
-                    <label className="flex items-center gap-1 text-sm font-normal cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={hideSelected}
-                            onChange={e => setHideSelected(e.target.checked)}
-                            className="accent-blue-500"
-                        />
-                        Hide selected
-                    </label>
-                    {/* View mode selector beside Available Players */}
-                    <div className="flex items-center gap-1 ml-4">
-                        <span className="text-xs text-gray-600">View:</span>
-                        {/* Mobile: Dropdown */}
-                        <select
-                            className="block sm:hidden border p-1 rounded text-xs bg-white/90 shadow"
-                            value={viewMode}
-                            onChange={e => setViewMode(e.target.value)}
-                            aria-label="Select view mode"
-                        >
-                            <option value="list">List</option>
-                            <option value="small">Card</option>
-                            <option value="big">Attributes</option>
-                        </select>
-                        {/* Desktop: Button group */}
-                        <div className="hidden sm:flex items-center gap-1">
-                            <button
-                                className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "list" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                                onClick={() => setViewMode("list")}
-                                type="button"
-                                aria-label="List view"
-                            >
-                                <span role="img" aria-label="List">List</span>
-                            </button>
-                            <button
-                                className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "small" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                                onClick={() => setViewMode("small")}
-                                type="button"
-                                aria-label="Small cards"
-                            >
-                                <span role="img" aria-label="Small cards">Card</span>
-                            </button>
-                            <button
-                                className={`px-2 py-1 rounded text-xs font-semibold border transition ${viewMode === "big" ? "bg-blue-500 text-white border-blue-500" : "bg-white hover:bg-blue-100 border-gray-300"}`}
-                                onClick={() => setViewMode("big")}
-                                type="button"
-                                aria-label="Big cards"
-                            >
-                                <span role="img" aria-label="Big cards">Attributes</span>
-                            </button>
-                        </div>
-                    </div>
+            <DndContext collisionDetection={closestCenter}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <DroppableTeam
+                        id="teamA"
+                        label="Team A"
+                        players={teamA}
+                        onPlayerDrop={handlePlayerDrop}
+                        formation={formationA}
+                        allPlayers={players}
+                    />
+                    <DroppableTeam
+                        id="teamB"
+                        label="Team B"
+                        players={teamB}
+                        onPlayerDrop={handlePlayerDrop}
+                        formation={formationB}
+                        allPlayers={players}
+                    />
                 </div>
 
                 {/* Player display modes */}
@@ -2420,6 +2427,20 @@ function LineupCreator() {
         </div>
     );
 }
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
 
 function MOTMPage() {
     const [data, setData] = React.useState([]);
@@ -2542,4 +2563,24 @@ function MOTMPage() {
             </div>
         </div>
     );
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
 }
+<<<<<<<<< Temporary merge branch 1
+<<<<<<<<< Temporary merge branch 1
+=========
+<<<<<<<<< Temporary merge branch 1
+=========
+ 
+>>>>>>>>> Temporary merge branch 2
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+>>>>>>>>> Temporary merge branch 2
+=========
+}   
+>>>>>>>>> Temporary merge branch 2
+=========
+}
+>>>>>>>>> Temporary merge branch 2
