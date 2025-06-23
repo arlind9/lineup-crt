@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import Papa from "papaparse";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -2218,6 +2218,64 @@ function LineupCreator() {
     );
 }
 
+function AttributeBarChart({ playerA, playerB }) {
+    const attrs = [
+        { key: "overall", label: "Overall", max: 100 },
+        { key: "speed", label: "Speed", max: 100 },
+        { key: "shooting", label: "Shooting", max: 100 },
+        { key: "passing", label: "Passing", max: 100 },
+        { key: "dribbling", label: "Dribbling", max: 100 },
+        { key: "physical", label: "Physical", max: 100 },
+        { key: "defending", label: "Defending", max: 100 },
+        { key: "goalkeeping", label: "Goalkeeping", max: 100 },
+        { key: "weakFoot", label: "Weak Foot", max: 50 }
+    ];
+
+    return (
+        <div className="w-full mt-4">
+            <div className="text-xs font-semibold mb-2 text-center text-gray-700">Attribute Comparison Chart</div>
+            <div className="space-y-2">
+                {attrs.map(attr => {
+                    const aVal = playerA[attr.key] || 0;
+                    const bVal = playerB[attr.key] || 0;
+                    const max = attr.max;
+                    const aPct = Math.max(5, (aVal / max) * 100);
+                    const bPct = Math.max(5, (bVal / max) * 100);
+                    return (
+                        <div key={attr.key} className="flex items-center gap-2">
+                            <span className="w-16 text-right text-xs font-semibold text-blue-700">{aVal}</span>
+                            <div className="flex-1 flex justify-end">
+                                <div
+                                    className="h-3 rounded-l bg-blue-400"
+                                    style={{
+                                        width: `${aPct}%`,
+                                        minWidth: aVal > 0 ? 12 : 0,
+                                        opacity: aVal >= bVal ? 1 : 0.5,
+                                        transition: "width 0.3s"
+                                    }}
+                                />
+                            </div>
+                            <span className="w-24 text-xs text-gray-700 text-center font-medium">{attr.label}</span>
+                            <div className="flex-1 flex">
+                                <div
+                                    className="h-3 rounded-r bg-red-400"
+                                    style={{
+                                        width: `${bPct}%`,
+                                        minWidth: bVal > 0 ? 12 : 0,
+                                        opacity: bVal >= aVal ? 1 : 0.5,
+                                        transition: "width 0.3s"
+                                    }}
+                                />
+                            </div>
+                            <span className="w-16 text-left text-xs font-semibold text-red-700">{bVal}</span>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
 function PlayerAttributeCompareTable({ playerA, playerB, onClose }) {
     if (!playerA || !playerB) return null;
     const attrs = [
@@ -2232,28 +2290,52 @@ function PlayerAttributeCompareTable({ playerA, playerB, onClose }) {
         { key: "weakFoot", label: "Weak Foot" }
     ];
     return (
-        <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 bg-white rounded-xl shadow-xl border p-4 min-w-[320px] max-w-xs">
+        <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 bg-white rounded-2xl shadow-2xl border-2 border-blue-200 p-6 min-w-[340px] max-w-md animate-fade-in">
             <button
                 className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg font-bold"
                 onClick={onClose}
                 aria-label="Close"
                 type="button"
             >×</button>
-            <div className="font-bold text-center mb-2 text-blue-900">Attribute Comparison</div>
-            <table className="w-full text-xs">
+            <div className="flex items-center justify-center gap-4 mb-4">
+                <div className="flex flex-col items-center">
+                    <img
+                        src={playerA.photo || PLACEHOLDER_IMG}
+                        alt={playerA.name}
+                        className="w-14 h-14 rounded-full object-cover border border-blue-300 shadow"
+                        style={{ background: "#eee" }}
+                        loading="lazy"
+                    />
+                    <div className="font-bold text-blue-900 text-sm mt-1">{playerA.name}</div>
+                    <div className="text-xs text-gray-500">{playerA.position}</div>
+                </div>
+                <span className="text-2xl font-bold text-gray-400">vs</span>
+                <div className="flex flex-col items-center">
+                    <img
+                        src={playerB.photo || PLACEHOLDER_IMG}
+                        alt={playerB.name}
+                        className="w-14 h-14 rounded-full object-cover border border-red-300 shadow"
+                        style={{ background: "#eee" }}
+                        loading="lazy"
+                    />
+                    <div className="font-bold text-red-900 text-sm mt-1">{playerB.name}</div>
+                    <div className="text-xs text-gray-500">{playerB.position}</div>
+                </div>
+            </div>
+            <table className="w-full text-xs mb-2">
                 <thead>
                     <tr>
-                        <th className="p-1 text-right">{playerA.name}</th>
+                        <th className="p-1 text-right text-blue-800">{playerA.name}</th>
                         <th className="p-1 text-center"></th>
-                        <th className="p-1 text-left">{playerB.name}</th>
+                        <th className="p-1 text-left text-red-800">{playerB.name}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {attrs.map(attr => (
                         <tr key={attr.key}>
-                            <td className="p-1 text-right font-semibold">{playerA[attr.key]}</td>
+                            <td className={`p-1 text-right font-semibold ${playerA[attr.key] > playerB[attr.key] ? "text-blue-700" : "text-gray-700"}`}>{playerA[attr.key]}</td>
                             <td className="p-1 text-center text-gray-500">{attr.label}</td>
-                            <td className="p-1 text-left font-semibold">{playerB[attr.key]}</td>
+                            <td className={`p-1 text-left font-semibold ${playerB[attr.key] > playerA[attr.key] ? "text-red-700" : "text-gray-700"}`}>{playerB[attr.key]}</td>
                         </tr>
                     ))}
                 </tbody>
