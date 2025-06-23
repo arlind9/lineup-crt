@@ -663,112 +663,112 @@ function DroppableTeam({
         const layouts = {
             "3-3-3": [
                 // GK, 3 DF, 3 MF, 3 ST
-                { top: "92%", left: "50%" }, // GK
-                { top: "75%", left: "20%" },
+                { top: "92%", left: "50%" }, // GK (was 95%)
+                { top: "75%", left: "20%" }, // DFs (was 75%)
                 { top: "75%", left: "50%" },
                 { top: "75%", left: "80%" },
-                { top: "55%", left: "20%" },
-                { top: "55%", left: "50%" },
-                { top: "55%", left: "80%" },
-                { top: "30%", left: "20%" },
-                { top: "30%", left: "50%" },
-                { top: "30%", left: "80%" },
+                { top: "56%", left: "20%" }, // MFs (was 55%)
+                { top: "56%", left: "50%" },
+                { top: "56%", left: "80%" },
+                { top: "28%", left: "20%" }, // STs (was 30%)
+                { top: "28%", left: "50%" },
+                { top: "28%", left: "80%" },
             ],
             "4-4-1": [
-                { top: "92%", left: "50%" }, // GK
-                { top: "75%", left: "15%" },
+                { top: "92%", left: "50%" }, // GK (was 95%)
+                { top: "75%", left: "15%" }, // DFs (was 75%)
                 { top: "75%", left: "38%" },
                 { top: "75%", left: "62%" },
                 { top: "75%", left: "85%" },
-                { top: "55%", left: "15%" },
-                { top: "55%", left: "38%" },
-                { top: "55%", left: "62%" },
-                { top: "55%", left: "85%" },
-                { top: "30%", left: "50%" },
+                { top: "56%", left: "15%" }, // MFs (was 55%)
+                { top: "56%", left: "38%" },
+                { top: "56%", left: "62%" },
+                { top: "56%", left: "85%" },
+                { top: "28%", left: "50%" }, // ST (was 30%)
             ],
             "4-3-2": [
-                { top: "92%", left: "50%" }, // GK
-                { top: "75%", left: "15%" },
+                { top: "92%", left: "50%" }, // GK (was 95%)
+                { top: "75%", left: "15%" }, // DFs (was 75%)
                 { top: "75%", left: "38%" },
                 { top: "75%", left: "62%" },
                 { top: "75%", left: "85%" },
-                { top: "55%", left: "25%" },
-                { top: "55%", left: "50%" },
-                { top: "55%", left: "75%" },
-                { top: "35%", left: "35%" },
-                { top: "35%", left: "65%" },
+                { top: "56%", left: "25%" }, // MFs (was 55%)
+                { top: "56%", left: "50%" },
+                { top: "56%", left: "75%" },
+                { top: "28%", left: "35%" }, // STs (was 30%)
+                { top: "28%", left: "65%" },
             ],
             "4-2-3": [
-                { top: "92%", left: "50%" }, // GK
-                { top: "75%", left: "15%" },
+                { top: "92%", left: "50%" }, // GK (was 95%)
+                { top: "75%", left: "15%" }, // DFs (was 75%)
                 { top: "75%", left: "38%" },
                 { top: "75%", left: "62%" },
                 { top: "75%", left: "85%" },
-                { top: "55%", left: "30%" },
-                { top: "55%", left: "70%" },
-                { top: "35%", left: "25%" },
-                { top: "35%", left: "50%" },
-                { top: "35%", left: "75%" },
+                { top: "56%", left: "30%" }, // MFs (was 55%)
+                { top: "56%", left: "70%" },
+                { top: "28%", left: "25%" }, // STs (was 30%)
+                { top: "28%", left: "50%" },
+                { top: "28%", left: "75%" },
             ],
             "5-2-2": [
-                { top: "92%", left: "50%" }, // GK
-                { top: "80%", left: "10%" },
-                { top: "80%", left: "30%" },
-                { top: "80%", left: "50%" },
-                { top: "80%", left: "70%" },
-                { top: "80%", left: "90%" },
-                { top: "60%", left: "35%" },
-                { top: "60%", left: "65%" },
-                { top: "35%", left: "35%" },
-                { top: "35%", left: "65%" },
+                { top: "92%", left: "50%" }, // GK (was 95%)
+                { top: "75%", left: "10%" }, // DFs (was 80%)
+                { top: "75%", left: "30%" },
+                { top: "75%", left: "50%" },
+                { top: "75%", left: "70%" },
+                { top: "75%", left: "90%" },
+                { top: "56%", left: "35%" }, // MFs (was 55%)
+                { top: "56%", left: "65%" },
+                { top: "28%", left: "35%" }, // STs (was 30%)
+                { top: "28%", left: "65%" },
             ],
             "5-3-1": [
-                { top: "92%", left: "50%" }, // GK
-                { top: "80%", left: "10%" },
-                { top: "80%", left: "30%" },
-                { top: "80%", left: "50%" },
-                { top: "80%", left: "70%" },
-                { top: "80%", left: "90%" },
-                { top: "60%", left: "25%" },
-                { top: "60%", left: "50%" },
-                { top: "60%", left: "75%" },
-                { top: "35%", left: "50%" },
+                { top: "92%", left: "50%" }, // GK (was 95%)
+                { top: "75%", left: "10%" }, // DFs (was 80%)
+                { top: "75%", left: "30%" },
+                { top: "75%", left: "50%" },
+                { top: "75%", left: "70%" },
+                { top: "75%", left: "90%" },
+                { top: "56%", left: "25%" }, // MFs (was 55%)
+                { top: "56%", left: "50%" },
+                { top: "56%", left: "75%" },
+                { top: "28%", left: "50%" }, // ST (was 30%)
             ],
             "3-4-2": [
-                { top: "92%", left: "50%" }, // GK
-                { top: "75%", left: "20%" },
+                { top: "92%", left: "50%" }, // GK (was 95%)
+                { top: "75%", left: "20%" }, // DFs (was 75%)
                 { top: "75%", left: "50%" },
                 { top: "75%", left: "80%" },
-                { top: "55%", left: "15%" },
-                { top: "55%", left: "38%" },
-                { top: "55%", left: "62%" },
-                { top: "55%", left: "85%" },
-                { top: "30%", left: "35%" },
-                { top: "30%", left: "65%" },
+                { top: "56%", left: "15%" }, // MFs (was 55%)
+                { top: "56%", left: "38%" },
+                { top: "56%", left: "62%" },
+                { top: "56%", left: "85%" },
+                { top: "28%", left: "35%" }, // STs (was 30%)
+                { top: "28%", left: "65%" },
             ],
             "3-5-1": [
-                { top: "92%", left: "50%" }, // GK
-                { top: "75%", left: "20%" },
+                { top: "92%", left: "50%" }, // GK (was 95%)
+                { top: "75%", left: "20%" }, // DFs (was 75%)
                 { top: "75%", left: "50%" },
                 { top: "75%", left: "80%" },
-                { top: "55%", left: "10%" },
-                { top: "55%", left: "30%" },
-                { top: "55%", left: "50%" },
-                { top: "55%", left: "70%" },
-                { top: "55%", left: "90%" },
-                { top: "30%", left: "50%" },
+                { top: "56%", left: "10%" }, // MFs (was 55%)
+                { top: "56%", left: "30%" },
+                { top: "56%", left: "50%" },
+                { top: "56%", left: "70%" },
+                { top: "56%", left: "90%" },
+                { top: "28%", left: "50%" }, // ST (was 30%)
             ],
             "3-2-4": [
-                { top: "92%", left: "50%" }, // GK
-                { top: "75%", left: "20%" },
+                { top: "92%", left: "50%" }, // GK (was 95%)
+                { top: "75%", left: "20%" }, // DFs (was 75%)
                 { top: "75%", left: "50%" },
                 { top: "75%", left: "80%" },
-                { top: "55%", left: "30%" },
-                { top: "55%", left: "70%" },
-                { top: "30%", left: "15%" },
-                { top: "30%", left: "38%" },
-                { top: "30%", left: "62%" },
-                { top: "30%", left: "85%" },
+                { top: "56%", left: "30%" }, // MFs (was 55%)
+                { top: "56%", left: "70%" },
+                { top: "28%", left: "15%" }, // STs (was 30%)
+                { top: "28%", left: "38%" },
+                { top: "28%", left: "62%" },
+                { top: "28%", left: "85%" },
             ],
         };
         const layout = layouts[formation] || layouts["3-3-3"];
@@ -777,7 +777,7 @@ function DroppableTeam({
 
     // Pitch background and player positions
     return (
-        <div className="relative bg-gradient-to-b from-green-600 to-green-800 rounded-2xl min-h-[420px] md:min-h-[520px] overflow-hidden shadow-2xl border-2 border-green-900">
+        <div className="relative bg-gradient-to-b from-green-600 to-green-800 rounded-2xl min-h-[600px] md:min-h-[800px] overflow-visible shadow-2xl border-2 border-green-900" style={{ paddingBottom: "48px" }}>
             {/* Pitch Markings */}
             <div className="absolute inset-0 pointer-events-none">
                 {/* Outer lines */}
@@ -2542,4 +2542,4 @@ function MOTMPage() {
             </div>
         </div>
     );
-}
+}   
