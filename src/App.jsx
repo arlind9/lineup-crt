@@ -74,6 +74,7 @@ function getCardHighlight({ assigned, selected }) {
 function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
     const [search, setSearch] = useState("");
     const [showAll, setShowAll] = useState(false);
+    const [hoveredPlayer, setHoveredPlayer] = useState(null);
     const modalRef = useRef(null);
 
     useEffect(() => {
@@ -94,6 +95,7 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
         if (open) {
             setShowAll(false);
             setSearch("");
+            setHoveredPlayer(null);
         }
     }, [open]);
 
@@ -116,61 +118,104 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-            <div ref={modalRef} className={`w-full max-w-xs bg-white rounded-xl shadow-xl border p-4 ${glass} relative`}>
+            <div
+                ref={modalRef}
+                className={`w-full max-w-2xl bg-white rounded-xl shadow-xl border p-4 ${glass} relative flex flex-col sm:flex-row gap-4`}
+                style={{ minWidth: 480 }}
+            >
                 <button
                     className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg font-bold"
                     onClick={onClose}
                     aria-label="Close"
                     type="button"
                 >×</button>
-                <div className="mb-2 text-base font-semibold text-center text-green-900">
-                    Select Player {slotLabel ? `for ${slotLabel}` : ""}
-                </div>
-                <Input
-                    autoFocus
-                    placeholder="Search players..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="mb-3"
-                />
-                <div className="max-h-64 overflow-y-auto">
-                    {visiblePlayers.length === 0 ? (
-                        <div className="text-xs text-gray-400 p-2 text-center">No available players</div>
-                    ) : (
-                        visiblePlayers.map(p => (
-                            <div
-                                key={p.name}
-                                className="p-2 rounded hover:bg-blue-100 cursor-pointer flex justify-between items-center"
-                                onClick={() => onSelect(p)}
-                            >
-                                <span>
-                                    <span className="font-semibold">{p.name}</span>
-                                    <span className="text-gray-500 ml-1">({p.position})</span>
-                                </span>
-                                <span className="text-gray-400 text-xs">OVR: {p.overall}</span>
+                <div className="flex-1 flex flex-col">
+                    <div className="mb-2 text-base font-semibold text-center text-green-900">
+                        Select Player {slotLabel ? `for ${slotLabel}` : ""}
+                    </div>
+                    <Input
+                        autoFocus
+                        placeholder="Search players..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        className="mb-3"
+                    />
+                    <div className="flex-1 max-h-80 overflow-y-auto">
+                        {visiblePlayers.length === 0 ? (
+                            <div className="text-xs text-gray-400 p-2 text-center">No available players</div>
+                        ) : (
+                            visiblePlayers.map(p => {
+                                const cardBg = getCardBgByOverall(p.overall);
+                                return (
+                                    <div
+                                        key={p.name}
+                                        className={`p-2 rounded cursor-pointer flex justify-between items-center mb-1 ${cardBg} border hover:bg-blue-100 transition`}
+                                        onClick={() => onSelect(p)}
+                                        onMouseEnter={() => setHoveredPlayer(p)}
+                                        onMouseLeave={() => setHoveredPlayer(null)}
+                                        onFocus={() => setHoveredPlayer(p)}
+                                        onBlur={() => setHoveredPlayer(null)}
+                                        tabIndex={0}
+                                    >
+                                        <span>
+                                            <span className="font-semibold">{p.name}</span>
+                                            <span className="text-gray-500 ml-1">({p.position})</span>
+                                        </span>
+                                        <span className="text-gray-400 text-xs">OVR: {p.overall}</span>
+                                    </div>
+                                );
+                            })
+                        )}
+                        {showLimited && filtered.length > 9 && (
+                            <div className="flex justify-center mt-2">
+                                <button
+                                    className="px-3 py-1 rounded bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 transition"
+                                    onClick={() => setShowAll(true)}
+                                    type="button"
+                                >
+                                    Show all ({filtered.length})
+                                </button>
                             </div>
-                        ))
-                    )}
-                    {showLimited && filtered.length > 9 && (
-                        <div className="flex justify-center mt-2">
-                            <button
-                                className="px-3 py-1 rounded bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 transition"
-                                onClick={() => setShowAll(true)}
-                                type="button"
-                            >
-                                Show all ({filtered.length})
-                            </button>
-                        </div>
-                    )}
-                    {!showLimited && filtered.length > 9 && (
-                        <div className="flex justify-center mt-2">
-                            <button
-                                className="px-3 py-1 rounded bg-gray-300 text-gray-800 text-xs font-semibold hover:bg-gray-400 transition"
-                                onClick={() => setShowAll(false)}
-                                type="button"
-                            >
-                                Show less
-                            </button>
+                        )}
+                        {!showLimited && filtered.length > 9 && (
+                            <div className="flex justify-center mt-2">
+                                <button
+                                    className="px-3 py-1 rounded bg-gray-300 text-gray-800 text-xs font-semibold hover:bg-gray-400 transition"
+                                    onClick={() => setShowAll(false)}
+                                    type="button"
+                                >
+                                    Show less
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                {/* Attribute preview panel */}
+                <div className="w-56 min-w-[12rem] hidden sm:block">
+                    {hoveredPlayer && (
+                        <div className={`border rounded-lg p-2 text-xs shadow ${getCardBgByOverall(hoveredPlayer.overall)}`}>
+                            <div className="font-bold text-center mb-1">{hoveredPlayer.name}</div>
+                            <div className="text-center text-gray-500 mb-2">{hoveredPlayer.position}</div>
+                            <div className="flex justify-center mb-2">
+                                <img
+                                    src={hoveredPlayer.photo ? hoveredPlayer.photo : PLACEHOLDER_IMG}
+                                    alt={hoveredPlayer.name}
+                                    className="w-12 h-12 rounded-full object-cover border"
+                                    style={{ background: "#eee" }}
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-x-2 gap-y-1 mb-1">
+                                <span>Speed: {hoveredPlayer.speed}</span>
+                                <span>Shooting: {hoveredPlayer.shooting}</span>
+                                <span>Passing: {hoveredPlayer.passing}</span>
+                                <span>Dribbling: {hoveredPlayer.dribbling}</span>
+                                <span>Physical: {hoveredPlayer.physical}</span>
+                                <span>Defending: {hoveredPlayer.defending}</span>
+                                <span>Weak Foot: {hoveredPlayer.weakFoot}</span>
+                                <span>Goalkeeping: {hoveredPlayer.goalkeeping}</span>
+                            </div>
+                            <div className="text-center font-bold">Overall: {hoveredPlayer.overall}</div>
                         </div>
                     )}
                 </div>
@@ -1736,31 +1781,31 @@ function PlayerDatabase() {
     return (
         <div>
             <h1 className="text-3xl font-bold mb-4 text-center text-green-900">Player Database</h1>
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-                <Input
-                    type="text"
-                    placeholder="Search players..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="w-full md:w-1/2"
-                />
-                <div className="flex gap-2">
-                    {["All", "ST", "MF", "DF", "GK"].map((pos) => (
-                        <button
-                            key={pos}
-                            className={`px-3 py-1 rounded font-semibold transition ${positionFilter === pos ? "bg-blue-500 text-white shadow" : "bg-gray-200 hover:bg-blue-100"}`}
-                            onClick={() => setPositionFilter(pos)}
-                        >
-                            {pos}
-                        </button>
-                    ))}
-                </div>
-                <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="border p-2 rounded-md bg-white/90 shadow">
-                    {["overall", "speed", "shooting", "passing", "dribbling", "physical", "defending"].map(key => (
-                        <option key={key} value={key}>Sort by {key.charAt(0).toUpperCase() + key.slice(1)}</option>
-                    ))}
-                </select>
-            </div>
+            {/*<div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-4 ${glass}`}>*/}
+            {/*    <Input*/}
+            {/*        type="text"*/}
+            {/*        placeholder="Search players..."*/}
+            {/*        value={search}*/}
+            {/*        onChange={e => setSearch(e.target.value)}*/}
+            {/*        className="w-full md:w-1/2"*/}
+            {/*    />*/}
+            {/*    <div className="flex gap-2">*/}
+            {/*        {["All", "ST", "MF", "DF", "GK"].map((pos) => (*/}
+            {/*            <button*/}
+            {/*                key={pos}*/}
+            {/*                className={`px-3 py-1 rounded font-semibold transition ${positionFilter === pos ? "bg-blue-500 text-white shadow" : "bg-gray-200 hover:bg-blue-100"}`}*/}
+            {/*                onClick={() => setPositionFilter(pos)}*/}
+            {/*            >*/}
+            {/*                {pos}*/}
+            {/*            </button>*/}
+            {/*        ))}*/}
+            {/*    </div>*/}
+            {/*    <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="border p-2 rounded-md bg-white/90 shadow">*/}
+            {/*        {["overall", "speed", "shooting", "passing", "dribbling", "physical", "defending"].map(key => (*/}
+            {/*            <option key={key} value={key}>Sort by {key.charAt(0).toUpperCase() + key.slice(1)}</option>*/}
+            {/*        ))}*/}
+            {/*    </select>*/}
+            {/*</div>*/}
             <div className="flex items-center gap-2 mb-4">
                 <span className="text-xs text-gray-600">View:</span>
                 <select
@@ -2051,24 +2096,14 @@ function LineupCreator() {
     const [formationA, setFormationA] = useState("3-3-3");
     const [formationB, setFormationB] = useState("3-3-3");
     const [players, setPlayers] = useState([]);
-    const [filtered, setFiltered] = useState([]);
-    const [search, setSearch] = useState("");
-    const [positionFilter, setPositionFilter] = useState("All");
-    const [sortBy, setSortBy] = useState("overall");
     const [teamA, setTeamA] = useState(Array(10).fill(null));
     const [teamB, setTeamB] = useState(Array(10).fill(null));
-    const [hideSelected, setHideSelected] = useState(false);
     const [showComparison, setShowComparison] = useState(false);
 
     const [globalActiveSlot, setGlobalActiveSlot] = useState(null);
 
     // Modal state for player selection
     const [playerSelectModal, setPlayerSelectModal] = useState({ open: false });
-
-    const assignedNames = [
-        ...teamA.filter(Boolean).map(p => p.name),
-        ...teamB.filter(Boolean).map(p => p.name)
-    ];
 
     useEffect(() => {
         fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
@@ -2094,20 +2129,8 @@ function LineupCreator() {
                     return player;
                 });
                 setPlayers(rows);
-                setFiltered(rows);
             });
     }, []);
-
-    useEffect(() => {
-        let results = players.filter((p) =>
-            p.name.toLowerCase().includes(search.toLowerCase())
-        );
-        if (positionFilter !== "All") {
-            results = results.filter((p) => p.position === positionFilter);
-        }
-        results.sort((a, b) => b[sortBy] - a[sortBy]);
-        setFiltered(results);
-    }, [search, positionFilter, players, sortBy]);
 
     const calculateOverall = (p) => {
         const { speed, shooting, passing, dribbling, physical, defending, goalkeeping, weakFoot } = p;
@@ -2198,12 +2221,6 @@ function LineupCreator() {
         setTeamB(newTeamB);
     };
 
-    const availablePlayers = hideSelected
-        ? filtered.filter(p => !assignedNames.includes(p.name))
-        : filtered;
-
-    const sortedAvailablePlayers = availablePlayers.sort((a, b) => b[sortBy] - a[sortBy]);
-
     const mainRef = useRef(null);
     useEffect(() => {
         const handleClick = (e) => {
@@ -2279,7 +2296,7 @@ function LineupCreator() {
                         setGlobalActiveSlot={setGlobalActiveSlot}
                         playerSelectModal={playerSelectModal}
                         setPlayerSelectModal={setPlayerSelectModal}
-                        otherFormationPositions={formationMap[formationB]} // Pass other team's formation positions
+                        otherFormationPositions={formationMap[formationB]}
                     />
                     <DroppableTeam
                         id="teamB"
@@ -2293,31 +2310,10 @@ function LineupCreator() {
                         setGlobalActiveSlot={setGlobalActiveSlot}
                         playerSelectModal={playerSelectModal}
                         setPlayerSelectModal={setPlayerSelectModal}
-                        otherFormationPositions={formationMap[formationA]} // Pass other team's formation positions
+                        otherFormationPositions={formationMap[formationA]}
                     />
                 </div>
             </>
-
-            {/* The rest (search, available players) is always visible */}
-            <div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-4 ${glass}`}>
-                <Input type="text" placeholder="Search players..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full md:w-1/2" />
-                <div className="flex gap-2">
-                    {["All", "ST", "MF", "DF", "GK"].map((pos) => (
-                        <button
-                            key={pos}
-                            className={`px-3 py-1 rounded font-semibold transition ${positionFilter === pos ? "bg-blue-500 text-white shadow" : "bg-gray-200 hover:bg-blue-100"}`}
-                            onClick={() => setPositionFilter(pos)}
-                        >
-                            {pos}
-                        </button>
-                    ))}
-                </div>
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border p-2 rounded-md bg-white/90 shadow">
-                    {["overall", "speed", "shooting", "passing", "dribbling", "physical", "defending"].map(key => (
-                        <option key={key} value={key}>Sort by {key.charAt(0).toUpperCase() + key.slice(1)}</option>
-                    ))}
-                </select>
-            </div>
 
             <DndContext
                 collisionDetection={closestCenter}
@@ -2344,35 +2340,6 @@ function LineupCreator() {
                     onSelect={playerSelectModal.onSelect || (() => { })}
                     slotLabel={playerSelectModal.slotLabel}
                 />
-
-                <div className={`flex items-center mb-2 gap-2 ${glass}`}>
-                    <h2 className="text-xl font-semibold text-green-900">Available Players</h2>
-                    <label className="flex items-center gap-1 text-sm font-normal cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={hideSelected}
-                            onChange={e => setHideSelected(e.target.checked)}
-                            className="accent-blue-500"
-                        />
-                        Hide selected
-                    </label>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    {sortedAvailablePlayers.map((p, idx) => (
-                        <DraggablePlayer
-                            key={p.name}
-                            player={p}
-                            fromTeam={null}
-                            fromIndex={null}
-                            small={false}
-                            assigned={assignedNames.includes(p.name)}
-                            selected={assignedNames.includes(p.name)}
-                            onDragStart={handleDragStart}
-                            onDragEnd={handleDragEnd}
-                        />
-                    ))}
-                </div>
             </DndContext>
         </div>
     );
