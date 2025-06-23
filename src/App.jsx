@@ -15,6 +15,20 @@ import {
 const glass = "backdrop-blur-md bg-white/80 shadow-lg border border-gray-200";
 const PLACEHOLDER_IMG = "https://ui-avatars.com/api/?name=Player&background=eee&color=888&size=128&rounded=true";
 
+// --- Add this at the top level ---
+const formationMap = {
+    "4-4-1": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST"],
+    "4-3-2": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
+    "4-2-3": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "ST", "ST", "ST"],
+    "5-2-2": ["GK", "DF", "DF", "DF", "DF", "DF", "MF", "MF", "ST", "ST"],
+    "5-3-1": ["GK", "DF", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST"],
+    "3-3-3": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST", "ST"],
+    "3-4-2": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST", "ST"],
+    "3-5-1": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "MF", "ST"],
+    "3-2-4": ["GK", "DF", "DF", "DF", "MF", "MF", "ST", "ST", "ST", "ST"],
+};
+// --- end addition ---
+
 // Simple loading spinner component
 function LoadingSpinner({ className = "" }) {
     return (
@@ -606,6 +620,7 @@ function DroppableTeam({
     setGlobalActiveSlot,
     playerSelectModal, // new prop
     setPlayerSelectModal, // new prop
+    otherFormationPositions, // new prop
 }) {
     const formationMap = {
         "4-4-1": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST"],
@@ -829,12 +844,24 @@ function DroppableTeam({
                                 const data = JSON.parse(e.dataTransfer.getData("application/json"));
                                 if (!data.player) return;
                                 if (!isPositionCompatible(pos, data.player.position)) return;
-                                // Recalculate attributes for the slot's position
-                                const playerForSlot = getPlayerWithPositionAttributes(data.player, pos);
 
-                                if (player && typeof data.fromIndex === "number" && data.fromIndex !== i) {
-                                    // Swap: recalculate both
-                                    const swapWith = getPlayerWithPositionAttributes(players[i], pos);
+                                // Get the correct source position for swapWith
+                                let sourcePos;
+                                if (data.fromTeam === id) {
+                                    sourcePos = formationPositions[data.fromIndex];
+                                } else {
+                                    sourcePos = otherFormationPositions[data.fromIndex];
+                                }
+
+                                if (player && typeof data.fromIndex === "number" && (data.fromTeam !== id || data.fromIndex !== i)) {
+                                    // player = player currently in the target slot (Y)
+                                    // data.player = player being dragged (X)
+                                    // pos = target slot position
+                                    // sourcePos = source slot position
+
+                                    const playerForSlot = getPlayerWithPositionAttributes(data.player, pos); // X for target
+                                    const swapWith = getPlayerWithPositionAttributes(player, sourcePos);     // Y for source
+
                                     onPlayerDrop({
                                         toTeam: id,
                                         toIndex: i,
@@ -844,6 +871,7 @@ function DroppableTeam({
                                         swapWith,
                                     });
                                 } else {
+                                    const playerForSlot = getPlayerWithPositionAttributes(data.player, pos);
                                     onPlayerDrop({
                                         toTeam: id,
                                         toIndex: i,
@@ -2109,41 +2137,61 @@ function LineupCreator() {
         let newTeamA = [...teamA];
         let newTeamB = [...teamB];
 
+        // Remove player from slot (on click)
         if (remove) {
             if (toTeam === "teamA") newTeamA[toIndex] = null;
             if (toTeam === "teamB") newTeamB[toIndex] = null;
-        } else if (swapWith && typeof fromIndex === "number" && fromTeam && toTeam && fromTeam !== toTeam) {
-            // Swap between teams
+        }
+        // Swap between teams
+        else if (
+            swapWith &&
+            typeof fromIndex === "number" &&
+            fromTeam &&
+            toTeam &&
+            fromTeam !== toTeam
+        ) {
             if (toTeam === "teamA" && fromTeam === "teamB") {
-                const temp = newTeamA[toIndex];
-                newTeamA[toIndex] = player;
-                newTeamB[fromIndex] = swapWith;
+                newTeamA[toIndex] = player;      // Dragged player (X) to target slot
+                newTeamB[fromIndex] = swapWith;  // Target player (Y) to source slot
             } else if (toTeam === "teamB" && fromTeam === "teamA") {
-                const temp = newTeamB[toIndex];
                 newTeamB[toIndex] = player;
                 newTeamA[fromIndex] = swapWith;
             }
-        } else if (swapWith && fromTeam === toTeam && typeof fromIndex === "number") {
-            // Swap within the same team
+        }
+        // Swap within the same team
+        else if (
+            swapWith &&
+            fromTeam === toTeam &&
+            typeof fromIndex === "number"
+        ) {
             if (toTeam === "teamA") {
-                const temp = newTeamA[toIndex];
-                newTeamA[toIndex] = swapWith;
-                newTeamA[fromIndex] = temp;
+                newTeamA[toIndex] = player;      // Dragged player (X) to target slot
+                newTeamA[fromIndex] = swapWith;  // Target player (Y) to source slot
             }
             if (toTeam === "teamB") {
-                const temp = newTeamB[toIndex];
-                newTeamB[toIndex] = swapWith;
-                newTeamB[fromIndex] = temp;
+                newTeamB[toIndex] = player;
+                newTeamB[fromIndex] = swapWith;
             }
-        } else {
+        }
+        // Place player in empty slot or move from available list
+        else {
+            // Remove player from previous slot if needed
             if (fromTeam === "teamA" && typeof fromIndex === "number") newTeamA[fromIndex] = null;
             if (fromTeam === "teamB" && typeof fromIndex === "number") newTeamB[fromIndex] = null;
 
-            if (toTeam === "teamA") newTeamA = newTeamA.map((p, idx) => (p && p.name === player.name && idx !== toIndex ? null : p));
-            if (toTeam === "teamB") newTeamB = newTeamB.map((p, idx) => (p && p.name === player.name && idx !== toIndex ? null : p));
-
-            if (toTeam === "teamA") newTeamA[toIndex] = player;
-            if (toTeam === "teamB") newTeamB[toIndex] = player;
+            // Remove duplicates in the target team (except the slot being filled)
+            if (toTeam === "teamA") {
+                newTeamA = newTeamA.map((p, idx) =>
+                    p && p.name === player.name && idx !== toIndex ? null : p
+                );
+                newTeamA[toIndex] = player;
+            }
+            if (toTeam === "teamB") {
+                newTeamB = newTeamB.map((p, idx) =>
+                    p && p.name === player.name && idx !== toIndex ? null : p
+                );
+                newTeamB[toIndex] = player;
+            }
         }
 
         setTeamA(newTeamA);
@@ -2231,6 +2279,7 @@ function LineupCreator() {
                         setGlobalActiveSlot={setGlobalActiveSlot}
                         playerSelectModal={playerSelectModal}
                         setPlayerSelectModal={setPlayerSelectModal}
+                        otherFormationPositions={formationMap[formationB]} // Pass other team's formation positions
                     />
                     <DroppableTeam
                         id="teamB"
@@ -2244,6 +2293,7 @@ function LineupCreator() {
                         setGlobalActiveSlot={setGlobalActiveSlot}
                         playerSelectModal={playerSelectModal}
                         setPlayerSelectModal={setPlayerSelectModal}
+                        otherFormationPositions={formationMap[formationA]} // Pass other team's formation positions
                     />
                 </div>
             </>
