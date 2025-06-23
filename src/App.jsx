@@ -15,7 +15,6 @@ import {
 const glass = "backdrop-blur-md bg-white/80 shadow-lg border border-gray-200";
 const PLACEHOLDER_IMG = "https://ui-avatars.com/api/?name=Player&background=eee&color=888&size=128&rounded=true";
 
-// --- Add this at the top level ---
 const formationMap = {
     "4-4-1": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST"],
     "4-3-2": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
@@ -27,9 +26,7 @@ const formationMap = {
     "3-5-1": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "MF", "ST"],
     "3-2-4": ["GK", "DF", "DF", "DF", "MF", "MF", "ST", "ST", "ST", "ST"],
 };
-// --- end addition ---
 
-// Simple loading spinner component
 function LoadingSpinner({ className = "" }) {
     return (
         <div className={`flex justify-center items-center py-8 ${className}`}>
@@ -42,30 +39,23 @@ function LoadingSpinner({ className = "" }) {
     );
 }
 
-// Helper to extract image URL from Google Sheets column M (index 12)
 function extractPhotoUrl(cellValue) {
     if (!cellValue) return null;
-    // If the cell contains =IMAGE("url"), extract the url
     const match = typeof cellValue === "string" && cellValue.match(/=IMAGE\("([^"]+)"\)/i);
     return match ? match[1] : cellValue;
 }
 
-// Add this helper function near the top of your file (after imports)
 function getCardBgByOverall(overall) {
-    if (overall >= 90) return "bg-gradient-to-br from-[#e5e4e2] via-[#b3e0fc] to-[#f8fafc] border-blue-300"; // platinum
-    if (overall >= 80) return "bg-gradient-to-br from-yellow-200 via-yellow-100 to-white border-yellow-400"; // gold
-    return "bg-gradient-to-br from-gray-200 via-gray-100 to-white border-gray-300"; // silver
+    if (overall >= 90) return "bg-gradient-to-br from-[#e5e4e2] via-[#b3e0fc] to-[#f8fafc] border-blue-300";
+    if (overall >= 80) return "bg-gradient-to-br from-yellow-200 via-yellow-100 to-white border-yellow-400";
+    return "bg-gradient-to-br from-gray-200 via-gray-100 to-white border-gray-300";
 }
 
-// Add this helper function after getCardBgByOverall
 function getCardHighlight({ assigned, selected }) {
-    // assigned: selected for lineup, selected: selected for comparison
     if (assigned) {
-        // Green highlight for lineup
         return "ring-2 ring-green-400 ring-offset-2";
     }
     if (selected) {
-        // Blue highlight for comparison
         return "ring-2 ring-blue-400 ring-offset-2";
     }
     return "";
@@ -190,7 +180,6 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
                         )}
                     </div>
                 </div>
-                {/* Attribute preview panel */}
                 <div className="w-56 min-w-[12rem] hidden sm:block">
                     {hoveredPlayer && (
                         <div className={`border rounded-lg p-2 text-xs shadow ${getCardBgByOverall(hoveredPlayer.overall)}`}>
@@ -225,7 +214,6 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
 }
 
 function TeamAttributesBarChart({ players }) {
-    // Only consider filled slots
     const filled = players.filter(Boolean);
     if (filled.length === 0) return null;
 
@@ -241,7 +229,6 @@ function TeamAttributesBarChart({ players }) {
         { key: "weakFoot", label: "Weak Foot" }
     ];
 
-    // Compute averages
     const avgs = {};
     attributes.forEach(attr => {
         if (attr.key === "goalkeeping") {
@@ -252,20 +239,17 @@ function TeamAttributesBarChart({ players }) {
         } else if (
             ["speed", "shooting", "passing", "dribbling", "physical", "defending"].includes(attr.key)
         ) {
-            // Exclude GKs from these attributes
             const nonGKs = filled.filter(p => p.position !== "GK");
             avgs[attr.key] = nonGKs.length
                 ? Math.round(nonGKs.reduce((sum, p) => sum + (p[attr.key] || 0), 0) / nonGKs.length)
                 : 0;
         } else {
-            // overall and weakFoot: include all
             avgs[attr.key] = Math.round(
                 filled.reduce((sum, p) => sum + (p[attr.key] || 0), 0) / filled.length
             );
         }
     });
 
-    // Set cap for each attribute (default 100, but 50 for weakFoot)
     const caps = {
         weakFoot: 50
     };
@@ -279,7 +263,6 @@ function TeamAttributesBarChart({ players }) {
                     const percent = (avgs[attr.key] / cap) * 100;
                     return (
                         <div key={attr.key} className="flex items-center gap-2 w-full">
-                            {/* Left bar and value */}
                             <span className="w-8 text-right text-xs">{avgs[attr.key]}</span>
                             <div className="flex-1 flex justify-end">
                                 <div
@@ -291,9 +274,7 @@ function TeamAttributesBarChart({ players }) {
                                     }}
                                 />
                             </div>
-                            {/* Center label */}
                             <span className="w-20 text-xs text-gray-500 text-center">{attr.label}</span>
-                            {/* Right bar and value (mirrored) */}
                             <div className="flex-1 flex">
                                 <div
                                     className="bg-blue-500 h-3 rounded-r"
@@ -335,14 +316,12 @@ function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel
                 : 0;
         }
         if (["speed", "shooting", "passing", "dribbling", "physical", "defending"].includes(key)) {
-            // Exclude GKs from these attributes
             const nonGKs = filled.filter(p => p.position !== "GK");
             return nonGKs.length
                 ? Math.round(nonGKs.reduce((sum, p) => sum + (p[key] || 0), 0) / nonGKs.length)
                 : 0;
         }
         if (!filled.length) return 0;
-        // overall and weakFoot: include all
         return Math.round(filled.reduce((sum, p) => sum + (p[key] || 0), 0) / filled.length);
     }
 
@@ -355,7 +334,6 @@ function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel
 
     return (
         <div className="mb-6 max-w-2xl mx-auto bg-white rounded-xl shadow p-4 border relative">
-            {/* Hide button */}
             {onHide && (
                 <button
                     onClick={onHide}
@@ -413,13 +391,10 @@ function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel
     );
 }
 
-// Circular (Radar) Comparison
 function RadarCompare({ players }) {
     if (players.length < 2) return null;
 
-    // Determine if all selected are outfield (not GK)
     const allOutfield = players.every(p => p.position !== "GK");
-    // Attributes to compare
     const attrs = allOutfield
         ? [
             { key: "overall", label: "Overall", max: 100 },
@@ -443,22 +418,19 @@ function RadarCompare({ players }) {
             { key: "weakFoot", label: "Weak Foot", max: 50 }
         ];
 
-    // Colors for up to 5 players
     const colors = [
-        "#3b82f6", // blue
-        "#ef4444", // red
-        "#f59e42", // orange
-        "#10b981", // green
-        "#a21caf"  // purple
+        "#3b82f6",
+        "#ef4444",
+        "#f59e42",
+        "#10b981",
+        "#a21caf"
     ];
 
-    // Radar chart dimensions
     const size = 320;
     const center = size / 2;
     const radius = size / 2 - 40;
     const angleStep = (2 * Math.PI) / attrs.length;
 
-    // Helper: get points for a player
     function getPoints(player, idx) {
         return attrs.map((attr, i) => {
             const value = player[attr.key] || 0;
@@ -471,12 +443,10 @@ function RadarCompare({ players }) {
         });
     }
 
-    // Helper: get polygon string
     function pointsToString(points) {
         return points.map(([x, y]) => `${x},${y}`).join(" ");
     }
 
-    // Draw attribute axes and labels
     const axes = attrs.map((attr, i) => {
         const angle = i * angleStep - Math.PI / 2;
         const x = center + radius * Math.cos(angle);
@@ -508,7 +478,6 @@ function RadarCompare({ players }) {
         );
     });
 
-    // Draw grid (concentric polygons)
     const gridLevels = 4;
     const grid = [];
     for (let level = 1; level <= gridLevels; level++) {
@@ -531,7 +500,6 @@ function RadarCompare({ players }) {
         );
     }
 
-    // Draw player polygons
     const polygons = players.map((player, idx) => {
         const points = getPoints(player, idx);
         return (
@@ -545,7 +513,6 @@ function RadarCompare({ players }) {
         );
     });
 
-    // Draw player dots
     const dots = players.map((player, idx) => {
         const points = getPoints(player, idx);
         return points.map(([x, y], i) => (
@@ -561,7 +528,6 @@ function RadarCompare({ players }) {
         ));
     });
 
-    // Legend
     const legend = (
         <div className="flex justify-center gap-4 mt-2 mb-2">
             {players.map((p, idx) => (
@@ -603,15 +569,10 @@ function RadarCompare({ players }) {
             <div className="flex flex-col md:flex-row gap-6 justify-center items-start">
                 <div>
                     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-                        {/* Grid */}
                         {grid}
-                        {/* Axes and labels */}
                         {axes}
-                        {/* Player polygons */}
                         {polygons}
-                        {/* Dots */}
                         {dots}
-                        {/* Center dot */}
                         <circle cx={center} cy={center} r={3} fill="#6b7280" />
                     </svg>
                 </div>
@@ -621,15 +582,9 @@ function RadarCompare({ players }) {
     );
 }
 
-// Utility: calculate attributes for a player as if they were playing in a different position
 function getPlayerWithPositionAttributes(player, newPosition) {
     if (!player) return null;
-    // If already in that position, return as is
     if (player.position === newPosition) return { ...player };
-
-    // Use the same weights as in calculateOverall for each position
-    // We'll recalculate overall, but also optionally adjust other attributes if needed
-    // For now, only overall is recalculated, but you can expand this if you want to simulate attribute drops/boosts
 
     const { speed, shooting, passing, dribbling, physical, defending, goalkeeping, weakFoot } = player;
     let overall = 0;
@@ -649,7 +604,6 @@ function getPlayerWithPositionAttributes(player, newPosition) {
         default:
             overall = 0;
     }
-    // Return a new player object with the new position and recalculated overall
     return { ...player, position: newPosition, overall };
 }
 
@@ -663,34 +617,21 @@ function DroppableTeam({
     onFormationChange,
     globalActiveSlot,
     setGlobalActiveSlot,
-    playerSelectModal, // new prop
-    setPlayerSelectModal, // new prop
-    otherFormationPositions, // new prop
+    playerSelectModal,
+    setPlayerSelectModal,
+    otherFormationPositions,
+    setCompareHover,
+    handleDragStart,
+    handleDragEnd
 }) {
-    const formationMap = {
-        "4-4-1": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST"],
-        "4-3-2": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
-        "4-2-3": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "ST", "ST", "ST"],
-        "5-2-2": ["GK", "DF", "DF", "DF", "DF", "DF", "MF", "MF", "ST", "ST"],
-        "5-3-1": ["GK", "DF", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST"],
-        "3-3-3": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST", "ST"],
-        "3-4-2": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST", "ST"],
-        "3-5-1": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "MF", "ST"],
-        "3-2-4": ["GK", "DF", "DF", "DF", "MF", "MF", "ST", "ST", "ST", "ST"],
-    };
-
     const formationPositions = formationMap[formation] || formationMap["3-3-3"];
 
-    // Allow any player to be dragged to any position except: 
-    // - Only allow GK in GK slot
-    // - Do not allow GK to be placed in non-GK slots
     function isPositionCompatible(slotPos, playerPos) {
         if (slotPos === "GK") return playerPos === "GK";
-        if (playerPos === "GK") return false; // Prevent GK in non-GK slots
-        return true; // Allow any other player in any other slot
+        if (playerPos === "GK") return false;
+        return true;
     }
 
-    // Returns eligible players for a given slot position (for the popup list)
     const eligiblePlayersForSlot = (slotPos) =>
         allPlayers.filter(
             (p) =>
@@ -712,120 +653,112 @@ function DroppableTeam({
         setPlayerSelectModal({ open: false });
     };
 
-    // Map slot index to pitch coordinates (percentages)
-    // These are rough, but visually pleasing for 10 players (1 GK, 3-5 DF, 2-5 MF, 1-4 ST)
     function getSlotStyle(pos, idx) {
-        // For each formation, define a layout (row, col) for each slot
-        // We'll use a normalized pitch: 0% (top, own goal) to 100% (bottom, opponent goal)
-        // Left to right: 0% to 100%
-        // We'll use a map of arrays for each formation
-        // If not found, fallback to a default
         const layouts = {
             "3-3-3": [
-                // GK, 3 DF, 3 MF, 3 ST
-                { top: "92%", left: "50%" }, // GK (was 95%)
-                { top: "72%", left: "20%" }, // DFs (was 75%)
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "20%" },
                 { top: "72%", left: "50%" },
                 { top: "72%", left: "80%" },
-                { top: "51%", left: "20%" }, // MFs (was 55%)
+                { top: "51%", left: "20%" },
                 { top: "51%", left: "50%" },
                 { top: "51%", left: "80%" },
-                { top: "23%", left: "20%" }, // STs (was 30%)
+                { top: "23%", left: "20%" },
                 { top: "23%", left: "50%" },
                 { top: "23%", left: "80%" },
             ],
             "4-4-1": [
-                { top: "92%", left: "50%" }, // GK (was 95%)
-                { top: "72%", left: "15%" }, // DFs (was 75%)
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "15%" },
                 { top: "72%", left: "38%" },
                 { top: "72%", left: "62%" },
                 { top: "72%", left: "85%" },
-                { top: "51%", left: "15%" }, // MFs (was 55%)
+                { top: "51%", left: "15%" },
                 { top: "51%", left: "38%" },
                 { top: "51%", left: "62%" },
                 { top: "51%", left: "85%" },
-                { top: "23%", left: "50%" }, // ST (was 30%)
+                { top: "23%", left: "50%" },
             ],
             "4-3-2": [
-                { top: "92%", left: "50%" }, // GK (was 95%)
-                { top: "72%", left: "15%" }, // DFs (was 75%)
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "15%" },
                 { top: "72%", left: "38%" },
                 { top: "72%", left: "62%" },
                 { top: "72%", left: "85%" },
-                { top: "51%", left: "25%" }, // MFs (was 55%)
+                { top: "51%", left: "25%" },
                 { top: "51%", left: "50%" },
                 { top: "51%", left: "75%" },
-                { top: "23%", left: "35%" }, // STs (was 30%)
+                { top: "23%", left: "35%" },
                 { top: "23%", left: "65%" },
             ],
             "4-2-3": [
-                { top: "92%", left: "50%" }, // GK (was 95%)
-                { top: "72%", left: "15%" }, // DFs (was 75%)
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "15%" },
                 { top: "72%", left: "38%" },
                 { top: "72%", left: "62%" },
                 { top: "72%", left: "85%" },
-                { top: "51%", left: "30%" }, // MFs (was 55%)
+                { top: "51%", left: "30%" },
                 { top: "51%", left: "70%" },
-                { top: "23%", left: "25%" }, // STs (was 30%)
+                { top: "23%", left: "25%" },
                 { top: "23%", left: "50%" },
                 { top: "23%", left: "75%" },
             ],
             "5-2-2": [
-                { top: "92%", left: "50%" }, // GK (was 95%)
-                { top: "72%", left: "10%" }, // DFs (was 80%)
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "10%" },
                 { top: "72%", left: "30%" },
                 { top: "72%", left: "50%" },
                 { top: "72%", left: "70%" },
                 { top: "72%", left: "90%" },
-                { top: "51%", left: "35%" }, // MFs (was 55%)
+                { top: "51%", left: "35%" },
                 { top: "51%", left: "65%" },
-                { top: "23%", left: "35%" }, // STs (was 30%)
+                { top: "23%", left: "35%" },
                 { top: "23%", left: "65%" },
             ],
             "5-3-1": [
-                { top: "92%", left: "50%" }, // GK (was 95%)
-                { top: "72%", left: "10%" }, // DFs (was 80%)
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "10%" },
                 { top: "72%", left: "30%" },
                 { top: "72%", left: "50%" },
                 { top: "72%", left: "70%" },
                 { top: "72%", left: "90%" },
-                { top: "51%", left: "25%" }, // MFs (was 55%)
+                { top: "51%", left: "25%" },
                 { top: "51%", left: "50%" },
                 { top: "51%", left: "75%" },
-                { top: "23%", left: "50%" }, // ST (was 30%)
+                { top: "23%", left: "50%" },
             ],
             "3-4-2": [
-                { top: "92%", left: "50%" }, // GK (was 95%)
-                { top: "72%", left: "20%" }, // DFs (was 75%)
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "20%" },
                 { top: "72%", left: "50%" },
                 { top: "72%", left: "80%" },
-                { top: "51%", left: "15%" }, // MFs (was 55%)
+                { top: "51%", left: "15%" },
                 { top: "51%", left: "38%" },
                 { top: "51%", left: "62%" },
                 { top: "51%", left: "85%" },
-                { top: "23%", left: "35%" }, // STs (was 30%)
+                { top: "23%", left: "35%" },
                 { top: "23%", left: "65%" },
             ],
             "3-5-1": [
-                { top: "92%", left: "50%" }, // GK (was 95%)
-                { top: "72%", left: "20%" }, // DFs (was 75%)
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "20%" },
                 { top: "72%", left: "50%" },
                 { top: "72%", left: "80%" },
-                { top: "51%", left: "10%" }, // MFs (was 55%)
+                { top: "51%", left: "10%" },
                 { top: "51%", left: "30%" },
                 { top: "51%", left: "50%" },
                 { top: "51%", left: "70%" },
                 { top: "51%", left: "90%" },
-                { top: "23%", left: "50%" }, // ST (was 30%)
+                { top: "23%", left: "50%" },
             ],
             "3-2-4": [
-                { top: "92%", left: "50%" }, // GK (was 95%)
-                { top: "72%", left: "20%" }, // DFs (was 75%)
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "20%" },
                 { top: "72%", left: "50%" },
                 { top: "72%", left: "80%" },
-                { top: "51%", left: "30%" }, // MFs (was 55%)
+                { top: "51%", left: "30%" },
                 { top: "51%", left: "70%" },
-                { top: "23%", left: "15%" }, // STs (was 30%)
+                { top: "23%", left: "15%" },
                 { top: "23%", left: "38%" },
                 { top: "23%", left: "62%" },
                 { top: "23%", left: "85%" },
@@ -835,20 +768,13 @@ function DroppableTeam({
         return layout[idx] || { top: "50%", left: "50%" };
     }
 
-    // Pitch background and player positions
     return (
         <div className="relative bg-gradient-to-b from-green-600 to-green-800 rounded-2xl min-h-[500px] md:min-h-[650px] overflow-visible shadow-2xl border-2 border-green-900" style={{ paddingBottom: "48px" }}>
-            {/* Pitch Markings */}
             <div className="absolute inset-0 pointer-events-none">
-                {/* Outer lines */}
                 <div className="absolute border-4 border-white rounded-2xl w-[96%] h-[96%] left-[2%] top-[2%]" />
-                {/* Center circle */}
                 <div className="absolute left-1/2 top-[50%] -translate-x-1/2 -translate-y-1/2 border-2 border-white rounded-full w-24 h-24" />
-                {/* Halfway line */}
                 <div className="absolute left-0 top-1/2 w-full h-0.5 bg-white opacity-80" />
-                {/* Penalty box (bottom) */}
                 <div className="absolute left-1/2 bottom-0 -translate-x-1/2 border-2 border-white w-[40%] h-[16%] rounded-b-lg" style={{ borderTop: "none" }} />
-                {/* Penalty box (top) */}
                 <div className="absolute left-1/2 top-0 -translate-x-1/2 border-2 border-white w-[40%] h-[16%] rounded-t-lg" style={{ borderBottom: "none" }} />
             </div>
             <div className="absolute left-4 top-4 flex items-center gap-2 z-10">
@@ -867,7 +793,6 @@ function DroppableTeam({
                     ))}
                 </select>
             </div>
-            {/* Players on pitch */}
             <div className="w-full h-full absolute inset-0">
                 {formationPositions.map((pos, i) => {
                     const player = players[i];
@@ -884,13 +809,25 @@ function DroppableTeam({
                         <div
                             key={i}
                             style={style}
-                            onDragOver={(e) => e.preventDefault()}
-                            onDrop={(e) => {
+                            onDragOver={e => {
+                                e.preventDefault();
+                                if (window.__draggedPlayer && player) {
+                                    setCompareHover({
+                                        draggedPlayer: window.__draggedPlayer,
+                                        targetPlayer: player,
+                                        slotPos: pos
+                                    });
+                                } else {
+                                    setCompareHover(null);
+                                }
+                            }}
+                            onDragLeave={e => setCompareHover(null)}
+                            onDrop={e => {
+                                setCompareHover(null);
                                 const data = JSON.parse(e.dataTransfer.getData("application/json"));
                                 if (!data.player) return;
                                 if (!isPositionCompatible(pos, data.player.position)) return;
 
-                                // Get the correct source position for swapWith
                                 let sourcePos;
                                 if (data.fromTeam === id) {
                                     sourcePos = formationPositions[data.fromIndex];
@@ -899,13 +836,8 @@ function DroppableTeam({
                                 }
 
                                 if (player && typeof data.fromIndex === "number" && (data.fromTeam !== id || data.fromIndex !== i)) {
-                                    // player = player currently in the target slot (Y)
-                                    // data.player = player being dragged (X)
-                                    // pos = target slot position
-                                    // sourcePos = source slot position
-
-                                    const playerForSlot = getPlayerWithPositionAttributes(data.player, pos); // X for target
-                                    const swapWith = getPlayerWithPositionAttributes(player, sourcePos);     // Y for source
+                                    const playerForSlot = getPlayerWithPositionAttributes(data.player, pos);
+                                    const swapWith = getPlayerWithPositionAttributes(player, sourcePos);
 
                                     onPlayerDrop({
                                         toTeam: id,
@@ -926,7 +858,7 @@ function DroppableTeam({
                                     });
                                 }
                             }}
-                            onClick={(e) => {
+                            onClick={e => {
                                 e.stopPropagation();
                                 if (!player) {
                                     setPlayerSelectModal({
@@ -938,14 +870,14 @@ function DroppableTeam({
                                     });
                                 }
                             }}
-                            onDoubleClick={(e) => {
+                            onDoubleClick={e => {
                                 e.stopPropagation();
                                 if (!player) setGlobalActiveSlot(null);
                             }}
                         >
                             {player ? (
                                 <div
-                                    onClick={(e) => {
+                                    onClick={e => {
                                         e.stopPropagation();
                                         onPlayerDrop({
                                             toTeam: id,
@@ -962,7 +894,15 @@ function DroppableTeam({
                                     style={{ outline: "none" }}
                                 >
                                     <div className={`rounded-full border-2 border-white shadow-lg bg-gradient-to-br from-green-200/80 to-green-100/80 p-0.5 transition group-hover:scale-105`}>
-                                        <DraggablePlayer player={player} fromTeam={id} fromIndex={i} small assigned />
+                                        <DraggablePlayer
+                                            player={player}
+                                            fromTeam={id}
+                                            fromIndex={i}
+                                            small
+                                            assigned
+                                            onDragStart={handleDragStart}
+                                            onDragEnd={handleDragEnd}
+                                        />
                                     </div>
                                 </div>
                             ) : (
@@ -1062,7 +1002,6 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
     );
 }
 
-// Add a simple ListPlayer component for list view
 function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragStart, onDragEnd }) {
     const dragRef = useRef(null);
 
@@ -1114,10 +1053,9 @@ function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragSta
     );
 }
 
-// Helper to get next Wednesday's date as dd/mm/yyyy
 function getNextWednesday() {
     const today = new Date();
-    const dayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, ..., 3=Wednesday
+    const dayOfWeek = today.getDay();
     const daysUntilNextWednesday = (3 - dayOfWeek + 7) % 7 || 7;
     const nextWednesday = new Date(today);
     nextWednesday.setDate(today.getDate() + daysUntilNextWednesday);
@@ -1127,7 +1065,6 @@ function getNextWednesday() {
     return `${dd}/${mm}/${yyyy}`;
 }
 
-// Home component
 function Home() {
     const [data, setData] = useState([]);
     const [topEarners, setTopEarners] = useState([]);
@@ -1188,7 +1125,6 @@ function Home() {
     return (
         <div className="w-full flex flex-col items-center">
             <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
-                {/* Left: Shortcuts */}
                 <div className="flex flex-col items-center gap-4 sm:gap-8 w-full">
                     <div className="w-full max-w-md">
                         <div
@@ -1229,7 +1165,6 @@ function Home() {
                         </div>
                     </div>
                 </div>
-                {/* Center: Next Match Table */}
                 <div className="flex flex-col items-center justify-center w-full">
                     <div className="w-full max-w-md">
                         <div className="relative mb-4 sm:mb-8 mt-4 sm:mt-6">
@@ -1255,7 +1190,6 @@ function Home() {
                         </div>
                     </div>
                 </div>
-                {/* Right: MOTM and Top Earners */}
                 <div className="flex flex-col gap-4 sm:gap-8 items-center w-full">
                     <div className="w-full max-w-md">
                         <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">MOTM Last Winners</h2>
@@ -1319,7 +1253,6 @@ function Home() {
                     </div>
                 </div>
             </div>
-            {/* Mobile stacking: show all blocks in a single column on small screens */}
             <style>{`
                 @media (max-width: 640px) {
                     .grid-cols-1.lg\\:grid-cols-3 {
@@ -1336,19 +1269,17 @@ function Home() {
     );
 }
 
-// PlayerDatabase component with 5-way circular visual compare function and top earners table
 function PlayerDatabase() {
     const [players, setPlayers] = useState([]);
     const [search, setSearch] = useState("");
     const [positionFilter, setPositionFilter] = useState("All");
     const [sortBy, setSortBy] = useState("overall");
-    const [selected, setSelected] = useState([]); // up to 5 for compare
+    const [selected, setSelected] = useState([]);
     const [topEarners, setTopEarners] = useState([]);
-    const [viewMode, setViewMode] = useState("big"); // "list", "small", "big"
+    const [viewMode, setViewMode] = useState("big");
     const [modalPlayer, setModalPlayer] = useState(null);
-    const [addCompareModalOpen, setAddCompareModalOpen] = useState(false); // Modal state
+    const [addCompareModalOpen, setAddCompareModalOpen] = useState(false);
 
-    // Fetch player stats
     useEffect(() => {
         fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
             .then((res) => res.text())
@@ -1376,7 +1307,6 @@ function PlayerDatabase() {
             });
     }, []);
 
-    // Fetch top earners
     useEffect(() => {
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/1g9WWrlzTIwr2bZFyw9fqNpMTDpMzpk2ROC3UAWqofuA/gviz/tq?tqx=out:csv';
         fetch(sheetUrl)
@@ -1432,8 +1362,7 @@ function PlayerDatabase() {
             if (prev.some((p) => p.name === player.name)) {
                 return prev.filter((p) => p.name !== player.name);
             }
-            if (prev.length >= 5) { // <-- Allow up to 5
-                // Remove the first and add the new one
+            if (prev.length >= 5) {
                 return [...prev.slice(1), player];
             }
             return [...prev, player];
@@ -1444,7 +1373,6 @@ function PlayerDatabase() {
         setSelected((prev) => prev.filter((p) => p.name !== name));
     }
 
-    // Modal for full player card
     function PlayerModal({ player, onClose }) {
         if (!player) return null;
         return (
@@ -1458,7 +1386,6 @@ function PlayerDatabase() {
                     >×</button>
                     <div className="font-bold text-xl mb-1 text-center">{player.name}</div>
                     <div className="text-center text-sm text-gray-500 mb-2">{player.position}</div>
-                    {/* --- Player Image --- */}
                     <div className="flex justify-center mb-2">
                         <img
                             src={player.photo ? player.photo : PLACEHOLDER_IMG}
@@ -1484,7 +1411,6 @@ function PlayerDatabase() {
         );
     }
 
-    // Modal for adding a player to comparison
     function AddPlayerToCompareModal({ open, onClose, players, alreadySelected, onSelect }) {
         const [search, setSearch] = useState("");
         if (!open) return null;
@@ -1534,7 +1460,6 @@ function PlayerDatabase() {
         );
     }
 
-    // Top Earners Comparison Table (unchanged)
     function TopEarnersCompare({ selected }) {
         if (!selected.length) return null;
         const selectedEarners = selected.map(sel => {
@@ -1570,13 +1495,10 @@ function PlayerDatabase() {
         );
     }
 
-    // RadarCompare (updated to include Add button)
     function RadarCompare({ players }) {
         if (players.length < 2) return null;
 
-        // Determine if all selected are outfield (not GK)
         const allOutfield = players.every(p => p.position !== "GK");
-        // Attributes to compare
         const attrs = allOutfield
             ? [
                 { key: "overall", label: "Overall", max: 100 },
@@ -1600,22 +1522,19 @@ function PlayerDatabase() {
                 { key: "weakFoot", label: "Weak Foot", max: 50 }
             ];
 
-        // Colors for up to 5 players
         const colors = [
-            "#3b82f6", // blue
-            "#ef4444", // red
-            "#f59e42", // orange
-            "#10b981", // green
-            "#a21caf"  // purple
+            "#3b82f6",
+            "#ef4444",
+            "#f59e42",
+            "#10b981",
+            "#a21caf"
         ];
 
-        // Radar chart dimensions
         const size = 320;
         const center = size / 2;
         const radius = size / 2 - 40;
         const angleStep = (2 * Math.PI) / attrs.length;
 
-        // Helper: get points for a player
         function getPoints(player, idx) {
             return attrs.map((attr, i) => {
                 const value = player[attr.key] || 0;
@@ -1628,12 +1547,10 @@ function PlayerDatabase() {
             });
         }
 
-        // Helper: get polygon string
         function pointsToString(points) {
             return points.map(([x, y]) => `${x},${y}`).join(" ");
         }
 
-        // Draw attribute axes and labels
         const axes = attrs.map((attr, i) => {
             const angle = i * angleStep - Math.PI / 2;
             const x = center + radius * Math.cos(angle);
@@ -1665,7 +1582,6 @@ function PlayerDatabase() {
             );
         });
 
-        // Draw grid (concentric polygons)
         const gridLevels = 4;
         const grid = [];
         for (let level = 1; level <= gridLevels; level++) {
@@ -1688,7 +1604,6 @@ function PlayerDatabase() {
             );
         }
 
-        // Draw player polygons
         const polygons = players.map((player, idx) => {
             const points = getPoints(player, idx);
             return (
@@ -1702,7 +1617,6 @@ function PlayerDatabase() {
             );
         });
 
-        // Draw player dots
         const dots = players.map((player, idx) => {
             const points = getPoints(player, idx);
             return points.map(([x, y], i) => (
@@ -1718,7 +1632,6 @@ function PlayerDatabase() {
             ));
         });
 
-        // Legend
         const legend = (
             <div className="flex justify-center gap-4 mt-2 mb-2">
                 {players.map((p, idx) => (
@@ -1760,15 +1673,10 @@ function PlayerDatabase() {
                 <div className="flex flex-col md:flex-row gap-6 justify-center items-start">
                     <div>
                         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-                            {/* Grid */}
                             {grid}
-                            {/* Axes and labels */}
                             {axes}
-                            {/* Player polygons */}
                             {polygons}
-                            {/* Dots */}
                             {dots}
-                            {/* Center dot */}
                             <circle cx={center} cy={center} r={3} fill="#6b7280" />
                         </svg>
                     </div>
@@ -1781,31 +1689,6 @@ function PlayerDatabase() {
     return (
         <div>
             <h1 className="text-3xl font-bold mb-4 text-center text-green-900">Player Database</h1>
-            {/*<div className={`flex flex-col md:flex-row justify-between items-center gap-4 mb-4 ${glass}`}>*/}
-            {/*    <Input*/}
-            {/*        type="text"*/}
-            {/*        placeholder="Search players..."*/}
-            {/*        value={search}*/}
-            {/*        onChange={e => setSearch(e.target.value)}*/}
-            {/*        className="w-full md:w-1/2"*/}
-            {/*    />*/}
-            {/*    <div className="flex gap-2">*/}
-            {/*        {["All", "ST", "MF", "DF", "GK"].map((pos) => (*/}
-            {/*            <button*/}
-            {/*                key={pos}*/}
-            {/*                className={`px-3 py-1 rounded font-semibold transition ${positionFilter === pos ? "bg-blue-500 text-white shadow" : "bg-gray-200 hover:bg-blue-100"}`}*/}
-            {/*                onClick={() => setPositionFilter(pos)}*/}
-            {/*            >*/}
-            {/*                {pos}*/}
-            {/*            </button>*/}
-            {/*        ))}*/}
-            {/*    </div>*/}
-            {/*    <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="border p-2 rounded-md bg-white/90 shadow">*/}
-            {/*        {["overall", "speed", "shooting", "passing", "dribbling", "physical", "defending"].map(key => (*/}
-            {/*            <option key={key} value={key}>Sort by {key.charAt(0).toUpperCase() + key.slice(1)}</option>*/}
-            {/*        ))}*/}
-            {/*    </select>*/}
-            {/*</div>*/}
             <div className="flex items-center gap-2 mb-4">
                 <span className="text-xs text-gray-600">View:</span>
                 <select
@@ -1890,7 +1773,6 @@ function PlayerDatabase() {
                     {filtered.map((p) => {
                         const cardBg = getCardBgByOverall(p.overall);
                         const isSelected = selected.some(sel => sel.name === p.name);
-                        // In database, only "selected" (comparison) is relevant
                         const cardHighlight = getCardHighlight({ assigned: false, selected: isSelected });
                         return (
                             <div
@@ -1903,7 +1785,6 @@ function PlayerDatabase() {
                                 ].join(" ")}
                                 onClick={e => { e.stopPropagation(); toggleSelect(p); }}
                             >
-                                {/* Player Image */}
                                 <div className="flex justify-center mb-2">
                                     <img
                                         src={p.photo ? p.photo : PLACEHOLDER_IMG}
@@ -1949,13 +1830,11 @@ function PlayerDatabase() {
     );
 }
 
-// Main App with view switching
 export default function App() {
-    const [view, setView] = useState("home"); // "home", "lineup", "database"
+    const [view, setView] = useState("home");
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-    // Listen for scroll to shrink the header
     useEffect(() => {
         function onScroll() {
             setScrolled(window.scrollY > 24);
@@ -1972,7 +1851,6 @@ export default function App() {
         return () => window.removeEventListener("setView", handler);
     }, []);
 
-    // Close mobile menu on view change
     useEffect(() => {
         setMobileMenuOpen(false);
     }, [view]);
@@ -1987,7 +1865,6 @@ export default function App() {
                         : "py-4")
                 }
                 style={{
-                    // Optional: add a little blur when scrolled
                     backdropFilter: scrolled ? "blur(4px)" : undefined,
                 }}
             >
@@ -2005,7 +1882,6 @@ export default function App() {
                     >
                         Grupi i Futbollit
                     </h1>
-                    {/* Desktop nav */}
                     <div className="hidden sm:flex gap-4 text-lg">
                         <button
                             className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`}
@@ -2032,7 +1908,6 @@ export default function App() {
                             MOTM
                         </button>
                     </div>
-                    {/* Mobile hamburger */}
                     <div className="sm:hidden flex items-center">
                         <button
                             className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -2049,7 +1924,6 @@ export default function App() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
-                        {/* Mobile menu dropdown */}
                         {mobileMenuOpen && (
                             <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50 flex flex-col animate-fade-in">
                                 <button
@@ -2091,7 +1965,6 @@ export default function App() {
     );
 }
 
-// The LineupCreator component is your current App code
 function LineupCreator() {
     const [formationA, setFormationA] = useState("3-3-3");
     const [formationB, setFormationB] = useState("3-3-3");
@@ -2102,8 +1975,9 @@ function LineupCreator() {
 
     const [globalActiveSlot, setGlobalActiveSlot] = useState(null);
 
-    // Modal state for player selection
     const [playerSelectModal, setPlayerSelectModal] = useState({ open: false });
+
+    const [compareHover, setCompareHover] = useState(null);
 
     useEffect(() => {
         fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
@@ -2160,13 +2034,10 @@ function LineupCreator() {
         let newTeamA = [...teamA];
         let newTeamB = [...teamB];
 
-        // Remove player from slot (on click)
         if (remove) {
             if (toTeam === "teamA") newTeamA[toIndex] = null;
             if (toTeam === "teamB") newTeamB[toIndex] = null;
-        }
-        // Swap between teams
-        else if (
+        } else if (
             swapWith &&
             typeof fromIndex === "number" &&
             fromTeam &&
@@ -2174,35 +2045,29 @@ function LineupCreator() {
             fromTeam !== toTeam
         ) {
             if (toTeam === "teamA" && fromTeam === "teamB") {
-                newTeamA[toIndex] = player;      // Dragged player (X) to target slot
-                newTeamB[fromIndex] = swapWith;  // Target player (Y) to source slot
+                newTeamA[toIndex] = player;
+                newTeamB[fromIndex] = swapWith;
             } else if (toTeam === "teamB" && fromTeam === "teamA") {
                 newTeamB[toIndex] = player;
                 newTeamA[fromIndex] = swapWith;
             }
-        }
-        // Swap within the same team
-        else if (
+        } else if (
             swapWith &&
             fromTeam === toTeam &&
             typeof fromIndex === "number"
         ) {
             if (toTeam === "teamA") {
-                newTeamA[toIndex] = player;      // Dragged player (X) to target slot
-                newTeamA[fromIndex] = swapWith;  // Target player (Y) to source slot
+                newTeamA[toIndex] = player;
+                newTeamA[fromIndex] = swapWith;
             }
             if (toTeam === "teamB") {
                 newTeamB[toIndex] = player;
                 newTeamB[fromIndex] = swapWith;
             }
-        }
-        // Place player in empty slot or move from available list
-        else {
-            // Remove player from previous slot if needed
+        } else {
             if (fromTeam === "teamA" && typeof fromIndex === "number") newTeamA[fromIndex] = null;
             if (fromTeam === "teamB" && typeof fromIndex === "number") newTeamB[fromIndex] = null;
 
-            // Remove duplicates in the target team (except the slot being filled)
             if (toTeam === "teamA") {
                 newTeamA = newTeamA.map((p, idx) =>
                     p && p.name === player.name && idx !== toIndex ? null : p
@@ -2236,90 +2101,98 @@ function LineupCreator() {
         return () => document.removeEventListener("mousedown", handleClick);
     }, [globalActiveSlot]);
 
-    // Enable both mouse and touch sensors for drag and drop (mobile support)
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
         useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } })
     );
 
-    // Drag overlay state for mobile visual feedback
     const [activeDrag, setActiveDrag] = useState(null);
 
-    // Handler for drag start (for mobile fallback)
     const handleDragStart = (player, fromTeam, fromIndex) => {
         setActiveDrag({ player, fromTeam, fromIndex });
+        window.__draggedPlayer = player;
     };
     const handleDragEnd = () => {
         setActiveDrag(null);
+        window.__draggedPlayer = null;
+        setCompareHover(null);
     };
 
     return (
         <div className="p-4 max-w-7xl mx-auto" ref={mainRef}>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
 
-            {/* Always show the lineups and attribute comparison */}
-            <>
-                {/* Attribute Comparison */}
-                {!showComparison && (
-                    <div className="flex justify-center mb-4">
-                        <button
-                            onClick={() => setShowComparison(true)}
-                            className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
-                            type="button"
-                        >
-                            Show Attribute Comparison
-                        </button>
-                    </div>
-                )}
-
-                {showComparison && (
-                    <MirroredTeamAttributesBarChart
-                        teamAPlayers={teamA}
-                        teamBPlayers={teamB}
-                        teamALabel="Team A"
-                        teamBLabel="Team B"
-                        onHide={() => setShowComparison(false)}
-                    />
-                )}
-
-                {/* Lineups */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <DroppableTeam
-                        id="teamA"
-                        label="Team A"
-                        players={teamA}
-                        onPlayerDrop={handlePlayerDrop}
-                        formation={formationA}
-                        onFormationChange={setFormationA}
-                        allPlayers={players}
-                        globalActiveSlot={globalActiveSlot}
-                        setGlobalActiveSlot={setGlobalActiveSlot}
-                        playerSelectModal={playerSelectModal}
-                        setPlayerSelectModal={setPlayerSelectModal}
-                        otherFormationPositions={formationMap[formationB]}
-                    />
-                    <DroppableTeam
-                        id="teamB"
-                        label="Team B"
-                        players={teamB}
-                        onPlayerDrop={handlePlayerDrop}
-                        formation={formationB}
-                        onFormationChange={setFormationB}
-                        allPlayers={players}
-                        globalActiveSlot={globalActiveSlot}
-                        setGlobalActiveSlot={setGlobalActiveSlot}
-                        playerSelectModal={playerSelectModal}
-                        setPlayerSelectModal={setPlayerSelectModal}
-                        otherFormationPositions={formationMap[formationA]}
-                    />
+            {!showComparison && (
+                <div className="flex justify-center mb-4">
+                    <button
+                        onClick={() => setShowComparison(true)}
+                        className="px-4 py-1 rounded text-sm bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow transition"
+                        type="button"
+                    >
+                        Show Attribute Comparison
+                    </button>
                 </div>
-            </>
+            )}
+
+            {showComparison && (
+                <MirroredTeamAttributesBarChart
+                    teamAPlayers={teamA}
+                    teamBPlayers={teamB}
+                    teamALabel="Team A"
+                    teamBLabel="Team B"
+                    onHide={() => setShowComparison(false)}
+                />
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <DroppableTeam
+                    id="teamA"
+                    label="Team A"
+                    players={teamA}
+                    onPlayerDrop={handlePlayerDrop}
+                    formation={formationA}
+                    onFormationChange={setFormationA}
+                    allPlayers={players}
+                    globalActiveSlot={globalActiveSlot}
+                    setGlobalActiveSlot={setGlobalActiveSlot}
+                    playerSelectModal={playerSelectModal}
+                    setPlayerSelectModal={setPlayerSelectModal}
+                    otherFormationPositions={formationMap[formationB]}
+                    setCompareHover={setCompareHover}
+                    handleDragStart={handleDragStart}
+                    handleDragEnd={handleDragEnd}
+                />
+                <DroppableTeam
+                    id="teamB"
+                    label="Team B"
+                    players={teamB}
+                    onPlayerDrop={handlePlayerDrop}
+                    formation={formationB}
+                    onFormationChange={setFormationB}
+                    allPlayers={players}
+                    globalActiveSlot={globalActiveSlot}
+                    setGlobalActiveSlot={setGlobalActiveSlot}
+                    playerSelectModal={playerSelectModal}
+                    setPlayerSelectModal={setPlayerSelectModal}
+                    otherFormationPositions={formationMap[formationA]}
+                    setCompareHover={setCompareHover}
+                    handleDragStart={handleDragStart}
+                    handleDragEnd={handleDragEnd}
+                />
+            </div>
+
+            {compareHover && compareHover.draggedPlayer && compareHover.targetPlayer && (
+                <PlayerAttributeCompareTable
+                    playerA={compareHover.draggedPlayer}
+                    playerB={compareHover.targetPlayer}
+                    onClose={() => setCompareHover(null)}
+                />
+            )}
 
             <DndContext
                 collisionDetection={closestCenter}
                 sensors={sensors}
             >
-                {/* Drag overlay for mobile visual feedback */}
                 <DragOverlay>
                     {activeDrag ? (
                         <DraggablePlayer
@@ -2341,6 +2214,50 @@ function LineupCreator() {
                     slotLabel={playerSelectModal.slotLabel}
                 />
             </DndContext>
+        </div>
+    );
+}
+
+function PlayerAttributeCompareTable({ playerA, playerB, onClose }) {
+    if (!playerA || !playerB) return null;
+    const attrs = [
+        { key: "overall", label: "Overall" },
+        { key: "speed", label: "Speed" },
+        { key: "shooting", label: "Shooting" },
+        { key: "passing", label: "Passing" },
+        { key: "dribbling", label: "Dribbling" },
+        { key: "physical", label: "Physical" },
+        { key: "defending", label: "Defending" },
+        { key: "goalkeeping", label: "Goalkeeping" },
+        { key: "weakFoot", label: "Weak Foot" }
+    ];
+    return (
+        <div className="fixed left-1/2 top-24 z-50 -translate-x-1/2 bg-white rounded-xl shadow-xl border p-4 min-w-[320px] max-w-xs">
+            <button
+                className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg font-bold"
+                onClick={onClose}
+                aria-label="Close"
+                type="button"
+            >×</button>
+            <div className="font-bold text-center mb-2 text-blue-900">Attribute Comparison</div>
+            <table className="w-full text-xs">
+                <thead>
+                    <tr>
+                        <th className="p-1 text-right">{playerA.name}</th>
+                        <th className="p-1 text-center"></th>
+                        <th className="p-1 text-left">{playerB.name}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {attrs.map(attr => (
+                        <tr key={attr.key}>
+                            <td className="p-1 text-right font-semibold">{playerA[attr.key]}</td>
+                            <td className="p-1 text-center text-gray-500">{attr.label}</td>
+                            <td className="p-1 text-left font-semibold">{playerB[attr.key]}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 }
