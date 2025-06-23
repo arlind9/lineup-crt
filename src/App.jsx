@@ -777,7 +777,7 @@ function DroppableTeam({
 
     // Pitch background and player positions
     return (
-        <div className="relative bg-gradient-to-b from-green-600 to-green-800 rounded-2xl min-h-[600px] md:min-h-[800px] overflow-visible shadow-2xl border-2 border-green-900" style={{ paddingBottom: "48px" }}>
+        <div className="relative bg-gradient-to-b from-green-600 to-green-800 rounded-2xl min-h-[500px] md:min-h-[650px] overflow-visible shadow-2xl border-2 border-green-900" style={{ paddingBottom: "48px" }}>
             {/* Pitch Markings */}
             <div className="absolute inset-0 pointer-events-none">
                 {/* Outer lines */}
