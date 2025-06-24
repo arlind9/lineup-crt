@@ -1829,9 +1829,19 @@ function PlayerDatabase() {
     );
 }
 
-// --- Add GalleryImageModal component ---
+// Utility to determine media type
+function getMediaType(url) {
+    if (!url) return "image";
+    const ext = url.split('.').pop().toLowerCase().split(/\#|\?/)[0];
+    if (["mp4", "webm", "ogg"].includes(ext)) return "video";
+    if (ext === "gif") return "gif";
+    return "image";
+}
+
+// --- Update GalleryImageModal component ---
 function GalleryImageModal({ open, image, caption, onClose }) {
     if (!open) return null;
+    const mediaType = getMediaType(image);
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
@@ -1849,12 +1859,21 @@ function GalleryImageModal({ open, image, caption, onClose }) {
                     aria-label="Close"
                     type="button"
                 >×</button>
-                <img
-                    src={image}
-                    alt={caption || "Gallery image"}
-                    className="rounded-lg object-contain w-full max-h-[70vh] bg-gray-100"
-                    style={{ background: "#eee" }}
-                />
+                {mediaType === "video" ? (
+                    <video
+                        src={image}
+                        controls
+                        className="rounded-lg object-contain w-full max-h-[70vh] bg-gray-100"
+                        style={{ background: "#eee" }}
+                    />
+                ) : (
+                    <img
+                        src={image}
+                        alt={caption || "Gallery image"}
+                        className="rounded-lg object-contain w-full max-h-[70vh] bg-gray-100"
+                        style={{ background: "#eee" }}
+                    />
+                )}
                 {caption && (
                     <div className="text-base text-gray-700 text-center mt-3">{caption}</div>
                 )}
@@ -1918,30 +1937,49 @@ function GalleryPage() {
         <div className="w-full flex flex-col items-center">
             <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Gallery</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
-                {images.map((img, idx) => (
-                    <div
-                        key={idx}
-                        className="bg-white rounded-xl shadow border p-2 flex flex-col items-center cursor-pointer hover:shadow-lg transition"
-                        onClick={() => setModal({ open: true, image: img.url, caption: img.caption })}
-                        tabIndex={0}
-                        onKeyDown={e => {
-                            if (e.key === "Enter" || e.key === " ") setModal({ open: true, image: img.url, caption: img.caption });
-                        }}
-                        role="button"
-                        aria-label="View image"
-                    >
-                        <img
-                            src={img.url}
-                            alt={img.caption || `Gallery image ${idx + 1}`}
-                            className="rounded-lg object-cover w-full max-h-72 mb-2"
-                            style={{ aspectRatio: "4/3", background: "#eee" }}
-                            loading="lazy"
-                        />
-                        {img.caption && (
-                            <div className="text-xs text-gray-700 text-center mt-1">{img.caption}</div>
-                        )}
-                    </div>
-                ))}
+                {images.map((img, idx) => {
+                    const mediaType = getMediaType(img.url);
+                    return (
+                        <div
+                            key={idx}
+                            className="bg-white rounded-xl shadow border p-2 flex flex-col items-center cursor-pointer hover:shadow-lg transition"
+                            onClick={() => setModal({ open: true, image: img.url, caption: img.caption })}
+                            tabIndex={0}
+                            onKeyDown={e => {
+                                if (e.key === "Enter" || e.key === " ") setModal({ open: true, image: img.url, caption: img.caption });
+                            }}
+                            role="button"
+                            aria-label="View image"
+                        >
+                            {mediaType === "video" ? (
+                                <div className="relative w-full">
+                                    <video
+                                        src={img.url}
+                                        className="rounded-lg object-cover w-full max-h-72 mb-2"
+                                        style={{ aspectRatio: "4/3", background: "#eee" }}
+                                        preload="metadata"
+                                        muted
+                                        playsInline
+                                    />
+                                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl text-white/80 pointer-events-none">
+                                        ▶
+                                    </span>
+                                </div>
+                            ) : (
+                                <img
+                                    src={img.url}
+                                    alt={img.caption || `Gallery image ${idx + 1}`}
+                                    className="rounded-lg object-cover w-full max-h-72 mb-2"
+                                    style={{ aspectRatio: "4/3", background: "#eee" }}
+                                    loading="lazy"
+                                />
+                            )}
+                            {img.caption && (
+                                <div className="text-xs text-gray-700 text-center mt-1">{img.caption}</div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
             <GalleryImageModal
                 open={modal.open}
