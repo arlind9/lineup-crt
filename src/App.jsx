@@ -1829,6 +1829,130 @@ function PlayerDatabase() {
     );
 }
 
+// --- Add GalleryImageModal component ---
+function GalleryImageModal({ open, image, caption, onClose }) {
+    if (!open) return null;
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+            onClick={onClose}
+            tabIndex={-1}
+        >
+            <div
+                className="relative bg-white rounded-xl shadow-2xl border p-2 max-w-3xl w-full flex flex-col items-center"
+                style={{ outline: "none" }}
+                onClick={e => e.stopPropagation()}
+            >
+                <button
+                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-2xl font-bold"
+                    onClick={onClose}
+                    aria-label="Close"
+                    type="button"
+                >×</button>
+                <img
+                    src={image}
+                    alt={caption || "Gallery image"}
+                    className="rounded-lg object-contain w-full max-h-[70vh] bg-gray-100"
+                    style={{ background: "#eee" }}
+                />
+                {caption && (
+                    <div className="text-base text-gray-700 text-center mt-3">{caption}</div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// --- Update GalleryPage component ---
+function GalleryPage() {
+    const [images, setImages] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [modal, setModal] = useState({ open: false, image: null, caption: "" });
+
+    useEffect(() => {
+        setLoading(true);
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/12sjC6sz8z_ZNKwwQ_IuZc1bfpJr939NZFbB0B26tOIs/gviz/tq?tqx=out:csv';
+        fetch(sheetUrl)
+            .then(res => res.text())
+            .then(csv => {
+                Papa.parse(csv, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: results => {
+                        const data = results.data
+                            .map(row => ({
+                                url: row["Image"] || row["URL"] || row[Object.keys(row)[0]],
+                                caption: row["Caption"] || row["Description"] || ""
+                            }))
+                            .filter(row => row.url && row.url.startsWith("http"));
+                        setImages(data);
+                        setLoading(false);
+                    }
+                });
+            })
+            .catch(() => setLoading(false));
+    }, []);
+
+    // Close modal on Escape key
+    useEffect(() => {
+        if (!modal.open) return;
+        function handleKey(e) {
+            if (e.key === "Escape") setModal({ open: false, image: null, caption: "" });
+        }
+        window.addEventListener("keydown", handleKey);
+        return () => window.removeEventListener("keydown", handleKey);
+    }, [modal.open]);
+
+    if (loading) return <LoadingSpinner />;
+
+    if (!images.length) {
+        return (
+            <div className="w-full flex flex-col items-center">
+                <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Gallery</h1>
+                <div className="text-gray-500 text-center">No images found.</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-full flex flex-col items-center">
+            <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Gallery</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
+                {images.map((img, idx) => (
+                    <div
+                        key={idx}
+                        className="bg-white rounded-xl shadow border p-2 flex flex-col items-center cursor-pointer hover:shadow-lg transition"
+                        onClick={() => setModal({ open: true, image: img.url, caption: img.caption })}
+                        tabIndex={0}
+                        onKeyDown={e => {
+                            if (e.key === "Enter" || e.key === " ") setModal({ open: true, image: img.url, caption: img.caption });
+                        }}
+                        role="button"
+                        aria-label="View image"
+                    >
+                        <img
+                            src={img.url}
+                            alt={img.caption || `Gallery image ${idx + 1}`}
+                            className="rounded-lg object-cover w-full max-h-72 mb-2"
+                            style={{ aspectRatio: "4/3", background: "#eee" }}
+                            loading="lazy"
+                        />
+                        {img.caption && (
+                            <div className="text-xs text-gray-700 text-center mt-1">{img.caption}</div>
+                        )}
+                    </div>
+                ))}
+            </div>
+            <GalleryImageModal
+                open={modal.open}
+                image={modal.image}
+                caption={modal.caption}
+                onClose={() => setModal({ open: false, image: null, caption: "" })}
+            />
+        </div>
+    );
+}
+
 export default function App() {
     const [view, setView] = useState("home");
     const [scrolled, setScrolled] = useState(false);
@@ -1906,6 +2030,13 @@ export default function App() {
                         >
                             MOTM
                         </button>
+                        {/* --- Add Gallery nav button --- */}
+                        <button
+                            className={`hover:underline ${view === "gallery" ? "font-bold text-blue-700" : ""}`}
+                            onClick={() => setView("gallery")}
+                        >
+                            Gallery
+                        </button>
                     </div>
                     <div className="sm:hidden flex items-center">
                         <button
@@ -1944,10 +2075,17 @@ export default function App() {
                                     Player Database
                                 </button>
                                 <button
-                                    className={`text-left px-4 py-3 hover:bg-blue-50 ${view === "motm" ? "font-bold text-blue-700" : ""}`}
+                                    className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "motm" ? "font-bold text-blue-700" : ""}`}
                                     onClick={() => setView("motm")}
                                 >
                                     MOTM
+                                </button>
+                                {/* --- Add Gallery nav button (mobile) --- */}
+                                <button
+                                    className={`text-left px-4 py-3 hover:bg-blue-50 ${view === "gallery" ? "font-bold text-blue-700" : ""}`}
+                                    onClick={() => setView("gallery")}
+                                >
+                                    Gallery
                                 </button>
                             </div>
                         )}
@@ -1959,6 +2097,8 @@ export default function App() {
                 {view === "lineup" && <LineupCreator />}
                 {view === "database" && <PlayerDatabase />}
                 {view === "motm" && <MOTMPage />}
+                {/* --- Add Gallery page route --- */}
+                {view === "gallery" && <GalleryPage />}
             </main>
         </div>
     );
