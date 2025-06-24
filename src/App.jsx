@@ -1713,11 +1713,10 @@ function PlayerDatabase() {
                     {["All", "ST", "MF", "DF", "GK"].map(pos => (
                         <button
                             key={pos}
-                            className={`px-2 py-1 rounded text-xs font-semibold border transition ${
-                                positionFilter === pos
+                            className={`px-2 py-1 rounded text-xs font-semibold border transition ${positionFilter === pos
                                     ? "bg-blue-500 text-white border-blue-500"
                                     : "bg-white hover:bg-blue-100 border-gray-300"
-                            }`}
+                                }`}
                             onClick={() => setPositionFilter(pos)}
                             type="button"
                         >
@@ -1838,13 +1837,7 @@ function getMediaType(url) {
     return "image";
 }
 
-// Helper to get a static preview for GIFs (fallback to GIF itself if not available)
-function getGifPreview(url) {
-    // If you have a convention for static previews, implement here.
-    // For now, just return the GIF itself.
-    return url;
-}
-
+// --- Update GalleryImageModal component ---
 function GalleryImageModal({ open, image, caption, onClose }) {
     if (!open) return null;
     const mediaType = getMediaType(image);
@@ -1869,7 +1862,6 @@ function GalleryImageModal({ open, image, caption, onClose }) {
                     <video
                         src={image}
                         controls
-                        autoPlay
                         className="rounded-lg object-contain w-full max-h-[70vh] bg-gray-100"
                         style={{ background: "#eee" }}
                     />
@@ -1889,95 +1881,7 @@ function GalleryImageModal({ open, image, caption, onClose }) {
     );
 }
 
-function GalleryThumbnail({ url, caption, onClick }) {
-    const mediaType = getMediaType(url);
-    const [hovered, setHovered] = useState(false);
-    const [gifLoaded, setGifLoaded] = useState(false);
-
-    // For GIFs, show static preview until hover
-    const gifPreview = getGifPreview(url);
-
-    return (
-        <div
-            className="bg-white rounded-xl shadow border p-2 flex flex-col items-center cursor-pointer hover:shadow-lg transition"
-            style={{
-                width: 240,
-                height: 180,
-                position: "relative",
-                overflow: "hidden",
-                background: "#eee"
-            }}
-            onClick={onClick}
-            tabIndex={0}
-            onKeyDown={e => {
-                if (e.key === "Enter" || e.key === " ") onClick();
-            }}
-            role="button"
-            aria-label="View image"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => { setHovered(false); setGifLoaded(false); }}
-        >
-            {mediaType === "video" ? (
-                <div className="w-full h-full flex items-center justify-center relative">
-                    <video
-                        src={url}
-                        className="object-contain w-full h-full rounded-lg bg-gray-100"
-                        style={{ background: "#eee" }}
-                        preload="metadata"
-                        muted
-                        playsInline
-                        controls={false}
-                        autoPlay={hovered}
-                        loop
-                        onMouseOver={e => { e.currentTarget.play(); }}
-                        onMouseOut={e => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
-                    />
-                    {!hovered && (
-                        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl text-white/80 pointer-events-none">
-                            ▶
-                        </span>
-                    )}
-                </div>
-            ) : mediaType === "gif" ? (
-                <div className="w-full h-full flex items-center justify-center relative">
-                    {!hovered ? (
-                        <img
-                            src={gifPreview}
-                            alt={caption || "GIF preview"}
-                            className="object-contain w-full h-full rounded-lg bg-gray-100"
-                            style={{ background: "#eee" }}
-                        />
-                    ) : (
-                        <img
-                            src={url}
-                            alt={caption || "GIF"}
-                            className="object-contain w-full h-full rounded-lg bg-gray-100"
-                            style={{ background: "#eee" }}
-                            onLoad={() => setGifLoaded(true)}
-                        />
-                    )}
-                    {!gifLoaded && hovered && (
-                        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg text-white/80 pointer-events-none">
-                            Loading...
-                        </span>
-                    )}
-                </div>
-            ) : (
-                <img
-                    src={url}
-                    alt={caption || "Gallery image"}
-                    className="object-contain w-full h-full rounded-lg bg-gray-100"
-                    style={{ background: "#eee" }}
-                    loading="lazy"
-                />
-            )}
-            {caption && (
-                <div className="text-xs text-gray-700 text-center mt-1 w-full truncate">{caption}</div>
-            )}
-        </div>
-    );
-}
-
+// --- Update GalleryPage component ---
 function GalleryPage() {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -2032,14 +1936,49 @@ function GalleryPage() {
         <div className="w-full flex flex-col items-center">
             <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Gallery</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
-                {images.map((img, idx) => (
-                    <GalleryThumbnail
-                        key={idx}
-                        url={img.url}
-                        caption={img.caption}
-                        onClick={() => setModal({ open: true, image: img.url, caption: img.caption })}
-                    />
-                ))}
+                {images.map((img, idx) => {
+                    const mediaType = getMediaType(img.url);
+                    return (
+                        <div
+                            key={idx}
+                            className="bg-white rounded-xl shadow border p-2 flex flex-col items-center cursor-pointer hover:shadow-lg transition"
+                            onClick={() => setModal({ open: true, image: img.url, caption: img.caption })}
+                            tabIndex={0}
+                            onKeyDown={e => {
+                                if (e.key === "Enter" || e.key === " ") setModal({ open: true, image: img.url, caption: img.caption });
+                            }}
+                            role="button"
+                            aria-label="View image"
+                        >
+                            {mediaType === "video" ? (
+                                <div className="relative w-full">
+                                    <video
+                                        src={img.url}
+                                        className="rounded-lg object-cover w-full max-h-72 mb-2"
+                                        style={{ aspectRatio: "4/3", background: "#eee" }}
+                                        preload="metadata"
+                                        muted
+                                        playsInline
+                                    />
+                                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl text-white/80 pointer-events-none">
+                                        ▶
+                                    </span>
+                                </div>
+                            ) : (
+                                <img
+                                    src={img.url}
+                                    alt={img.caption || `Gallery image ${idx + 1}`}
+                                    className="rounded-lg object-cover w-full max-h-72 mb-2"
+                                    style={{ aspectRatio: "4/3", background: "#eee" }}
+                                    loading="lazy"
+                                />
+                            )}
+                            {img.caption && (
+                                <div className="text-xs text-gray-700 text-center mt-1">{img.caption}</div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
             <GalleryImageModal
                 open={modal.open}
@@ -2128,6 +2067,7 @@ export default function App() {
                         >
                             MOTM
                         </button>
+                        {/* --- Add Gallery nav button --- */}
                         <button
                             className={`hover:underline ${view === "gallery" ? "font-bold text-blue-700" : ""}`}
                             onClick={() => setView("gallery")}
@@ -2177,6 +2117,7 @@ export default function App() {
                                 >
                                     MOTM
                                 </button>
+                                {/* --- Add Gallery nav button (mobile) --- */}
                                 <button
                                     className={`text-left px-4 py-3 hover:bg-blue-50 ${view === "gallery" ? "font-bold text-blue-700" : ""}`}
                                     onClick={() => setView("gallery")}
@@ -2193,6 +2134,7 @@ export default function App() {
                 {view === "lineup" && <LineupCreator />}
                 {view === "database" && <PlayerDatabase />}
                 {view === "motm" && <MOTMPage />}
+                {/* --- Add Gallery page route --- */}
                 {view === "gallery" && <GalleryPage />}
             </main>
         </div>
@@ -2200,8 +2142,10 @@ export default function App() {
 }
 
 function LineupCreator() {
+    // Use unique keys for localStorage
     const STORAGE_KEY = "lineupCreatorStateV1";
 
+    // Load from localStorage or use defaults
     function getInitialState() {
         try {
             const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -2213,7 +2157,7 @@ function LineupCreator() {
                     teamB: Array.isArray(saved.teamB) ? saved.teamB : Array(10).fill(null),
                 };
             }
-        } catch {}
+        } catch { }
         return {
             formationA: "3-3-3",
             formationB: "3-3-3",
@@ -2229,13 +2173,16 @@ function LineupCreator() {
     const [compareHover, setCompareHover] = useState(null);
     const [activeDrag, setActiveDrag] = useState(null);
 
+    // Persisted state
     const [{ formationA, formationB, teamA, teamB }, setPersistedState] = useState(getInitialState);
 
+    // Add these lines:
     const setTeamA = (newTeamA) => setPersistedState(s => ({ ...s, teamA: newTeamA }));
     const setTeamB = (newTeamB) => setPersistedState(s => ({ ...s, teamB: newTeamB }));
     const setFormationA = (f) => setPersistedState(s => ({ ...s, formationA: f }));
     const setFormationB = (f) => setPersistedState(s => ({ ...s, formationB: f }));
 
+    // Save to localStorage on change
     useEffect(() => {
         localStorage.setItem(
             STORAGE_KEY,
@@ -2380,12 +2327,15 @@ function LineupCreator() {
         setCompareHover(null);
     };
 
+    // Helper: Clear all lineups
     function handleClearAll() {
         setTeamA(Array(10).fill(null));
         setTeamB(Array(10).fill(null));
     }
 
+    // Helper: Randomize best matchups (with shuffling)
     function handleRandomize() {
+        // Shuffle an array in-place (Fisher-Yates)
         function shuffle(array) {
             const arr = array.slice();
             for (let i = arr.length - 1; i > 0; i--) {
@@ -2395,29 +2345,36 @@ function LineupCreator() {
             return arr;
         }
 
+        // Get a shuffled copy of all players
         const shuffledPlayers = shuffle(players);
 
+        // Helper to pick best for a position from a pool
         function pickBest(pos, pool, taken) {
+            // Find all available for this position, not already taken
             const candidates = pool
                 .filter(p => p.position === pos && !taken.has(p.name))
                 .sort((a, b) => b.overall - a.overall);
             if (candidates.length > 0) return candidates[0];
+            // If none, fallback to any available not taken and not GK for outfield
             const fallback = pool
                 .filter(p => !taken.has(p.name) && (pos === "GK" ? p.position === "GK" : p.position !== "GK"))
                 .sort((a, b) => b.overall - a.overall);
             return fallback[0] || null;
         }
 
+        // Assign best for each slot in both teams, alternating picks for fairness, but with shuffled order
         const taken = new Set();
         const formationAPos = formationMap[formationA];
         const formationBPos = formationMap[formationB];
         let newTeamA = [];
         let newTeamB = [];
         for (let i = 0; i < 10; i++) {
+            // Team A pick
             const bestA = pickBest(formationAPos[i], shuffledPlayers, taken);
             newTeamA.push(bestA ? getPlayerWithPositionAttributes(bestA, formationAPos[i]) : null);
             if (bestA) taken.add(bestA.name);
 
+            // Team B pick
             const bestB = pickBest(formationBPos[i], shuffledPlayers, taken);
             newTeamB.push(bestB ? getPlayerWithPositionAttributes(bestB, formationBPos[i]) : null);
             if (bestB) taken.add(bestB.name);
@@ -2430,6 +2387,7 @@ function LineupCreator() {
         <div className="p-4 max-w-7xl mx-auto" ref={mainRef}>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
 
+            {/* Team selection fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <DroppableTeam
                     id="teamA"
@@ -2467,6 +2425,7 @@ function LineupCreator() {
                 />
             </div>
 
+            {/* Add Clear All and Randomizer buttons */}
             <div className="flex flex-wrap justify-center gap-4 mb-4">
                 <button
                     onClick={handleClearAll}
@@ -2484,6 +2443,7 @@ function LineupCreator() {
                 </button>
             </div>
 
+            {/* Show Attribute Comparison button */}
             {!showComparison && (
                 <div className="flex justify-center mb-4">
                     <button
@@ -2496,6 +2456,7 @@ function LineupCreator() {
                 </div>
             )}
 
+            {/* Comparison tables */}
             {showComparison && (
                 <>
                     <MirroredTeamAttributesBarChart
