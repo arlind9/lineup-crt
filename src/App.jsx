@@ -1881,6 +1881,85 @@ function GalleryImageModal({ open, image, caption, onClose }) {
     );
 }
 
+// --- Update GalleryThumbnail component ---
+function GalleryThumbnail({ url, caption, onClick }) {
+    const mediaType = getMediaType(url);
+    const [hovered, setHovered] = useState(false);
+
+    // For GIFs, you may want to use a static preview image if available.
+    // Here, we just use the GIF itself for both states.
+    const gifPreview = url;
+
+    return (
+        <div
+            className="bg-white rounded-xl shadow border p-2 flex flex-col items-center cursor-pointer hover:shadow-lg transition"
+            style={{
+                width: 240,
+                height: 180,
+                position: "relative",
+                overflow: "hidden",
+                background: "#eee"
+            }}
+            onClick={onClick}
+            tabIndex={0}
+            onKeyDown={e => {
+                if (e.key === "Enter" || e.key === " ") onClick();
+            }}
+            role="button"
+            aria-label="View image"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+        >
+            {mediaType === "video" ? (
+                <div className="w-full h-full flex items-center justify-center relative">
+                    <video
+                        src={url}
+                        className="object-contain w-full h-full rounded-lg bg-gray-100"
+                        style={{ background: "#eee" }}
+                        preload="metadata"
+                        muted
+                        playsInline
+                        controls={false}
+                        ref={ref => {
+                            if (ref) {
+                                if (hovered) {
+                                    ref.play();
+                                } else {
+                                    ref.pause();
+                                    ref.currentTime = 0;
+                                }
+                            }
+                        }}
+                    />
+                    {!hovered && (
+                        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl text-white/80 pointer-events-none">
+                            ▶
+                        </span>
+                    )}
+                </div>
+            ) : mediaType === "gif" ? (
+                <img
+                    src={hovered ? url : gifPreview}
+                    alt={caption || "GIF"}
+                    className="object-contain w-full h-full rounded-lg bg-gray-100"
+                    style={{ background: "#eee" }}
+                />
+            ) : (
+                <img
+                    src={url}
+                    alt={caption || "Gallery image"}
+                    className="object-contain w-full h-full rounded-lg bg-gray-100"
+                    style={{ background: "#eee" }}
+                    loading="lazy"
+                />
+            )}
+            {caption && (
+                <div className="text-xs text-gray-700 text-center mt-1 w-full truncate">{caption}</div>
+            )}
+        </div>
+    );
+}
+
 // --- Update GalleryPage component ---
 function GalleryPage() {
     const [images, setImages] = useState([]);
@@ -1936,49 +2015,14 @@ function GalleryPage() {
         <div className="w-full flex flex-col items-center">
             <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Gallery</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
-                {images.map((img, idx) => {
-                    const mediaType = getMediaType(img.url);
-                    return (
-                        <div
-                            key={idx}
-                            className="bg-white rounded-xl shadow border p-2 flex flex-col items-center cursor-pointer hover:shadow-lg transition"
-                            onClick={() => setModal({ open: true, image: img.url, caption: img.caption })}
-                            tabIndex={0}
-                            onKeyDown={e => {
-                                if (e.key === "Enter" || e.key === " ") setModal({ open: true, image: img.url, caption: img.caption });
-                            }}
-                            role="button"
-                            aria-label="View image"
-                        >
-                            {mediaType === "video" ? (
-                                <div className="relative w-full">
-                                    <video
-                                        src={img.url}
-                                        className="rounded-lg object-cover w-full max-h-72 mb-2"
-                                        style={{ aspectRatio: "4/3", background: "#eee" }}
-                                        preload="metadata"
-                                        muted
-                                        playsInline
-                                    />
-                                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl text-white/80 pointer-events-none">
-                                        ▶
-                                    </span>
-                                </div>
-                            ) : (
-                                <img
-                                    src={img.url}
-                                    alt={img.caption || `Gallery image ${idx + 1}`}
-                                    className="rounded-lg object-cover w-full max-h-72 mb-2"
-                                    style={{ aspectRatio: "4/3", background: "#eee" }}
-                                    loading="lazy"
-                                />
-                            )}
-                            {img.caption && (
-                                <div className="text-xs text-gray-700 text-center mt-1">{img.caption}</div>
-                            )}
-                        </div>
-                    );
-                })}
+                {images.map((img, idx) => (
+                    <GalleryThumbnail
+                        key={idx}
+                        url={img.url}
+                        caption={img.caption}
+                        onClick={() => setModal({ open: true, image: img.url, caption: img.caption })}
+                    />
+                ))}
             </div>
             <GalleryImageModal
                 open={modal.open}
