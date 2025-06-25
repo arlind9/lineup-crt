@@ -16,15 +16,32 @@ const glass = "backdrop-blur-md bg-white/80 shadow-lg border border-gray-200";
 const PLACEHOLDER_IMG = "https://ui-avatars.com/api/?name=Player&background=eee&color=888&size=128&rounded=true";
 
 const formationMap = {
-    "4-4-1": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST"],
+    // 6v6 (6 players: GK + 5)
+    "2-2-1": ["GK", "DF", "DF", "MF", "MF", "ST"],
+    "1-3-1": ["GK", "DF", "MF", "MF", "MF", "ST"],
+    "2-1-2": ["GK", "DF", "DF", "MF", "ST", "ST"],
+
+    // 10v10 (10 players: GK + 9)
     "4-3-2": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
+    "3-4-2": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST", "ST"],
+    "3-3-3": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST", "ST"],
     "4-2-3": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "ST", "ST", "ST"],
     "5-2-2": ["GK", "DF", "DF", "DF", "DF", "DF", "MF", "MF", "ST", "ST"],
     "5-3-1": ["GK", "DF", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST"],
-    "3-3-3": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST", "ST"],
-    "3-4-2": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST", "ST"],
-    "3-5-1": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "MF", "ST"],
-    "3-2-4": ["GK", "DF", "DF", "DF", "MF", "MF", "ST", "ST", "ST", "ST"],
+
+    // 11v11 (11 players: GK + 10)
+    "4-4-2": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST", "ST"],
+    "4-3-3": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST", "ST"],
+    "3-5-2": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "MF", "ST", "ST"],
+    "3-4-3": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST", "ST", "ST"],
+    "5-4-1": ["GK", "DF", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST"],
+    "4-5-1": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "MF", "ST"],
+    "5-3-2": ["GK", "DF", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
+};
+const FORMATIONS_BY_COUNT = {
+    "6v6": ["2-2-1", "1-3-1", "2-1-2"],
+    "10v10": ["4-3-2", "3-4-2", "3-3-3", "4-2-3", "5-2-2", "5-3-1"],
+    "11v11": ["4-4-2", "4-3-3", "3-5-2", "3-4-3", "5-4-1", "4-5-1", "5-3-2"],
 };
 
 function LoadingSpinner({ className = "" }) {
@@ -763,6 +780,122 @@ function DroppableTeam({
                 { top: "23%", left: "62%" },
                 { top: "23%", left: "85%" },
             ],
+            "2-2-1": [
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "30%" },
+                { top: "72%", left: "70%" },
+                { top: "51%", left: "30%" },
+                { top: "51%", left: "70%" },
+                { top: "23%", left: "50%" },
+            ],
+            "1-3-1": [
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "50%" },
+                { top: "51%", left: "20%" },
+                { top: "51%", left: "50%" },
+                { top: "51%", left: "80%" },
+                { top: "23%", left: "50%" },
+            ],
+            "2-1-2": [
+                { top: "92%", left: "50%" },
+                { top: "72%", left: "30%" },
+                { top: "72%", left: "70%" },
+                { top: "51%", left: "50%" },
+                { top: "23%", left: "30%" },
+                { top: "23%", left: "70%" },
+            ],
+            // Add these inside the layouts object in getSlotStyle:
+            "4-4-2": [
+                { top: "95%", left: "50%" },   // GK
+                { top: "75%", left: "15%" },   // LB
+                { top: "75%", left: "35%" },   // CB
+                { top: "75%", left: "65%" },   // CB
+                { top: "75%", left: "85%" },   // RB
+                { top: "50%", left: "15%" },   // LM
+                { top: "55%", left: "40%" },   // CM
+                { top: "55%", left: "60%" },   // CM
+                { top: "50%", left: "85%" },   // RM
+                { top: "25%", left: "35%" },   // ST
+                { top: "25%", left: "65%" },   // ST
+            ],
+            "4-3-3": [
+                { top: "95%", left: "50%" },   // GK
+                { top: "75%", left: "15%" },   // LB
+                { top: "75%", left: "35%" },   // CB
+                { top: "75%", left: "65%" },   // CB
+                { top: "75%", left: "85%" },   // RB
+                { top: "50%", left: "30%" },   // LCM
+                { top: "50%", left: "50%" },   // CM
+                { top: "50%", left: "70%" },   // RCM
+                { top: "30%", left: "20%" },   // LW
+                { top: "25%", left: "50%" },   // ST
+                { top: "30%", left: "80%" },   // RW
+            ],
+            "3-5-2": [
+                { top: "95%", left: "50%" },   // GK
+                { top: "75%", left: "20%" },   // CB
+                { top: "75%", left: "50%" },   // CB
+                { top: "75%", left: "80%" },   // CB
+                { top: "45%", left: "10%" },   // LWB
+                { top: "45%", left: "90%" },   // RWB
+                { top: "55%", left: "30%" },   // LCM
+                { top: "55%", left: "50%" },   // CM
+                { top: "55%", left: "70%" },   // RCM
+                { top: "20%", left: "40%" },   // ST
+                { top: "20%", left: "60%" },   // ST
+            ],
+            "3-4-3": [
+                { top: "95%", left: "50%" },   // GK
+                { top: "75%", left: "20%" },   // CB
+                { top: "75%", left: "50%" },   // CB
+                { top: "75%", left: "80%" },   // CB
+                { top: "50%", left: "10%" },   // LM
+                { top: "50%", left: "90%" },   // RM
+                { top: "55%", left: "60%" },   // CM
+                { top: "55%", left: "40%" },   // CM
+                { top: "30%", left: "20%" },   // ST
+                { top: "30%", left: "80%" },   // RW
+                { top: "20%", left: "50%" },   // CF
+            ],
+            "5-4-1": [
+                { top: "95%", left: "50%" },   // GK
+                { top: "75%", left: "10%" },   // LB
+                { top: "75%", left: "30%" },   // CB
+                { top: "75%", left: "50%" },   // CB
+                { top: "75%", left: "70%" },   // CB
+                { top: "75%", left: "90%" },   // RB
+                { top: "55%", left: "25%" },   // LM
+                { top: "55%", left: "50%" },   // CM
+                { top: "55%", left: "75%" },   // RM
+                { top: "33%", left: "50%" },   // CAM
+                { top: "13%", left: "50%" },   // ST
+            ],
+            "4-5-1": [
+                { top: "95%", left: "50%" },   // GK
+                { top: "75%", left: "15%" },   // LB
+                { top: "75%", left: "35%" },   // CB
+                { top: "75%", left: "65%" },   // CB
+                { top: "75%", left: "85%" },   // RB
+                { top: "50%", left: "15%" },   // LM
+                { top: "55%", left: "35%" },   // LCM
+                { top: "55%", left: "65%" },   // RCM
+                { top: "50%", left: "85%" },   // RM
+                { top: "33%", left: "50%" },   // CAM
+                { top: "13%", left: "50%" },   // ST
+            ],
+            "5-3-2": [
+                { top: "95%", left: "50%" },   // GK
+                { top: "75%", left: "10%" },   // LB
+                { top: "75%", left: "30%" },   // CB
+                { top: "75%", left: "50%" },   // CB
+                { top: "75%", left: "70%" },   // CB
+                { top: "75%", left: "90%" },   // RB
+                { top: "50%", left: "30%" },   // LCM
+                { top: "50%", left: "50%" },   // CM
+                { top: "50%", left: "70%" },   // RCM
+                { top: "20%", left: "40%" },   // ST
+                { top: "20%", left: "60%" },   // ST
+            ],
         };
         const layout = layouts[formation] || layouts["3-3-3"];
         return layout[idx] || { top: "50%", left: "50%" };
@@ -778,17 +911,13 @@ function DroppableTeam({
                 <div className="absolute left-1/2 top-0 -translate-x-1/2 border-2 border-white w-[40%] h-[16%] rounded-t-lg" style={{ borderBottom: "none" }} />
             </div>
             <div className="absolute left-4 top-4 flex items-center gap-2 z-10">
-                <h3 className="font-bold text-lg text-white drop-shadow">{label} <span className="text-green-200">({players.filter(Boolean).length}/10)</span></h3>
+                <h3 className="font-bold text-lg text-white drop-shadow">{label} <span className="text-green-200">({players.filter(Boolean).length}/{players.length})</span></h3>
                 <select
                     value={formation}
                     onChange={(e) => onFormationChange(e.target.value)}
                     className="border p-1 rounded text-sm bg-white/90 shadow"
                 >
-                    {[
-                        "3-3-3", "3-4-2", "3-5-1", "3-2-4",
-                        "4-4-1", "4-3-2", "4-2-3",
-                        "5-2-2", "5-3-1"
-                    ].map(f => (
+                    {FORMATIONS_BY_COUNT[players.length === 11 ? "11v11" : players.length === 10 ? "10v10" : "6v6"].map(f => (
                         <option key={f} value={f}>{f}</option>
                     ))}
                 </select>
@@ -1892,13 +2021,10 @@ function GalleryThumbnail({ url, caption, onClick }) {
 
     return (
         <div
-            className="
-                bg-white rounded-xl shadow border p-2 flex flex-col items-center cursor-pointer hover:shadow-lg transition
-                w-full max-w-[180px] min-h-[120px] aspect-[4/3] justify-center
-                md:max-w-[240px] md:min-h-[160px]
-                lg:max-w-[280px] lg:min-h-[180px]
-            "
+            className="bg-white rounded-xl shadow border p-2 flex flex-col items-center cursor-pointer hover:shadow-lg transition"
             style={{
+                width: 240,
+                height: 180,
                 position: "relative",
                 overflow: "hidden",
                 background: "#eee"
@@ -2017,19 +2143,7 @@ function GalleryPage() {
     return (
         <div className="w-full flex flex-col items-center">
             <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Gallery</h1>
-            <div
-                className="
-                    grid
-                    grid-cols-2
-                    sm:grid-cols-2
-                    md:grid-cols-3
-                    gap-4
-                    w-full
-                    max-w-5xl
-                    justify-items-center
-                    px-2
-                "
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
                 {images.map((img, idx) => (
                     <GalleryThumbnail
                         key={idx}
@@ -2201,27 +2315,34 @@ export default function App() {
 }
 
 function LineupCreator() {
-    // Use unique keys for localStorage
+    const PLAYER_COUNTS = {
+        "11v11": 11,
+        "10v10": 10,
+        "6v6": 6,
+    };
+    const DEFAULT_MODE = "11v11";
+
     const STORAGE_KEY = "lineupCreatorStateV1";
 
-    // Load from localStorage or use defaults
     function getInitialState() {
         try {
             const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
             if (saved) {
                 return {
-                    formationA: saved.formationA || "3-3-3",
-                    formationB: saved.formationB || "3-3-3",
-                    teamA: Array.isArray(saved.teamA) ? saved.teamA : Array(10).fill(null),
-                    teamB: Array.isArray(saved.teamB) ? saved.teamB : Array(10).fill(null),
+                    mode: saved.mode || DEFAULT_MODE,
+                    formationA: saved.formationA || FORMATIONS_BY_COUNT[saved.mode || DEFAULT_MODE][0],
+                    formationB: saved.formationB || FORMATIONS_BY_COUNT[saved.mode || DEFAULT_MODE][0],
+                    teamA: Array.isArray(saved.teamA) ? saved.teamA : Array(PLAYER_COUNTS[saved.mode || DEFAULT_MODE]).fill(null),
+                    teamB: Array.isArray(saved.teamB) ? saved.teamB : Array(PLAYER_COUNTS[saved.mode || DEFAULT_MODE]).fill(null),
                 };
             }
         } catch { }
         return {
-            formationA: "3-3-3",
-            formationB: "3-3-3",
-            teamA: Array(10).fill(null),
-            teamB: Array(10).fill(null),
+            mode: DEFAULT_MODE,
+            formationA: FORMATIONS_BY_COUNT[DEFAULT_MODE][0],
+            formationB: FORMATIONS_BY_COUNT[DEFAULT_MODE][0],
+            teamA: Array(PLAYER_COUNTS[DEFAULT_MODE]).fill(null),
+            teamB: Array(PLAYER_COUNTS[DEFAULT_MODE]).fill(null),
         };
     }
 
@@ -2232,22 +2353,29 @@ function LineupCreator() {
     const [compareHover, setCompareHover] = useState(null);
     const [activeDrag, setActiveDrag] = useState(null);
 
-    // Persisted state
-    const [{ formationA, formationB, teamA, teamB }, setPersistedState] = useState(getInitialState);
+    const [{ mode, formationA, formationB, teamA, teamB }, setPersistedState] = useState(getInitialState);
 
-    // Add these lines:
     const setTeamA = (newTeamA) => setPersistedState(s => ({ ...s, teamA: newTeamA }));
     const setTeamB = (newTeamB) => setPersistedState(s => ({ ...s, teamB: newTeamB }));
     const setFormationA = (f) => setPersistedState(s => ({ ...s, formationA: f }));
     const setFormationB = (f) => setPersistedState(s => ({ ...s, formationB: f }));
+    const setModeAndResetTeams = (newMode) => {
+        setPersistedState(s => ({
+            ...s,
+            mode: newMode,
+            formationA: FORMATIONS_BY_COUNT[newMode][0],
+            formationB: FORMATIONS_BY_COUNT[newMode][0],
+            teamA: Array(PLAYER_COUNTS[newMode]).fill(null),
+            teamB: Array(PLAYER_COUNTS[newMode]).fill(null),
+        }));
+    };
 
-    // Save to localStorage on change
     useEffect(() => {
         localStorage.setItem(
             STORAGE_KEY,
-            JSON.stringify({ formationA, formationB, teamA, teamB })
+            JSON.stringify({ mode, formationA, formationB, teamA, teamB })
         );
-    }, [formationA, formationB, teamA, teamB]);
+    }, [mode, formationA, formationB, teamA, teamB]);
 
     useEffect(() => {
         fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
@@ -2386,15 +2514,12 @@ function LineupCreator() {
         setCompareHover(null);
     };
 
-    // Helper: Clear all lineups
     function handleClearAll() {
-        setTeamA(Array(10).fill(null));
-        setTeamB(Array(10).fill(null));
+        setTeamA(Array(PLAYER_COUNTS[mode]).fill(null));
+        setTeamB(Array(PLAYER_COUNTS[mode]).fill(null));
     }
 
-    // Helper: Randomize best matchups (with shuffling)
     function handleRandomize() {
-        // Shuffle an array in-place (Fisher-Yates)
         function shuffle(array) {
             const arr = array.slice();
             for (let i = arr.length - 1; i > 0; i--) {
@@ -2404,36 +2529,29 @@ function LineupCreator() {
             return arr;
         }
 
-        // Get a shuffled copy of all players
         const shuffledPlayers = shuffle(players);
 
-        // Helper to pick best for a position from a pool
         function pickBest(pos, pool, taken) {
-            // Find all available for this position, not already taken
             const candidates = pool
                 .filter(p => p.position === pos && !taken.has(p.name))
                 .sort((a, b) => b.overall - a.overall);
             if (candidates.length > 0) return candidates[0];
-            // If none, fallback to any available not taken and not GK for outfield
             const fallback = pool
                 .filter(p => !taken.has(p.name) && (pos === "GK" ? p.position === "GK" : p.position !== "GK"))
                 .sort((a, b) => b.overall - a.overall);
             return fallback[0] || null;
         }
 
-        // Assign best for each slot in both teams, alternating picks for fairness, but with shuffled order
         const taken = new Set();
         const formationAPos = formationMap[formationA];
         const formationBPos = formationMap[formationB];
         let newTeamA = [];
         let newTeamB = [];
-        for (let i = 0; i < 10; i++) {
-            // Team A pick
+        for (let i = 0; i < PLAYER_COUNTS[mode]; i++) {
             const bestA = pickBest(formationAPos[i], shuffledPlayers, taken);
             newTeamA.push(bestA ? getPlayerWithPositionAttributes(bestA, formationAPos[i]) : null);
             if (bestA) taken.add(bestA.name);
 
-            // Team B pick
             const bestB = pickBest(formationBPos[i], shuffledPlayers, taken);
             newTeamB.push(bestB ? getPlayerWithPositionAttributes(bestB, formationBPos[i]) : null);
             if (bestB) taken.add(bestB.name);
@@ -2444,9 +2562,20 @@ function LineupCreator() {
 
     return (
         <div className="p-4 max-w-7xl mx-auto" ref={mainRef}>
+            <div className="flex justify-center mb-4">
+                <label className="mr-2 font-semibold text-green-900">Players per team:</label>
+                <select
+                    value={mode}
+                    onChange={e => setModeAndResetTeams(e.target.value)}
+                    className="border p-1 rounded text-sm bg-white/90 shadow"
+                >
+                    <option value="11v11">11v11</option>
+                    <option value="10v10">10v10</option>
+                    <option value="6v6">6v6</option>
+                </select>
+            </div>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
 
-            {/* Team selection fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <DroppableTeam
                     id="teamA"
@@ -2484,7 +2613,6 @@ function LineupCreator() {
                 />
             </div>
 
-            {/* Add Clear All and Randomizer buttons */}
             <div className="flex flex-wrap justify-center gap-4 mb-4">
                 <button
                     onClick={handleClearAll}
@@ -2502,7 +2630,6 @@ function LineupCreator() {
                 </button>
             </div>
 
-            {/* Show Attribute Comparison button */}
             {!showComparison && (
                 <div className="flex justify-center mb-4">
                     <button
@@ -2515,7 +2642,6 @@ function LineupCreator() {
                 </div>
             )}
 
-            {/* Comparison tables */}
             {showComparison && (
                 <>
                     <MirroredTeamAttributesBarChart
