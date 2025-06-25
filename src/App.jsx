@@ -876,12 +876,12 @@ function DroppableTeam({
                 { top: "75%", left: "35%" },   // CB
                 { top: "75%", left: "65%" },   // CB
                 { top: "75%", left: "85%" },   // RB
-                { top: "50%", left: "15%" },   // LM
-                { top: "55%", left: "35%" },   // LCM
-                { top: "55%", left: "65%" },   // RCM
-                { top: "50%", left: "85%" },   // RM
-                { top: "33%", left: "50%" },   // CAM
-                { top: "13%", left: "50%" },   // ST
+                { top: "45%", left: "10%" },   // LM
+                { top: "55%", left: "30%" },   // LCM
+                { top: "55%", left: "70%" },   // RCM
+                { top: "45%", left: "90%" },   // RM
+                { top: "45%", left: "50%" },   // CAM
+                { top: "20%", left: "50%" },   // ST
             ],
             "5-3-2": [
                 { top: "95%", left: "50%" },   // GK
