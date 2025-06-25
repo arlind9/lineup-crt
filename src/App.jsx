@@ -1050,6 +1050,8 @@ function DroppableTeam({
     );
 }
 
+// Replace the DraggablePlayer component with this version for mobile minimalism
+
 function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selected, onDragStart, onDragEnd }) {
     const dragRef = useRef(null);
 
@@ -1089,7 +1091,8 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
                     "border cursor-move space-y-1 transition-all duration-150",
                     (small ? "p-1 text-xs min-h-0" : "p-4 text-sm"),
                     "rounded-xl shadow",
-                    cardHighlight
+                    cardHighlight,
+                    "draggable-player-card"
                 ].join(" ")
             }
             draggable
@@ -1103,30 +1106,54 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
             }}
             onDragEnd={onDragEnd}
         >
-            <div className="flex justify-center mb-2">
-                <img
-                    src={imageUrl}
-                    alt={player.name}
-                    className={small ? "w-10 h-10 rounded-full object-cover border" : "w-16 h-16 rounded-full object-cover border"}
-                    style={{ background: "#eee" }}
-                    loading="lazy"
-                />
+            {/* Minimal card for mobile: only name and OVR */}
+            <div className="block sm:hidden text-center">
+                <div className="font-semibold text-xs truncate">{player.name}</div>
+                <div className="text-xs font-bold">OVR: {player.overall}</div>
             </div>
-            <div className={small ? "font-semibold text-xs truncate" : "font-semibold text-base truncate"}>{player.name}</div>
-            <div className={small ? "text-[10px] text-muted-foreground" : "text-xs text-muted-foreground"}>{player.position}</div>
-            {!small && (
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                    <span>Speed: {player.speed}</span>
-                    <span>Shooting: {player.shooting}</span>
-                    <span>Passing: {player.passing}</span>
-                    <span>Dribbling: {player.dribbling}</span>
-                    <span>Physical: {player.physical}</span>
-                    <span>Defending: {player.defending}</span>
-                    <span>Weak Foot: {player.weakFoot}</span>
-                    <span>Goalkeeping: {player.goalkeeping}</span>
+            {/* Full card for desktop */}
+            <div className="hidden sm:block">
+                <div className="flex justify-center mb-2">
+                    <img
+                        src={imageUrl}
+                        alt={player.name}
+                        className={small ? "w-10 h-10 rounded-full object-cover border" : "w-16 h-16 rounded-full object-cover border"}
+                        style={{ background: "#eee" }}
+                        loading="lazy"
+                    />
                 </div>
-            )}
-            <div className={small ? "text-xs font-bold pt-0" : "text-sm font-bold pt-1"}>Overall: {player.overall}</div>
+                <div className={small ? "font-semibold text-xs truncate" : "font-semibold text-base truncate"}>{player.name}</div>
+                <div className={small ? "text-[10px] text-muted-foreground" : "text-xs text-muted-foreground"}>{player.position}</div>
+                {!small && (
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                        <span>Speed: {player.speed}</span>
+                        <span>Shooting: {player.shooting}</span>
+                        <span>Passing: {player.passing}</span>
+                        <span>Dribbling: {player.dribbling}</span>
+                        <span>Physical: {player.physical}</span>
+                        <span>Defending: {player.defending}</span>
+                        <span>Weak Foot: {player.weakFoot}</span>
+                        <span>Goalkeeping: {player.goalkeeping}</span>
+                    </div>
+                )}
+                <div className={small ? "text-xs font-bold pt-0" : "text-sm font-bold pt-1"}>Overall: {player.overall}</div>
+            </div>
+            <style>{`
+                @media (max-width: 640px) {
+                    .draggable-player-card {
+                        padding: 0.25rem !important;
+                        min-width: 44px !important;
+                        max-width: 70px !important;
+                        min-height: 28px !important;
+                        max-height: 40px !important;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 0.1rem;
+                    }
+                }
+            `}</style>
         </Card>
     );
 }
