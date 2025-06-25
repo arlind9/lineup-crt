@@ -1892,10 +1892,13 @@ function GalleryThumbnail({ url, caption, onClick }) {
 
     return (
         <div
-            className="bg-white rounded-xl shadow border p-2 flex flex-col items-center cursor-pointer hover:shadow-lg transition"
+            className="
+                bg-white rounded-xl shadow border p-2 flex flex-col items-center cursor-pointer hover:shadow-lg transition
+                w-full max-w-[180px] min-h-[120px] aspect-[4/3] justify-center
+                md:max-w-[240px] md:min-h-[160px]
+                lg:max-w-[280px] lg:min-h-[180px]
+            "
             style={{
-                width: 240,
-                height: 180,
                 position: "relative",
                 overflow: "hidden",
                 background: "#eee"
@@ -2014,7 +2017,19 @@ function GalleryPage() {
     return (
         <div className="w-full flex flex-col items-center">
             <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Gallery</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
+            <div
+                className="
+                    grid
+                    grid-cols-2
+                    sm:grid-cols-2
+                    md:grid-cols-3
+                    gap-4
+                    w-full
+                    max-w-5xl
+                    justify-items-center
+                    px-2
+                "
+            >
                 {images.map((img, idx) => (
                     <GalleryThumbnail
                         key={idx}
