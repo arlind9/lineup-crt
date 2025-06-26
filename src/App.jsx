@@ -3222,8 +3222,8 @@ function MotmStatsFeature() {
             <h2 className="text-xl font-bold mb-4 text-center text-blue-900">MOTM per kete jave</h2>
             {latest ? (
                 <div className="flex flex-col sm:flex-row gap-6 justify-center items-start mt-4">
-                    <MotmStatsCard player={before} title="Before" />
-                    <MotmStatsCard player={latest} title="After" />
+                    <MotmStatsCard player={before} title="Atributet origjinale" />
+                    <MotmStatsCard player={latest} title="Atributet e javes" />
                 </div>
             ) : (
                 <div className="text-center text-red-600">No MOTM data found.</div>
@@ -3318,8 +3318,8 @@ function MotmBeforeAfterModal({ open, row, onClose }) {
                     {row.playerName} - {row.date}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-6 justify-center items-start mt-2">
-                    <MotmStatsCard player={row.before} title="Before" />
-                    <MotmStatsCard player={row.after} title="After" />
+                    <MotmStatsCard player={row.before} title="Atributet origjinale" />
+                    <MotmStatsCard player={row.after} title="Atributet e javes" />
                 </div>
             </div>
         </div>
@@ -3404,7 +3404,7 @@ function AllMotmStatsCards({ stats }) {
 
     return (
         <div className="my-8 w-full max-w-5xl mx-auto bg-blue-50 rounded-xl shadow p-6 border">
-            <h2 className="text-xl font-bold mb-4 text-center text-blue-900">All MOTM Winners (Stats at Award)</h2>
+            <h2 className="text-xl font-bold mb-4 text-center text-blue-900">Te gjithe fituesit (Atributet jane te lojtarit ne javet perkatese)</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {stats.map((row, idx) => {
                     const player = row.after;
