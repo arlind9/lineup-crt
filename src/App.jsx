@@ -1343,6 +1343,28 @@ function Home() {
                                     </tr>
                                 </tbody>
                             </table>
+                            <div className="w-full max-w-md">
+                                <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">  </h2>
+                                {/* Last week's MOTM table */}
+                                <table className="w-full shadow-xl rounded-2xl overflow-hidden border-4 border-blue-300 bg-blue-50/80 mb-4">
+                                    <tbody>
+                                        <tr>
+                                            <td className="p-4 text-center font-bold text-blue-900 text-base sm:text-lg tracking-wide">
+                                                {data.length > 0 ? (
+                                                    <>
+                                                        Njeriu i ndeshjes për ndeshjen e kaluar, luajtur ne date: <span className="text-blue-700 underline">{formatDate(data[0][Object.keys(data[0])[0]])}</span> është <br />
+                                                        <span className="text-green-700 underline text-xl sm:text-2xl">
+                                                            {data[0][Object.keys(data[0])[1]]}
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    "Nuk ka të dhëna për MOTM."
+                                                )}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
