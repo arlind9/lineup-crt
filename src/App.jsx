@@ -2121,6 +2121,10 @@ function GalleryPage() {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modal, setModal] = useState({ open: false, image: null, caption: "" });
+    const [page, setPage] = useState(1);
+
+    const PAGE_SIZE = 9;
+    const totalPages = Math.ceil(images.length / PAGE_SIZE);
 
     useEffect(() => {
         setLoading(true);
@@ -2156,6 +2160,11 @@ function GalleryPage() {
         return () => window.removeEventListener("keydown", handleKey);
     }, [modal.open]);
 
+    // Ensure page is valid if images change
+    useEffect(() => {
+        if (page > totalPages) setPage(totalPages || 1);
+    }, [images, totalPages, page]);
+
     if (loading) return <LoadingSpinner />;
 
     if (!images.length) {
@@ -2167,19 +2176,57 @@ function GalleryPage() {
         );
     }
 
+    const pagedImages = images.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+    function PageSelector() {
+        if (totalPages <= 1) return null;
+        return (
+            <div className="flex justify-center items-center gap-2 my-4">
+                <button
+                    className="px-2 py-1 rounded bg-gray-200 text-gray-700 font-semibold disabled:opacity-50"
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
+                    type="button"
+                >
+                    &lt; Prev
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                        key={i + 1}
+                        className={`px-2 py-1 rounded font-semibold ${page === i + 1 ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700"}`}
+                        onClick={() => setPage(i + 1)}
+                        type="button"
+                    >
+                        {i + 1}
+                    </button>
+                ))}
+                <button
+                    className="px-2 py-1 rounded bg-gray-200 text-gray-700 font-semibold disabled:opacity-50"
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === totalPages}
+                    type="button"
+                >
+                    Next &gt;
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full flex flex-col items-center">
             <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Gallery</h1>
+            <PageSelector />
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
-                {images.map((img, idx) => (
+                {pagedImages.map((img, idx) => (
                     <GalleryThumbnail
-                        key={idx}
+                        key={idx + (page - 1) * PAGE_SIZE}
                         url={img.url}
                         caption={img.caption}
                         onClick={() => setModal({ open: true, image: img.url, caption: img.caption })}
                     />
                 ))}
             </div>
+            <PageSelector />
             <GalleryImageModal
                 open={modal.open}
                 image={modal.image}
@@ -2189,11 +2236,15 @@ function GalleryPage() {
         </div>
     );
 }
-
 export default function App() {
-    const [view, setView] = useState("home");
-    const [scrolled, setScrolled] = useState(false);
+    const [view, setView] = useState(() => {
+        return localStorage.getItem("currentView") || "home";
+    });    const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    useEffect(() => {
+        localStorage.setItem("currentView", view);
+    }, [view]);
 
     useEffect(() => {
         function onScroll() {
