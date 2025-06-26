@@ -1320,6 +1320,25 @@ function Home() {
                             </span>
                         </div>
                     </div>
+                    <div className="w-full max-w-md">
+                        <div
+                            className="bg-purple-100 border-2 border-purple-300 rounded-xl shadow p-3 sm:p-6 flex flex-col items-center cursor-pointer hover:shadow-lg active:scale-[0.98] transition min-h-[120px]"
+                            onClick={() => goTo("gallery")}
+                            tabIndex={0}
+                            role="button"
+                            onKeyDown={e => { if (e.key === "Enter" || e.key === " ") goTo("gallery"); }}
+                            aria-label="Go to Gallery"
+                        >
+                            <span className="text-xl sm:text-3xl mb-1 sm:mb-2">🖼️</span>
+                            <h3 className="text-base sm:text-xl font-bold mb-1 text-purple-900 text-center">Gallery</h3>
+                            <p className="text-gray-700 text-center text-xs sm:text-base mb-2">
+                                Browse and view photos and videos from our football group events and matches.
+                            </p>
+                            <span className="text-blue-700 font-semibold underline text-xs sm:text-sm mt-1">
+                                Go to Gallery
+                            </span>
+                        </div>
+                    </div>
                 </div>
                 <div className="flex flex-col items-center justify-center w-full">
                     <div className="w-full max-w-md">
