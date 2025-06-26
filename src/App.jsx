@@ -3404,7 +3404,7 @@ function AllMotmStatsCards({ stats }) {
 
     return (
         <div className="my-8 w-full max-w-5xl mx-auto bg-blue-50 rounded-xl shadow p-6 border">
-            <h2 className="text-xl font-bold mb-4 text-center text-blue-900">Te gjithe fituesit (Atributet jane te lojtarit ne javet perkatese)</h2>
+            <h2 className="text-xl font-bold mb-4 text-center text-blue-900">Te gjithe fituesit (Atributet jane te lojtarit ne javet perkatese, kliko karten e lojtarit per me shume)</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {stats.map((row, idx) => {
                     const player = row.after;
