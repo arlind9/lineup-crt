@@ -1397,7 +1397,7 @@ function Home() {
                                                                 const playerName = data[0][Object.keys(data[0])[1]];
                                                                 const earner = topEarners.find(e => e.Player === playerName);
                                                                 return earner
-                                                                    ? `Me këtë fitore ${playerName} shkon në ${earner.Awards} MOTM awards, me këtë fitore ${playerName} kalon në vendin ${translateRankToAlbanian(earner.Rank)}`
+                                                                    ? `Me këtë fitore ${playerName} shkon në ${earner.Awards} MOTM awards, dhe kalon në vendin ${translateRankToAlbanian(earner.Rank)}`
                                                                     : null;
                                                             })()}
                                                         </span>
