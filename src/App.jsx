@@ -1276,6 +1276,22 @@ function Home() {
         window.dispatchEvent(event);
     }
 
+    function translateRankToAlbanian(rank) {
+        const map = {
+            1: "e parë",
+            2: "e dytë",
+            3: "e tretë",
+            4: "e katërt",
+            5: "e pestë",
+            6: "e gjashtë",
+            7: "e shtatë",
+            8: "e tetë",
+            9: "e nëntë",
+            10: "e dhjetë"
+        };
+        return map[rank] || `e ${rank}-të`;
+    }
+
     if (loading) return <LoadingSpinner />;
 
     return (
@@ -1374,6 +1390,16 @@ function Home() {
                                                         Njeriu i ndeshjes për ndeshjen e kaluar, luajtur ne date: <span className="text-blue-700 underline">{formatDate(data[0][Object.keys(data[0])[0]])}</span> është <br />
                                                         <span className="text-green-700 underline text-xl sm:text-2xl">
                                                             {data[0][Object.keys(data[0])[1]]}
+                                                        </span>
+                                                        <br />
+                                                        <span className="text-gray-700 text-sm font-medium">
+                                                            {(() => {
+                                                                const playerName = data[0][Object.keys(data[0])[1]];
+                                                                const earner = topEarners.find(e => e.Player === playerName);
+                                                                return earner
+                                                                    ? `Me këtë fitore ${playerName} shkon në ${earner.Awards} MOTM awards, me këtë fitore ${playerName} kalon në vendin ${translateRankToAlbanian(earner.Rank)}`
+                                                                    : null;
+                                                            })()}
                                                         </span>
                                                     </>
                                                 ) : (
