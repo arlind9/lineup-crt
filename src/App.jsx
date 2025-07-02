@@ -409,7 +409,7 @@ function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel
 }
 
 function RadarCompare({ players }) {
-    if (players.length < 2) return null;
+    if (!players || players.length === 0) return null;
 
     const allOutfield = players.every(p => p.position !== "GK");
     const attrs = allOutfield
@@ -1212,7 +1212,8 @@ function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragSta
 function getNextWednesday() {
     const today = new Date();
     const dayOfWeek = today.getDay();
-    const daysUntilNextWednesday = (3 - dayOfWeek + 7) % 7 || 7;
+    let daysUntilNextWednesday = (3 - dayOfWeek + 7) % 7;
+    // If today is Wednesday, daysUntilNextWednesday will be 0
     const nextWednesday = new Date(today);
     nextWednesday.setDate(today.getDate() + daysUntilNextWednesday);
     const dd = String(nextWednesday.getDate()).padStart(2, '0');
@@ -1227,6 +1228,8 @@ function Home() {
     const [showAll, setShowAll] = useState(false);
     const [showAllEarners, setShowAllEarners] = useState(false);
     const [loading, setLoading] = useState(true);
+
+
 
     const formatDate = (input) => {
         const date = new Date(input);
@@ -1270,6 +1273,11 @@ function Home() {
 
     const visibleData = showAll ? data : data.slice(0, 3);
     const visibleEarners = showAllEarners ? topEarners : topEarners.slice(0, 3);
+
+    const today = new Date();
+    const todayStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+    const nextWednesdayStr = getNextWednesday();
+    const isMatchDay = todayStr === nextWednesdayStr;
 
     function goTo(view) {
         const event = new CustomEvent("setView", { detail: view });
@@ -1370,10 +1378,15 @@ function Home() {
                                         <td className="p-3 sm:p-8 text-center font-bold text-yellow-900 text-sm sm:text-lg tracking-wide">
                                             Ndeshja e radhës do të luhet të mërkurën e ardhshme<br />
                                             në datë <span className="text-blue-700 underline">{getNextWednesday()}</span><br />
-                                            në orën <span className="text-blue-700 underline">20:30</span><br />
+                                            në orën <span className="text-blue-700 underline">20:00</span><br />
                                             <span className="block mt-2 text-sm sm:text-base font-semibold text-yellow-800">
                                                 Lokacioni: <span className="text-blue-700 underline">Laprake</span>
                                             </span>
+                                            {isMatchDay && (
+                                                <div className="mt-3 text-green-700 text-base font-bold animate-pulse">
+                                                    Dita e ndeshjes, ne oren 20:00 ju presim!
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1686,7 +1699,9 @@ function PlayerDatabase() {
     function TopEarnersCompare({ selected }) {
         if (!selected.length) return null;
         const selectedEarners = selected.map(sel => {
-            const found = topEarners.find(e => e.Player === sel.name);
+            const found = topEarners.find(
+                e => e.Player && e.Player.trim().toLowerCase() === sel.name.trim().toLowerCase()
+            );
             return {
                 name: sel.name,
                 awards: found ? found.Awards : 0,
@@ -1719,7 +1734,7 @@ function PlayerDatabase() {
     }
 
     function RadarCompare({ players }) {
-        if (players.length < 2) return null;
+        if (!players || players.length === 0) return null;
 
         const allOutfield = players.every(p => p.position !== "GK");
         const attrs = allOutfield
@@ -1949,7 +1964,7 @@ function PlayerDatabase() {
                 </div>
             </div>
             {/* --- Existing view mode and player grid/list code follows --- */}
-            {selected.length >= 2 && (
+            {selected.length > 0 && (
                 <div className="mb-4">
                     <RadarCompare players={selected} />
                 </div>
