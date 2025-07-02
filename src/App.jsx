@@ -451,7 +451,8 @@ function RadarCompare({ players }) {
     function getPoints(player, idx) {
         return attrs.map((attr, i) => {
             const value = player[attr.key] || 0;
-            const r = (value / attr.max) * radius;
+            const min = attr.key === "weakFoot" ? 0 : 50;
+            const r = value <= min ? 0 : ((value - min) / (attr.max - min)) * radius;
             const angle = i * angleStep - Math.PI / 2;
             return [
                 center + r * Math.cos(angle),
@@ -1776,7 +1777,8 @@ function PlayerDatabase() {
         function getPoints(player, idx) {
             return attrs.map((attr, i) => {
                 const value = player[attr.key] || 0;
-                const r = (value / attr.max) * radius;
+                const min = attr.key === "weakFoot" ? 0 : 35;
+                const r = value <= min ? 0 : ((value - min) / (attr.max - min)) * radius;
                 const angle = i * angleStep - Math.PI / 2;
                 return [
                     center + r * Math.cos(angle),
