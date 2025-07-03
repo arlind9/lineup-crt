@@ -3217,10 +3217,7 @@ function MotmStatsFeature() {
         }
     }
 
-    // Card background and highlight helpers (reuse from Player Database)
-    // Use special MOTM colors instead of the default scheme
-    function getMotmCardBg(overall) {
-        return getMotmCardBgByOverall(overall);
+
     }
     function getCardHighlight({ assigned, selected }) {
         if (assigned) return "ring-2 ring-green-400 ring-offset-2";
@@ -3415,9 +3412,7 @@ function MotmBeforeAfterModal({ open, row, onClose }) {
                 return 0;
         }
     }
-    // Use global helper for MOTM colors
-    function getMotmCardBg(overall) {
-        return getMotmCardBgByOverall(overall);
+
     }
 
     return (
@@ -3457,8 +3452,7 @@ function AllMotmStatsCards({ stats }) {
     };
 
     // Card background and highlight helpers (reuse from Player Database)
-    function getMotmCardBg(overall) {
-        return getMotmCardBgByOverall(overall);
+
     }
     function getCardHighlight({ assigned, selected }) {
         if (assigned) return "ring-2 ring-green-400 ring-offset-2";
