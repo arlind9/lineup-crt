@@ -3209,9 +3209,12 @@ function MotmStatsFeature() {
 
     // Card background and highlight helpers (reuse from Player Database)
     function getCardBgByOverall(overall) {
-        if (overall >= 90) return "bg-gradient-to-br from-[#e5e4e2] via-[#b3e0fc] to-[#f8fafc] border-blue-300";
-        if (overall >= 80) return "bg-gradient-to-br from-yellow-200 via-yellow-100 to-white border-yellow-400";
-        return "bg-gradient-to-br from-gray-200 via-gray-100 to-white border-gray-300";
+        if (overall >= 90) {
+            // Black with stronger blue gradient
+            return "bg-gradient-to-br from-black via-[#89c9f8] to-[#cbeaff] border-blue-400";
+        }
+        // Black with gold
+        return "bg-gradient-to-br from-black via-yellow-500 to-yellow-300 border-yellow-400";
     }
     function getCardHighlight({ assigned, selected }) {
         if (assigned) return "ring-2 ring-green-400 ring-offset-2";
@@ -3406,9 +3409,12 @@ function MotmBeforeAfterModal({ open, row, onClose }) {
         }
     }
     function getCardBgByOverall(overall) {
-        if (overall >= 90) return "bg-gradient-to-br from-[#e5e4e2] via-[#b3e0fc] to-[#f8fafc] border-blue-300";
-        if (overall >= 80) return "bg-gradient-to-br from-yellow-200 via-yellow-100 to-white border-yellow-400";
-        return "bg-gradient-to-br from-gray-200 via-gray-100 to-white border-gray-300";
+        if (overall >= 90) {
+            // Black with stronger blue gradient
+            return "bg-gradient-to-br from-black via-[#89c9f8] to-[#cbeaff] border-blue-400";
+        }
+        // Black with gold
+        return "bg-gradient-to-br from-black via-yellow-500 to-yellow-300 border-yellow-400";
     }
 
     return (
@@ -3449,9 +3455,12 @@ function AllMotmStatsCards({ stats }) {
 
     // Card background and highlight helpers (reuse from Player Database)
     function getCardBgByOverall(overall) {
-        if (overall >= 90) return "bg-gradient-to-br from-[#e5e4e2] via-[#b3e0fc] to-[#f8fafc] border-blue-300";
-        if (overall >= 80) return "bg-gradient-to-br from-yellow-200 via-yellow-100 to-white border-yellow-400";
-        return "bg-gradient-to-br from-gray-200 via-gray-100 to-white border-gray-300";
+        if (overall >= 90) {
+            // Black with stronger blue gradient
+            return "bg-gradient-to-br from-black via-[#89c9f8] to-[#cbeaff] border-blue-400";
+        }
+        // Black with gold
+        return "bg-gradient-to-br from-black via-yellow-500 to-yellow-300 border-yellow-400";
     }
     function getCardHighlight({ assigned, selected }) {
         if (assigned) return "ring-2 ring-green-400 ring-offset-2";
