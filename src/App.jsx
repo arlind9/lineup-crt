@@ -424,25 +424,21 @@ function RadarCompare({ players }) {
     const allOutfield = players.every(p => p.position !== "GK");
     const attrs = allOutfield
         ? [
-            { key: "overall", label: "Overall", max: 100 },
             { key: "speed", label: "Speed", max: 100 },
             { key: "shooting", label: "Shooting", max: 100 },
             { key: "passing", label: "Passing", max: 100 },
             { key: "dribbling", label: "Dribbling", max: 100 },
             { key: "physical", label: "Physical", max: 100 },
-            { key: "defending", label: "Defending", max: 100 },
-            { key: "weakFoot", label: "Weak Foot", max: 50 }
+            { key: "defending", label: "Defending", max: 100 }
         ]
         : [
-            { key: "overall", label: "Overall", max: 100 },
             { key: "speed", label: "Speed", max: 100 },
             { key: "shooting", label: "Shooting", max: 100 },
             { key: "passing", label: "Passing", max: 100 },
             { key: "dribbling", label: "Dribbling", max: 100 },
             { key: "physical", label: "Physical", max: 100 },
             { key: "defending", label: "Defending", max: 100 },
-            { key: "goalkeeping", label: "Goalkeeping", max: 100 },
-            { key: "weakFoot", label: "Weak Foot", max: 50 }
+            { key: "goalkeeping", label: "Goalkeeping", max: 100 }
         ];
 
     const colors = [
@@ -461,7 +457,7 @@ function RadarCompare({ players }) {
     function getPoints(player, idx) {
         return attrs.map((attr, i) => {
             const value = player[attr.key] || 0;
-            const min = attr.key === "weakFoot" ? 0 : 50;
+            const min = 35;
             const r = value <= min ? 0 : ((value - min) / (attr.max - min)) * radius;
             const angle = i * angleStep - Math.PI / 2;
             return [
@@ -605,6 +601,7 @@ function RadarCompare({ players }) {
                     </svg>
                 </div>
                 <TopEarnersCompare selected={players} />
+
             </div>
         </div>
     );
@@ -1837,25 +1834,21 @@ function PlayerDatabase() {
         const allOutfield = players.every(p => p.position !== "GK");
         const attrs = allOutfield
             ? [
-                { key: "overall", label: "Overall", max: 100 },
                 { key: "speed", label: "Speed", max: 100 },
                 { key: "shooting", label: "Shooting", max: 100 },
                 { key: "passing", label: "Passing", max: 100 },
                 { key: "dribbling", label: "Dribbling", max: 100 },
                 { key: "physical", label: "Physical", max: 100 },
-                { key: "defending", label: "Defending", max: 100 },
-                { key: "weakFoot", label: "Weak Foot", max: 50 }
+                { key: "defending", label: "Defending", max: 100 }
             ]
             : [
-                { key: "overall", label: "Overall", max: 100 },
                 { key: "speed", label: "Speed", max: 100 },
                 { key: "shooting", label: "Shooting", max: 100 },
                 { key: "passing", label: "Passing", max: 100 },
                 { key: "dribbling", label: "Dribbling", max: 100 },
                 { key: "physical", label: "Physical", max: 100 },
                 { key: "defending", label: "Defending", max: 100 },
-                { key: "goalkeeping", label: "Goalkeeping", max: 100 },
-                { key: "weakFoot", label: "Weak Foot", max: 50 }
+                { key: "goalkeeping", label: "Goalkeeping", max: 100 }
             ];
 
         const colors = [
@@ -1874,7 +1867,7 @@ function PlayerDatabase() {
         function getPoints(player, idx) {
             return attrs.map((attr, i) => {
                 const value = player[attr.key] || 0;
-                const min = attr.key === "weakFoot" ? 0 : 35;
+                const min = 35;
                 const r = value <= min ? 0 : ((value - min) / (attr.max - min)) * radius;
                 const angle = i * angleStep - Math.PI / 2;
                 return [
