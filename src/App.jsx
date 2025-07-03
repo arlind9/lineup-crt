@@ -21,6 +21,14 @@ const formationMap = {
     "1-3-1": ["GK", "DF", "MF", "MF", "MF", "ST"],
     "2-1-2": ["GK", "DF", "DF", "MF", "ST", "ST"],
 
+    // 9v9 (9 players: GK + 8)
+    "4-3-1": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST"],
+    "3-3-2": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
+    "4-2-2": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "ST", "ST"],
+    "2-3-3": ["GK", "DF", "DF", "MF", "MF", "MF", "ST", "ST", "ST"],
+    "3-2-3": ["GK", "DF", "DF", "DF", "MF", "MF", "ST", "ST", "ST"],
+    "2-4-2": ["GK", "DF", "DF", "MF", "MF", "MF", "MF", "ST", "ST"],
+
     // 10v10 (10 players: GK + 9)
     "4-3-2": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
     "3-4-2": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST", "ST"],
@@ -40,6 +48,7 @@ const formationMap = {
 };
 const FORMATIONS_BY_COUNT = {
     "6v6": ["2-2-1", "1-3-1", "2-1-2"],
+    "9v9": ["4-3-1", "3-3-2", "4-2-2", "2-3-3", "3-2-3", "2-4-2"],
     "10v10": ["4-3-2", "3-4-2", "3-3-3", "4-2-3", "5-2-2", "5-3-1"],
     "11v11": ["4-4-2", "4-3-3", "3-5-2", "3-4-3", "5-4-1", "4-5-1", "5-3-2"],
 };
@@ -673,6 +682,74 @@ function DroppableTeam({
 
     function getSlotStyle(pos, idx) {
         const layouts = {
+
+            "4-3-1": [
+                { top: "92%", left: "50%" },   // GK
+                { top: "75%", left: "15%" },   // DF
+                { top: "75%", left: "35%" },   // DF
+                { top: "75%", left: "65%" },   // DF
+                { top: "75%", left: "85%" },   // DF
+                { top: "55%", left: "30%" },   // MF
+                { top: "55%", left: "50%" },   // MF
+                { top: "55%", left: "70%" },   // MF
+                { top: "25%", left: "50%" },   // ST
+            ],
+
+            "3-3-2": [
+                { top: "92%", left: "50%" },   // GK
+                { top: "75%", left: "20%" },   // DF
+                { top: "75%", left: "50%" },   // DF
+                { top: "75%", left: "80%" },   // DF
+                { top: "55%", left: "25%" },   // MF
+                { top: "55%", left: "50%" },   // MF
+                { top: "55%", left: "75%" },   // MF
+                { top: "25%", left: "35%" },   // ST
+                { top: "25%", left: "65%" },   // ST
+            ],
+            "4-2-2": [
+                { top: "92%", left: "50%" },   // GK
+                { top: "75%", left: "15%" },   // DF
+                { top: "75%", left: "35%" },   // DF
+                { top: "75%", left: "65%" },   // DF
+                { top: "75%", left: "85%" },   // DF
+                { top: "55%", left: "35%" },   // MF
+                { top: "55%", left: "65%" },   // MF
+                { top: "25%", left: "35%" },   // ST
+                { top: "25%", left: "65%" },   // ST
+            ],
+            "2-3-3": [
+                { top: "92%", left: "50%" },   // GK
+                { top: "75%", left: "35%" },   // DF
+                { top: "75%", left: "65%" },   // DF
+                { top: "55%", left: "20%" },   // MF
+                { top: "55%", left: "50%" },   // MF
+                { top: "55%", left: "80%" },   // MF
+                { top: "25%", left: "20%" },   // ST
+                { top: "25%", left: "50%" },   // ST
+                { top: "25%", left: "80%" },   // ST
+            ],
+            "3-2-3": [
+                { top: "92%", left: "50%" },   // GK
+                { top: "75%", left: "20%" },   // DF
+                { top: "75%", left: "50%" },   // DF
+                { top: "75%", left: "80%" },   // DF
+                { top: "55%", left: "35%" },   // MF
+                { top: "55%", left: "65%" },   // MF
+                { top: "25%", left: "20%" },   // ST
+                { top: "25%", left: "50%" },   // ST
+                { top: "25%", left: "80%" },   // ST
+            ],
+            "2-4-2": [
+                { top: "92%", left: "50%" },   // GK
+                { top: "75%", left: "35%" },   // DF
+                { top: "75%", left: "65%" },   // DF
+                { top: "55%", left: "15%" },   // MF
+                { top: "55%", left: "35%" },   // MF
+                { top: "55%", left: "65%" },   // MF
+                { top: "55%", left: "85%" },   // MF
+                { top: "25%", left: "35%" },   // ST
+                { top: "25%", left: "65%" },   // ST
+            ],
             "3-3-3": [
                 { top: "92%", left: "50%" },
                 { top: "72%", left: "20%" },
@@ -805,7 +882,6 @@ function DroppableTeam({
                 { top: "23%", left: "30%" },
                 { top: "23%", left: "70%" },
             ],
-            // Add these inside the layouts object in getSlotStyle:
             "4-4-2": [
                 { top: "95%", left: "50%" },   // GK
                 { top: "75%", left: "15%" },   // LB
@@ -918,7 +994,15 @@ function DroppableTeam({
                     onChange={(e) => onFormationChange(e.target.value)}
                     className="border p-1 rounded text-sm bg-white/90 shadow"
                 >
-                    {FORMATIONS_BY_COUNT[players.length === 11 ? "11v11" : players.length === 10 ? "10v10" : "6v6"].map(f => (
+                    {FORMATIONS_BY_COUNT[
+                        players.length === 11
+                            ? "11v11"
+                            : players.length === 10
+                                ? "10v10"
+                                : players.length === 9
+                                    ? "9v9"
+                                    : "6v6"
+                    ].map(f => (
                         <option key={f} value={f}>{f}</option>
                     ))}
                 </select>
@@ -2480,6 +2564,7 @@ function LineupCreator() {
     const PLAYER_COUNTS = {
         "11v11": 11,
         "10v10": 10,
+        "9v9": 9,
         "6v6": 6,
     };
     const DEFAULT_MODE = "11v11";
@@ -2733,6 +2818,7 @@ function LineupCreator() {
                 >
                     <option value="11v11">11v11</option>
                     <option value="10v10">10v10</option>
+                    <option value="9v9">9v9</option>
                     <option value="6v6">6v6</option>
                 </select>
             </div>
