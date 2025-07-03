@@ -78,6 +78,16 @@ function getCardBgByOverall(overall) {
     return "bg-gradient-to-br from-gray-200 via-gray-100 to-white border-gray-300";
 }
 
+// Special darker gradient for MOTM winner cards
+function getMotmCardBgByOverall(overall) {
+    if (overall >= 90) {
+        // Black with stronger blue gradient
+        return "bg-gradient-to-br from-black via-[#89c9f8] to-[#cbeaff] border-blue-400";
+    }
+    // Black with gold
+    return "bg-gradient-to-br from-black via-yellow-500 to-yellow-300 border-yellow-400";
+}
+
 function getCardHighlight({ assigned, selected }) {
     if (assigned) {
         return "ring-2 ring-green-400 ring-offset-2";
@@ -3207,14 +3217,7 @@ function MotmStatsFeature() {
         }
     }
 
-    // Card background and highlight helpers (reuse from Player Database)
-    function getCardBgByOverall(overall) {
-        if (overall >= 90) {
-            // Black with stronger blue gradient
-            return "bg-gradient-to-br from-black via-[#89c9f8] to-[#cbeaff] border-blue-400";
-        }
-        // Black with gold
-        return "bg-gradient-to-br from-black via-yellow-500 to-yellow-300 border-yellow-400";
+
     }
     function getCardHighlight({ assigned, selected }) {
         if (assigned) return "ring-2 ring-green-400 ring-offset-2";
@@ -3286,14 +3289,15 @@ function MotmStatsFeature() {
     }, [stats]);
 
     // Card styled like Player Database
-    function MotmStatsCard({ player, title }) {
+    function MotmStatsCard({ player, title, motm }) {
         if (!player) return (
             <div className="bg-gray-100 rounded-xl shadow p-4 border min-w-[220px] text-center text-gray-400">
                 No data
             </div>
         );
         const isGK = player.position === "GK";
-        const cardBg = getCardBgByOverall(calculateOverall(player));
+        const overall = calculateOverall(player);
+        const cardBg = motm ? getMotmCardBg(overall) : getCardBgByOverall(overall);
         const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
 
         return (
@@ -3334,8 +3338,8 @@ function MotmStatsFeature() {
             <h2 className="text-xl font-bold mb-4 text-center text-blue-900">MOTM per kete jave</h2>
             {latest ? (
                 <div className="flex flex-col sm:flex-row gap-6 justify-center items-start mt-4">
-                    <MotmStatsCard player={before} title="Atributet origjinale" />
-                    <MotmStatsCard player={latest} title="Atributet e javes" />
+                    <MotmStatsCard player={before} title="Atributet origjinale" motm={false} />
+                    <MotmStatsCard player={latest} title="Atributet e javes" motm />
                 </div>
             ) : (
                 <div className="text-center text-red-600">No MOTM data found.</div>
@@ -3350,7 +3354,7 @@ function MotmBeforeAfterModal({ open, row, onClose }) {
     if (!open || !row) return null;
 
     // Card rendering logic (reuse from MotmStatsFeature)
-    function MotmStatsCard({ player, title }) {
+    function MotmStatsCard({ player, title, motm }) {
         if (!player) return (
             <div className="bg-gray-100 rounded-xl shadow p-4 border min-w-[220px] text-center text-gray-400">
                 No data
@@ -3358,7 +3362,7 @@ function MotmBeforeAfterModal({ open, row, onClose }) {
         );
         const isGK = player.position === "GK";
         const overall = calculateOverall(player);
-        const cardBg = getCardBgByOverall(overall);
+        const cardBg = motm ? getMotmCardBgByOverall(overall) : getCardBgByOverall(overall);
         const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
         return (
             <div className={[
@@ -3408,13 +3412,7 @@ function MotmBeforeAfterModal({ open, row, onClose }) {
                 return 0;
         }
     }
-    function getCardBgByOverall(overall) {
-        if (overall >= 90) {
-            // Black with stronger blue gradient
-            return "bg-gradient-to-br from-black via-[#89c9f8] to-[#cbeaff] border-blue-400";
-        }
-        // Black with gold
-        return "bg-gradient-to-br from-black via-yellow-500 to-yellow-300 border-yellow-400";
+
     }
 
     return (
@@ -3433,8 +3431,8 @@ function MotmBeforeAfterModal({ open, row, onClose }) {
                     {row.playerName} - {row.date}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-6 justify-center items-start mt-2">
-                    <MotmStatsCard player={row.before} title="Atributet origjinale" />
-                    <MotmStatsCard player={row.after} title="Atributet e javes" />
+                    <MotmStatsCard player={row.before} title="Atributet origjinale" motm={false} />
+                    <MotmStatsCard player={row.after} title="Atributet e javes" motm />
                 </div>
             </div>
         </div>
@@ -3454,13 +3452,7 @@ function AllMotmStatsCards({ stats }) {
     };
 
     // Card background and highlight helpers (reuse from Player Database)
-    function getCardBgByOverall(overall) {
-        if (overall >= 90) {
-            // Black with stronger blue gradient
-            return "bg-gradient-to-br from-black via-[#89c9f8] to-[#cbeaff] border-blue-400";
-        }
-        // Black with gold
-        return "bg-gradient-to-br from-black via-yellow-500 to-yellow-300 border-yellow-400";
+
     }
     function getCardHighlight({ assigned, selected }) {
         if (assigned) return "ring-2 ring-green-400 ring-offset-2";
@@ -3526,7 +3518,7 @@ function AllMotmStatsCards({ stats }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {stats.map((row, idx) => {
                     const player = row.after;
-                    const cardBg = getCardBgByOverall(calculateOverall(player));
+                    const cardBg = getMotmCardBg(calculateOverall(player));
                     const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
                     const isGK = player.position === "GK";
                     return (
