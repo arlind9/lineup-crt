@@ -23,6 +23,7 @@ const formationMap = {
 
     // 9v9 (9 players: GK + 8)
     "4-3-1": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "MF", "ST"],
+    "3-4-1": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "MF", "ST"],
     "3-3-2": ["GK", "DF", "DF", "DF", "MF", "MF", "MF", "ST", "ST"],
     "4-2-2": ["GK", "DF", "DF", "DF", "DF", "MF", "MF", "ST", "ST"],
     "2-3-3": ["GK", "DF", "DF", "MF", "MF", "MF", "ST", "ST", "ST"],
@@ -48,7 +49,7 @@ const formationMap = {
 };
 const FORMATIONS_BY_COUNT = {
     "6v6": ["2-2-1", "1-3-1", "2-1-2"],
-    "9v9": ["4-3-1", "3-3-2", "4-2-2", "2-3-3", "3-2-3", "2-4-2"],
+    "9v9": ["4-3-1", "3-4-1", "3-3-2", "4-2-2", "2-3-3", "3-2-3", "2-4-2"],
     "10v10": ["4-3-2", "3-4-2", "3-3-3", "4-2-3", "5-2-2", "5-3-1"],
     "11v11": ["4-4-2", "4-3-3", "3-5-2", "3-4-3", "5-4-1", "4-5-1", "5-3-2"],
 };
@@ -685,70 +686,82 @@ function DroppableTeam({
 
             "4-3-1": [
                 { top: "92%", left: "50%" },   // GK
-                { top: "75%", left: "15%" },   // DF
-                { top: "75%", left: "35%" },   // DF
-                { top: "75%", left: "65%" },   // DF
-                { top: "75%", left: "85%" },   // DF
-                { top: "55%", left: "30%" },   // MF
-                { top: "55%", left: "50%" },   // MF
-                { top: "55%", left: "70%" },   // MF
-                { top: "25%", left: "50%" },   // ST
+                { top: "72%", left: "15%" },   // DF
+                { top: "72%", left: "35%" },   // DF
+                { top: "72%", left: "65%" },   // DF
+                { top: "72%", left: "85%" },   // DF
+                { top: "51%", left: "30%" },   // MF
+                { top: "51%", left: "50%" },   // MF
+                { top: "51%", left: "70%" },   // MF
+                { top: "23%", left: "50%" },   // ST
+            ],
+
+            "3-4-1": [
+                { top: "92%", left: "50%" },   // GK
+                { top: "72%", left: "25%" },   // DF
+                { top: "72%", left: "50%" },   // DF
+                { top: "72%", left: "75%" },   // DF
+                { top: "51%", left: "20%" },   // MF
+                { top: "51%", left: "40%" },   // MF
+                { top: "51%", left: "60%" },   // MF
+                { top: "51%", left: "80%" },   // MF
+                { top: "23%", left: "50%" },   // ST
             ],
 
             "3-3-2": [
                 { top: "92%", left: "50%" },   // GK
-                { top: "75%", left: "20%" },   // DF
-                { top: "75%", left: "50%" },   // DF
-                { top: "75%", left: "80%" },   // DF
-                { top: "55%", left: "25%" },   // MF
-                { top: "55%", left: "50%" },   // MF
-                { top: "55%", left: "75%" },   // MF
-                { top: "25%", left: "35%" },   // ST
-                { top: "25%", left: "65%" },   // ST
+                { top: "72%", left: "20%" },   // DF
+                { top: "72%", left: "50%" },   // DF
+                { top: "72%", left: "80%" },   // DF
+                { top: "51%", left: "25%" },   // MF
+                { top: "51%", left: "50%" },   // MF
+                { top: "51%", left: "75%" },   // MF
+                { top: "23%", left: "35%" },   // ST
+                { top: "23%", left: "65%" },   // ST
             ],
             "4-2-2": [
                 { top: "92%", left: "50%" },   // GK
-                { top: "75%", left: "15%" },   // DF
-                { top: "75%", left: "35%" },   // DF
-                { top: "75%", left: "65%" },   // DF
-                { top: "75%", left: "85%" },   // DF
-                { top: "55%", left: "35%" },   // MF
-                { top: "55%", left: "65%" },   // MF
-                { top: "25%", left: "35%" },   // ST
-                { top: "25%", left: "65%" },   // ST
+                { top: "72%", left: "15%" },   // DF
+                { top: "72%", left: "35%" },   // DF
+                { top: "72%", left: "65%" },   // DF
+                { top: "72%", left: "85%" },   // DF
+                { top: "51%", left: "35%" },   // MF
+                { top: "51%", left: "65%" },   // MF
+                { top: "23%", left: "35%" },   // ST
+                { top: "23%", left: "65%" },   // ST
             ],
             "2-3-3": [
                 { top: "92%", left: "50%" },   // GK
-                { top: "75%", left: "35%" },   // DF
-                { top: "75%", left: "65%" },   // DF
-                { top: "55%", left: "20%" },   // MF
-                { top: "55%", left: "50%" },   // MF
-                { top: "55%", left: "80%" },   // MF
-                { top: "25%", left: "20%" },   // ST
-                { top: "25%", left: "50%" },   // ST
-                { top: "25%", left: "80%" },   // ST
+                { top: "72%", left: "35%" },   // DF
+                { top: "72%", left: "65%" },   // DF
+                { top: "51%", left: "20%" },   // MF
+                { top: "51%", left: "50%" },   // MF
+                { top: "51%", left: "80%" },   // MF
+                { top: "23%", left: "20%" },   // ST
+                { top: "23%", left: "50%" },   // ST
+                { top: "23%", left: "80%" },   // ST
             ],
             "3-2-3": [
                 { top: "92%", left: "50%" },   // GK
-                { top: "75%", left: "20%" },   // DF
-                { top: "75%", left: "50%" },   // DF
-                { top: "75%", left: "80%" },   // DF
-                { top: "55%", left: "35%" },   // MF
-                { top: "55%", left: "65%" },   // MF
-                { top: "25%", left: "20%" },   // ST
-                { top: "25%", left: "50%" },   // ST
-                { top: "25%", left: "80%" },   // ST
+                { top: "72%", left: "20%" },   // DF
+                { top: "72%", left: "50%" },   // DF
+                { top: "72%", left: "80%" },   // DF
+                { top: "51%", left: "35%" },   // MF
+                { top: "51%", left: "65%" },   // MF
+                { top: "23%", left: "20%" },   // ST
+                { top: "23%", left: "50%" },   // ST
+                { top: "23%", left: "80%" },   // ST
             ],
             "2-4-2": [
                 { top: "92%", left: "50%" },   // GK
-                { top: "75%", left: "35%" },   // DF
-                { top: "75%", left: "65%" },   // DF
-                { top: "55%", left: "15%" },   // MF
-                { top: "55%", left: "35%" },   // MF
-                { top: "55%", left: "65%" },   // MF
-                { top: "55%", left: "85%" },   // MF
-                { top: "25%", left: "35%" },   // ST
-                { top: "25%", left: "65%" },   // ST
+                { top: "72%", left: "35%" },   // DF
+                { top: "72%", left: "65%" },   // DF
+                { top: "51%", left: "15%" },   // MF
+                { top: "51%", left: "35%" },   // MF
+                { top: "51%", left: "65%" },   // MF
+                { top: "51%", left: "85%" },   // MF
+                { top: "23%", left: "35%" },   // ST
+                { top: "23%", left: "65%" },   // ST
             ],
             "3-3-3": [
                 { top: "92%", left: "50%" },
