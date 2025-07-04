@@ -3217,14 +3217,11 @@ function MotmStatsFeature() {
         }
     }
 
-
-    }
     function getCardHighlight({ assigned, selected }) {
         if (assigned) return "ring-2 ring-green-400 ring-offset-2";
         if (selected) return "ring-2 ring-blue-400 ring-offset-2";
         return "";
     }
-    const PLACEHOLDER_IMG = "https://ui-avatars.com/api/?name=Player&background=eee&color=888&size=128&rounded=true";
 
     React.useEffect(() => {
         fetch('https://docs.google.com/spreadsheets/d/13PZEIB0oMzZecDfuBAphm2Ip9FiO9KN8nHS0FihOl-c/gviz/tq?tqx=out:csv')
@@ -3412,8 +3409,6 @@ function MotmBeforeAfterModal({ open, row, onClose }) {
         }
     }
 
-    }
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
             <div
@@ -3452,13 +3447,11 @@ function AllMotmStatsCards({ stats }) {
 
     // Card background and highlight helpers (reuse from Player Database)
 
-    }
     function getCardHighlight({ assigned, selected }) {
         if (assigned) return "ring-2 ring-green-400 ring-offset-2";
         if (selected) return "ring-2 ring-blue-400 ring-offset-2";
         return "";
     }
-    const PLACEHOLDER_IMG = "https://ui-avatars.com/api/?name=Player&background=eee&color=888&size=128&rounded=true";
 
     // Consistent overall calculation as in Player Database
     function calculateOverall(p) {
