@@ -125,7 +125,6 @@ function expandPlayersForMotm(players, includeMotm) {
         }
     });
     return out;
-=======
 // Return player stats respecting MOTM toggle
 function getDisplayPlayer(player, useMotm) {
     if (useMotm && player.motmCard) {
@@ -216,7 +215,6 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                         ) : (
                             visiblePlayers.map(p => {
                                 const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
-=======
                                 const cardBg = p.motmCard && useMotm ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
                                 return (
                                     <div
