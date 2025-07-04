@@ -213,7 +213,7 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                         onChange={e => setSearch(e.target.value)}
                         className="mb-3"
                     />
-                    <div className="flex-1 max-h-80 overflow-y-auto">
+                    <div className="flex-1 max-h-80 min-h-[120px] overflow-y-auto">
                         {visiblePlayers.length === 0 ? (
                             <div className="text-xs text-gray-400 p-2 text-center">No available players</div>
                         ) : (
@@ -1498,7 +1498,10 @@ function Home() {
         const cardBg = motm
             ? "bg-gradient-to-br from-black via-yellow-500 to-yellow-300 border-yellow-400"
             : "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-300";
-        const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
+
+        const photoUrl = player.photo
+            ? player.photo
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
 
         return (
             <div
@@ -3512,8 +3515,9 @@ function MotmStatsFeature() {
         const isGK = player.position === "GK";
         const overall = calculateOverall(player);
         const cardBg = motm ? getMotmCardBgByOverall(overall) : getCardBgByOverall(overall);
-        const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
-
+        const photoUrl = player.photo
+            ? player.photo
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
         return (
             <div className={[
                 cardBg,
@@ -3576,7 +3580,9 @@ function MotmBeforeAfterModal({ open, row, onClose }) {
         const isGK = player.position === "GK";
         const overall = calculateOverall(player);
         const cardBg = motm ? getMotmCardBgByOverall(overall) : getCardBgByOverall(overall);
-        const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
+        const photoUrl = player.photo
+            ? player.photo
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
         return (
             <div className={[
                 cardBg,
@@ -3664,8 +3670,9 @@ function AllMotmStatsCards({ stats }) {
                 {stats.map((row, idx) => {
                     const player = row.after;
                     const cardBg = getMotmCardBgByOverall(calculateOverall(player));
-                    const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
-                    const isGK = player.position === "GK";
+                    const photoUrl = player.photo
+                        ? player.photo
+                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;                    const isGK = player.position === "GK";
                     return (
                         <div
                             key={idx}
@@ -3723,6 +3730,7 @@ function MOTMPage() {
     const [showAll, setShowAll] = React.useState(false);
     const [showAllEarners, setShowAllEarners] = React.useState(false);
     const [loading, setLoading] = React.useState(true);
+    const [playerPhotos, setPlayerPhotos] = React.useState({});
 
     React.useEffect(() => {
         return () => {
@@ -3743,6 +3751,22 @@ function MOTMPage() {
         if (isNaN(date)) return input;
         return date.toLocaleDateString('en-GB');
     };
+
+    React.useEffect(() => {
+        fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
+            .then(res => res.text())
+            .then(text => {
+                const json = JSON.parse(text.substring(47).slice(0, -2));
+                const photos = {};
+                json.table.rows.forEach(row => {
+                    const cells = row.c;
+                    const name = cells[0]?.v;
+                    const photo = extractPhotoUrl(cells[12]?.v) || null;
+                    if (name) photos[name] = photo;
+                });
+                setPlayerPhotos(photos);
+            });
+    }, []);
 
     React.useEffect(() => {
         setLoading(true);
@@ -3790,34 +3814,39 @@ function MOTMPage() {
                     complete: results => {
                         const rows = results.data
                             .filter(r => r.Date && r.Player)
-                            .map(r => ({
-                                date: r.Date,
-                                playerName: r.Player,
-                                before: {
-                                    name: r.Player,
-                                    position: r["Position"],
-                                    speed: Number(r["Speed"] || 0),
-                                    shooting: Number(r["Shooting"] || 0),
-                                    passing: Number(r["Passing"] || 0),
-                                    dribbling: Number(r["Dribbling"] || 0),
-                                    physical: Number(r["Physical"] || 0),
-                                    defending: Number(r["Defending"] || 0),
-                                    goalkeeping: Number(r["Goalkeeping"] || 0),
-                                    weakFoot: Number(r["Weak Foot"] || 0),
-                                },
-                                after: {
-                                    name: r.Player,
-                                    position: r["Updated_Position"],
-                                    speed: Number(r["Updated_Speed"] || 0),
-                                    shooting: Number(r["Updated_Shooting"] || 0),
-                                    passing: Number(r["Updated_Passing"] || 0),
-                                    dribbling: Number(r["Updated_Dribbling"] || 0),
-                                    physical: Number(r["Updated_Physical"] || 0),
-                                    defending: Number(r["Updated_Defending"] || 0),
-                                    goalkeeping: Number(r["Updated_Goalkeeping"] || 0),
-                                    weakFoot: Number(r["Updated_Weak Foot"] || 0),
-                                }
-                            }));
+                            .map(r => {
+                                const photo = playerPhotos[r.Player] || null;
+                                return {
+                                    date: r.Date,
+                                    playerName: r.Player,
+                                    before: {
+                                        name: r.Player,
+                                        position: r["Position"],
+                                        speed: Number(r["Speed"] || 0),
+                                        shooting: Number(r["Shooting"] || 0),
+                                        passing: Number(r["Passing"] || 0),
+                                        dribbling: Number(r["Dribbling"] || 0),
+                                        physical: Number(r["Physical"] || 0),
+                                        defending: Number(r["Defending"] || 0),
+                                        goalkeeping: Number(r["Goalkeeping"] || 0),
+                                        weakFoot: Number(r["Weak Foot"] || 0),
+                                        photo, // Attach photo
+                                    },
+                                    after: {
+                                        name: r.Player,
+                                        position: r["Updated_Position"],
+                                        speed: Number(r["Updated_Speed"] || 0),
+                                        shooting: Number(r["Updated_Shooting"] || 0),
+                                        passing: Number(r["Updated_Passing"] || 0),
+                                        dribbling: Number(r["Updated_Dribbling"] || 0),
+                                        physical: Number(r["Updated_Physical"] || 0),
+                                        defending: Number(r["Updated_Defending"] || 0),
+                                        goalkeeping: Number(r["Updated_Goalkeeping"] || 0),
+                                        weakFoot: Number(r["Updated_Weak Foot"] || 0),
+                                        photo, // Attach photo
+                                    }
+                                };
+                            });
                         // Sort by date descending
                         const sorted = rows.sort((a, b) => {
                             const parseDate = (str) => {
@@ -3835,7 +3864,7 @@ function MOTMPage() {
                     }
                 });
             });
-    }, []);
+    }, [playerPhotos]);
 
     const visibleData = showAll ? data : data.slice(0, 10);
     const visibleEarners = showAllEarners ? topEarners : topEarners.slice(0, 10);
