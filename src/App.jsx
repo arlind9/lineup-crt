@@ -125,6 +125,12 @@ function expandPlayersForMotm(players, includeMotm) {
         }
     });
     return out;
+
+function getDisplayPlayer(player, useMotm) {
+    if (useMotm && player.motmCard) {
+        return { ...player, ...player.motmCard };
+    }
+    return player;
 }
 
 function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMotm }) {
@@ -209,6 +215,7 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                         ) : (
                             visiblePlayers.map(p => {
                                 const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+
                                 return (
                                     <div
                                         key={p.id || p.name}
@@ -256,6 +263,7 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                 <div className="w-56 min-w-[12rem] hidden sm:block">
                     {hoveredPlayer && (
                         <div className={`border rounded-lg p-2 text-xs shadow ${hoveredPlayer.version === 'motm' ? getMotmCardBgByOverall(hoveredPlayer.overall) : getCardBgByOverall(hoveredPlayer.overall)}`}>
+
                             <div className="font-bold text-center mb-1">{hoveredPlayer.name}</div>
                             <div className="text-center text-gray-500 mb-2">{hoveredPlayer.position}</div>
                             <div className="flex justify-center mb-2">
@@ -1224,6 +1232,7 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
     const p = player;
     const imageUrl = p.photo ? p.photo : PLACEHOLDER_IMG;
     const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+
     const cardHighlight = getCardHighlight({ assigned, selected });
 
     return (
@@ -1281,6 +1290,7 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
                     </div>
                 )}
                 <div className={small ? "text-xs font-bold pt-0" : "text-sm font-bold pt-1"}>Overall: {p.overall} {p.version === 'motm' && <span>MOTM</span>}</div>
+
             </div>
             <style>{`
                 @media (max-width: 640px) {
@@ -1334,6 +1344,7 @@ function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragSta
             draggable
             onDragStart={e => {
                 const p = player;
+
                 e.dataTransfer.setData("application/json", JSON.stringify({
                     player: p,
                     fromTeam,
@@ -1353,6 +1364,7 @@ function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragSta
                 <span className="text-xs w-10 text-center">Sht: {p.shooting}</span>
                 <span className="text-xs w-10 text-center">Pas: {p.passing}</span>
                 </> ); })()}
+
         </div>
     );
 }
@@ -1419,6 +1431,14 @@ function Home() {
             .catch(() => setLoading(false));
     }, []);
 
+
+
+    useEffect(() => {
+        setSelected(prev => prev.map(sel => {
+            const base = players.find(p => p.name === sel.name) || sel;
+            return getDisplayPlayer(base, useMotm);
+        }));
+    }, [useMotm, players]);
 
     const visibleData = showAll ? data : data.slice(0, 3);
     const visibleEarners = showAllEarners ? topEarners : topEarners.slice(0, 3);
@@ -1781,6 +1801,7 @@ function PlayerDatabase() {
     }
 
     const displayPlayers = useMemo(() => expandPlayersForMotm(players, useMotm), [players, useMotm]);
+
     const filtered = displayPlayers
         .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
         .filter((p) => positionFilter === "All" || p.position === positionFilter)
@@ -1806,6 +1827,7 @@ function PlayerDatabase() {
         if (!player) return null;
         const p = player;
         const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                 <div className={[cardBg, "rounded-xl shadow-2xl border p-6 max-w-xs w-full relative"].join(' ')}>
@@ -1837,6 +1859,7 @@ function PlayerDatabase() {
                         <span>Goalkeeping: {p.goalkeeping}</span>
                     </div>
                     <div className="text-base font-bold text-center">Overall: {p.overall} {p.version === 'motm' && <span>MOTM</span>}</div>
+
                 </div>
             </div>
         );
@@ -2208,6 +2231,7 @@ function PlayerDatabase() {
                 >
                     {filtered.map((p) => {
                         const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+
                         const isSelected = selected.some(sel => sel.name === p.name);
                         const cardHighlight = getCardHighlight({ assigned: false, selected: isSelected });
                         return (
@@ -2879,6 +2903,7 @@ function LineupCreator() {
     const playersDisplay = useMemo(() => expandPlayersForMotm(players, useMotm), [players, useMotm]);
     const displayTeamA = teamA;
     const displayTeamB = teamB;
+
 
     function handleClearAll() {
         setTeamA(Array(PLAYER_COUNTS[mode]).fill(null));
