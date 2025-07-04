@@ -145,6 +145,13 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
         }
     }, [open]);
 
+    // When MOTM view is enabled show all players so MOTM options are visible
+    useEffect(() => {
+        if (open && useMotm) {
+            setShowAll(true);
+        }
+    }, [useMotm, open]);
+
     if (!open) return null;
 
     const sortedPlayers = [...players].sort((a, b) => {
@@ -1683,46 +1690,6 @@ function PlayerDatabase() {
             });
     }, []);
 
-    // Fetch MOTM stats for players
-    useEffect(() => {
-        fetch('https://docs.google.com/spreadsheets/d/13PZEIB0oMzZecDfuBAphm2Ip9FiO9KN8nHS0FihOl-c/gviz/tq?tqx=out:csv')
-            .then(res => res.text())
-            .then(csv => {
-                Papa.parse(csv, {
-                    header: true,
-                    skipEmptyLines: true,
-                    transformHeader: h => h.trim(),
-                    complete: results => {
-                        const latest = {};
-                        results.data
-                            .filter(r => r.Date && r.Player)
-                            .forEach(r => {
-                                const cur = latest[r.Player];
-                                if (!cur || parseSheetDate(r.Date) > parseSheetDate(cur.Date)) {
-                                    latest[r.Player] = r;
-                                }
-                            });
-                        setPlayers(prev => prev.map(p => {
-                            const row = latest[p.name];
-                            if (!row) return p;
-                            const after = {
-                                position: row["Updated_Position"],
-                                speed: Number(row["Updated_Speed"] || 0),
-                                shooting: Number(row["Updated_Shooting"] || 0),
-                                passing: Number(row["Updated_Passing"] || 0),
-                                dribbling: Number(row["Updated_Dribbling"] || 0),
-                                physical: Number(row["Updated_Physical"] || 0),
-                                defending: Number(row["Updated_Defending"] || 0),
-                                goalkeeping: Number(row["Updated_Goalkeeping"] || 0),
-                                weakFoot: Number(row["Updated_Weak Foot"] || 0)
-                            };
-                            const overall = calculateOverall({ ...p, ...after, position: after.position });
-                            return { ...p, motmCard: { ...after, overall } };
-                        }));
-                    }
-                });
-            });
-    }, []);
 
     // Fetch MOTM stats and attach latest "after" card to each player
     useEffect(() => {
