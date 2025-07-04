@@ -109,6 +109,23 @@ function parseSheetDate(str) {
     return new Date(`${c}-${a.padStart(2, '0')}-${b.padStart(2, '0')}`);
 }
 
+// Expand players list to include MOTM versions when enabled
+function expandPlayersForMotm(players, includeMotm) {
+    if (!includeMotm) return players;
+    const out = [];
+    players.forEach((p) => {
+        out.push({ ...p, id: `${p.name}-base`, version: 'base' });
+        if (p.motmCard) {
+            out.push({
+                ...p,
+                ...p.motmCard,
+                id: `${p.name}-motm`,
+                version: 'motm'
+            });
+        }
+    });
+    return out;
+=======
 // Return player stats respecting MOTM toggle
 function getDisplayPlayer(player, useMotm) {
     if (useMotm && player.motmCard) {
@@ -198,10 +215,12 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                             <div className="text-xs text-gray-400 p-2 text-center">No available players</div>
                         ) : (
                             visiblePlayers.map(p => {
+                                const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+=======
                                 const cardBg = p.motmCard && useMotm ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
                                 return (
                                     <div
-                                        key={p.name}
+                                        key={p.id || p.name}
                                         className={`p-2 rounded cursor-pointer flex justify-between items-center mb-1 ${cardBg} border hover:bg-blue-100 transition`}
                                         onClick={() => onSelect(p)}
                                         onMouseEnter={() => setHoveredPlayer(p)}
@@ -214,7 +233,7 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                                             <span className="font-semibold">{p.name}</span>
                                             <span className="text-gray-500 ml-1">({p.position})</span>
                                         </span>
-                                        <span className="text-gray-400 text-xs">OVR: {p.overall}</span>
+                                        <span className="text-gray-400 text-xs">OVR: {p.overall} {p.version === 'motm' && <strong>MOTM</strong>}</span>
                                     </div>
                                 );
                             })
@@ -267,7 +286,7 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                                 <span>Weak Foot: {hoveredPlayer.weakFoot}</span>
                                 <span>Goalkeeping: {hoveredPlayer.goalkeeping}</span>
                             </div>
-                            <div className="text-center font-bold">Overall: {hoveredPlayer.overall}</div>
+                            <div className="text-center font-bold">Overall: {hoveredPlayer.overall} {hoveredPlayer.version === 'motm' && <span>MOTM</span>}</div>
                         </div>
                     )}
                 </div>
@@ -1211,9 +1230,11 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
         };
     }, [player, fromTeam, fromIndex, onDragStart, onDragEnd]);
 
+
     const p = getDisplayPlayer(player, useMotm);
     const imageUrl = p.photo ? p.photo : PLACEHOLDER_IMG;
     const cardBg = p.motmCard && useMotm ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+    
     const cardHighlight = getCardHighlight({ assigned, selected });
 
     return (
@@ -1270,7 +1291,8 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
                         <span>Goalkeeping: {p.goalkeeping}</span>
                     </div>
                 )}
-                <div className={small ? "text-xs font-bold pt-0" : "text-sm font-bold pt-1"}>Overall: {p.overall}</div>
+                <div className={small ? "text-xs font-bold pt-0" : "text-sm font-bold pt-1"}>Overall: {p.overall} {p.version === 'motm' && <span>MOTM</span>}</div>
+
             </div>
             <style>{`
                 @media (max-width: 640px) {
@@ -1323,6 +1345,7 @@ function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragSta
             }
             draggable
             onDragStart={e => {
+
                 const p = getDisplayPlayer(player, useMotm);
                 e.dataTransfer.setData("application/json", JSON.stringify({
                     player: p,
@@ -1334,6 +1357,7 @@ function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragSta
             onDragEnd={onDragEnd}
             style={{ minHeight: 36 }}
         >
+
             {(() => { const p = getDisplayPlayer(player, useMotm); return (
             <>
             <span className="font-semibold flex-1 truncate">{p.name}</span>
@@ -1409,7 +1433,6 @@ function Home() {
             .catch(() => setLoading(false));
     }, []);
 
-    // Update selected players when toggling MOTM or when data changes
     useEffect(() => {
         setSelected(prev => prev.map(sel => {
             const base = players.find(p => p.name === sel.name) || sel;
@@ -1777,7 +1800,8 @@ function PlayerDatabase() {
         }
     }
 
-    const displayPlayers = players.map(p => getDisplayPlayer(p, useMotm));
+    const displayPlayers = useMemo(() => expandPlayersForMotm(players, useMotm), [players, useMotm]);
+
     const filtered = displayPlayers
         .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
         .filter((p) => positionFilter === "All" || p.position === positionFilter)
@@ -1801,8 +1825,9 @@ function PlayerDatabase() {
 
     function PlayerModal({ player, onClose }) {
         if (!player) return null;
-        const p = getDisplayPlayer(player, useMotm);
-        const cardBg = p.motmCard && useMotm ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+        const p = player;
+        const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                 <div className={[cardBg, "rounded-xl shadow-2xl border p-6 max-w-xs w-full relative"].join(' ')}>
@@ -1833,7 +1858,8 @@ function PlayerDatabase() {
                         <span>Weak Foot: {p.weakFoot}</span>
                         <span>Goalkeeping: {p.goalkeeping}</span>
                     </div>
-                    <div className="text-base font-bold text-center">Overall: {p.overall}</div>
+                    <div className="text-base font-bold text-center">Overall: {p.overall} {p.version === 'motm' && <span>MOTM</span>}</div>
+
                 </div>
             </div>
         );
@@ -1870,7 +1896,7 @@ function PlayerDatabase() {
                         ) : (
                             filtered.map(p => (
                                 <div
-                                    key={p.name}
+                                    key={p.id || p.name}
                                     className="p-2 rounded hover:bg-blue-100 cursor-pointer flex justify-between items-center"
                                     onClick={() => { onSelect(p); onClose(); }}
                                 >
@@ -1878,7 +1904,7 @@ function PlayerDatabase() {
                                         <span className="font-semibold">{p.name}</span>
                                         <span className="text-gray-500 ml-1">({p.position})</span>
                                     </span>
-                                    <span className="text-gray-400 text-xs">OVR: {p.overall}</span>
+                                    <span className="text-gray-400 text-xs">OVR: {p.overall} {p.version === 'motm' && <strong>MOTM</strong>}</span>
                                 </div>
                             ))
                         )}
@@ -2204,12 +2230,13 @@ function PlayerDatabase() {
                     style={{ minHeight: 200 }}
                 >
                     {filtered.map((p) => {
-                        const cardBg = p.motmCard && useMotm ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+                        const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+
                         const isSelected = selected.some(sel => sel.name === p.name);
                         const cardHighlight = getCardHighlight({ assigned: false, selected: isSelected });
                         return (
                             <div
-                                key={p.name}
+                                key={p.id || p.name}
                                 className={[
                                     cardBg,
                                     "border rounded-xl shadow p-4 cursor-pointer transition-all duration-150",
@@ -2250,7 +2277,7 @@ function PlayerDatabase() {
                                         <span>Goalkeeping: {p.goalkeeping}</span>
                                     </div>
                                 )}
-                                <div className="text-sm font-bold">Overall: {p.overall}</div>
+                                <div className="text-sm font-bold">Overall: {p.overall} {p.version === 'motm' && <span className='ml-1'>MOTM</span>}</div>
                                 {isSelected && (
                                     <div className="text-xs text-blue-700 font-semibold mt-1">Selected</div>
                                 )}
@@ -2873,24 +2900,10 @@ function LineupCreator() {
         setCompareHover(null);
     };
 
-    const playersDisplay = useMemo(() => players.map(p => getDisplayPlayer(p, useMotm)), [players, useMotm]);
-    const playersByName = useMemo(() => {
-        const m = {};
-        players.forEach(p => { m[p.name] = p; });
-        return m;
-    }, [players]);
-    const displayTeamA = teamA.map((slot, idx) => {
-        if (!slot) return null;
-        const base = playersByName[slot.name] || slot;
-        const disp = getDisplayPlayer(base, useMotm);
-        return getPlayerWithPositionAttributes(disp, slot.position);
-    });
-    const displayTeamB = teamB.map((slot, idx) => {
-        if (!slot) return null;
-        const base = playersByName[slot.name] || slot;
-        const disp = getDisplayPlayer(base, useMotm);
-        return getPlayerWithPositionAttributes(disp, slot.position);
-    });
+    const playersDisplay = useMemo(() => expandPlayersForMotm(players, useMotm), [players, useMotm]);
+    const displayTeamA = teamA;
+    const displayTeamB = teamB;
+
 
     function handleClearAll() {
         setTeamA(Array(PLAYER_COUNTS[mode]).fill(null));
