@@ -583,7 +583,7 @@ function RadarCompare({ players }) {
         const points = getPoints(player, idx);
         return (
             <polygon
-                key={player.name}
+                key={player.id || player.name}
                 points={pointsToString(points)}
                 fill={colors[idx] + "33"}
                 stroke={colors[idx]}
@@ -596,7 +596,7 @@ function RadarCompare({ players }) {
         const points = getPoints(player, idx);
         return points.map(([x, y], i) => (
             <circle
-                key={player.name + "-dot-" + i}
+                key={(player.id || player.name) + "-dot-" + i}
                 cx={x}
                 cy={y}
                 r={4}
@@ -610,7 +610,7 @@ function RadarCompare({ players }) {
     const legend = (
         <div className="flex justify-center gap-4 mt-2 mb-2">
             {players.map((p, idx) => (
-                <div key={p.name} className="flex items-center gap-2">
+                <div key={p.id || p.name} className="flex items-center gap-2">
                     <span style={{
                         display: "inline-block",
                         width: 16,
@@ -622,7 +622,7 @@ function RadarCompare({ players }) {
                     <span className="font-semibold text-sm">{p.name}</span>
                     <button
                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
-                        onClick={() => removeFromCompare(p.name)}
+                        onClick={() => removeFromCompare(p.id)}
                         title="Remove from comparison"
                     >×</button>
                 </div>
@@ -717,7 +717,7 @@ function DroppableTeam({
         allPlayers.filter(
             (p) =>
                 isPositionCompatible(slotPos, p.position) &&
-                !players.some((pl) => pl && pl.name === p.name)
+                !players.some((pl) => pl && (pl.id ? pl.id === p.id : pl.name === p.name))
         );
 
     const handlePlayerSelect = (slotIdx, player) => {
@@ -1790,8 +1790,8 @@ function PlayerDatabase() {
 
     function toggleSelect(player) {
         setSelected((prev) => {
-            if (prev.some((p) => p.name === player.name)) {
-                return prev.filter((p) => p.name !== player.name);
+            if (prev.some((p) => p.id === player.id)) {
+                return prev.filter((p) => p.id !== player.id);
             }
             if (prev.length >= 5) {
                 return [...prev.slice(1), player];
@@ -1800,8 +1800,8 @@ function PlayerDatabase() {
         });
     }
 
-    function removeFromCompare(name) {
-        setSelected((prev) => prev.filter((p) => p.name !== name));
+    function removeFromCompare(id) {
+        setSelected((prev) => prev.filter((p) => p.id !== id));
     }
 
     function PlayerModal({ player, onClose }) {
@@ -1850,7 +1850,7 @@ function PlayerDatabase() {
         const [search, setSearch] = useState("");
         if (!open) return null;
         const filtered = players
-            .filter(p => !alreadySelected.some(sel => sel.name === p.name))
+            .filter(p => !alreadySelected.some(sel => sel.id === p.id))
             .filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
@@ -1920,7 +1920,7 @@ function PlayerDatabase() {
                     </thead>
                     <tbody>
                         {selectedEarners.map((e, i) => (
-                            <tr key={e.name} className="odd:bg-white even:bg-gray-100">
+                            <tr key={e.name + i} className="odd:bg-white even:bg-gray-100">
                                 <td className="p-2 font-semibold">{e.name}</td>
                                 <td className="p-2 text-center">{e.rank}</td>
                                 <td className="p-2 text-center">{e.awards}</td>
@@ -2069,7 +2069,7 @@ function PlayerDatabase() {
         const legend = (
             <div className="flex justify-center gap-4 mt-2 mb-2">
                 {players.map((p, idx) => (
-                    <div key={p.name} className="flex items-center gap-2">
+                    <div key={p.id || p.name} className="flex items-center gap-2">
                         <span style={{
                             display: "inline-block",
                             width: 16,
@@ -2081,7 +2081,7 @@ function PlayerDatabase() {
                         <span className="font-semibold text-sm">{p.name}</span>
                         <button
                             className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
-                            onClick={() => removeFromCompare(p.name)}
+                            onClick={() => removeFromCompare(p.id)}
                             title="Remove from comparison"
                         >×</button>
                     </div>
@@ -2187,8 +2187,8 @@ function PlayerDatabase() {
                 >
                     {filtered.map((p) => (
                         <div
-                            key={p.name}
-                            className={`flex items-center px-4 py-3 cursor-pointer hover:bg-blue-50 ${selected.some(sel => sel.name === p.name) ? "bg-blue-100" : ""}`}
+                            key={p.id || p.name}
+                            className={`flex items-center px-4 py-3 cursor-pointer hover:bg-blue-50 ${selected.some(sel => sel.id === p.id) ? "bg-blue-100" : ""}`}
                             onClick={() => toggleSelect(p)}
                         >
                             <span
@@ -2198,7 +2198,7 @@ function PlayerDatabase() {
                             >
                                 {p.name}
                             </span>
-                            {selected.some(sel => sel.name === p.name) && (
+                            {selected.some(sel => sel.id === p.id) && (
                                 <span className="ml-2 text-xs text-blue-700 font-semibold">Selected</span>
                             )}
                         </div>
@@ -2213,7 +2213,7 @@ function PlayerDatabase() {
                     {filtered.map((p) => {
                         const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
 
-                        const isSelected = selected.some(sel => sel.name === p.name);
+                        const isSelected = selected.some(sel => sel.id === p.id);
                         const cardHighlight = getCardHighlight({ assigned: false, selected: isSelected });
                         return (
                             <div
@@ -2240,7 +2240,7 @@ function PlayerDatabase() {
                                     {isSelected && (
                                         <button
                                             className="ml-2 px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
-                                            onClick={e => { e.stopPropagation(); removeFromCompare(p.name); }}
+                                            onClick={e => { e.stopPropagation(); removeFromCompare(p.id); }}
                                             title="Remove from comparison"
                                         >×</button>
                                     )}
@@ -2825,13 +2825,13 @@ function LineupCreator() {
 
             if (toTeam === "teamA") {
                 newTeamA = newTeamA.map((p, idx) =>
-                    p && p.name === player.name && idx !== toIndex ? null : p
+                    p && (p.id ? p.id === player.id : p.name === player.name) && idx !== toIndex ? null : p
                 );
                 newTeamA[toIndex] = player;
             }
             if (toTeam === "teamB") {
                 newTeamB = newTeamB.map((p, idx) =>
-                    p && p.name === player.name && idx !== toIndex ? null : p
+                    p && (p.id ? p.id === player.id : p.name === player.name) && idx !== toIndex ? null : p
                 );
                 newTeamB[toIndex] = player;
             }
