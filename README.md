@@ -11,6 +11,37 @@ Currently, two official plugins are available:
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 
+## Installation and Development
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) **18** or newer
+- [npm](https://www.npmjs.com/) (comes with Node.js)
+
+### Install dependencies
+
+Run the following command in the project directory to install required packages:
+
+```bash
+npm install
+```
+
+### Run the development server
+
+Start a local dev server with hot reloading:
+
+```bash
+npm run dev
+```
+
+### Create a production build
+
+To generate the optimized production assets, run:
+
+```bash
+npm run build
+```
+=======
 ## Deployment
 
 Run `npm run deploy` to publish the contents of the `dist` folder to the `gh-pages` branch. This command relies on the `gh-pages` package and is useful for manual deployments. The repository also includes a GitHub Actions workflow that deploys automatically when changes are pushed to `master`.
