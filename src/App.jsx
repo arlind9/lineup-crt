@@ -3294,7 +3294,7 @@ function MotmStatsFeature() {
         );
         const isGK = player.position === "GK";
         const overall = calculateOverall(player);
-        const cardBg = motm ? getMotmCardBg(overall) : getCardBgByOverall(overall);
+        const cardBg = motm ? getMotmCardBgByOverall(overall) : getCardBgByOverall(overall);
         const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
 
         return (
@@ -3510,7 +3510,7 @@ function AllMotmStatsCards({ stats }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {stats.map((row, idx) => {
                     const player = row.after;
-                    const cardBg = getMotmCardBg(calculateOverall(player));
+                    const cardBg = getMotmCardBgByOverall(calculateOverall(player));
                     const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
                     const isGK = player.position === "GK";
                     return (
