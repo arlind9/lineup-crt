@@ -1605,7 +1605,7 @@ function Home() {
                             <span className="text-xl sm:text-3xl mb-1 sm:mb-2">📋</span>
                             <h3 className="text-base sm:text-xl font-bold mb-1 text-blue-900 text-center">Player Database</h3>
                             <p className="text-gray-700 text-center text-xs sm:text-base mb-2">
-                                Browse all players, filter and sort, and compare up to 3 players on a radar chart.
+                                Browse all players, filter and sort, and compare up to 5 players on a radar chart.
                             </p>
                             <span className="text-blue-700 font-semibold underline text-xs sm:text-sm mt-1">
                                 Go to Player Database
