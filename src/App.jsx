@@ -125,7 +125,7 @@ function expandPlayersForMotm(players, includeMotm) {
         }
     });
     return out;
-// Return player stats respecting MOTM toggle
+
 function getDisplayPlayer(player, useMotm) {
     if (useMotm && player.motmCard) {
         return { ...player, ...player.motmCard };
@@ -215,6 +215,7 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                         ) : (
                             visiblePlayers.map(p => {
                                 const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+
                                 const cardBg = p.motmCard && useMotm ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
                                 return (
                                     <div
@@ -262,7 +263,8 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                 </div>
                 <div className="w-56 min-w-[12rem] hidden sm:block">
                     {hoveredPlayer && (
-                        <div className={`border rounded-lg p-2 text-xs shadow ${hoveredPlayer.motmCard && useMotm ? getMotmCardBgByOverall(hoveredPlayer.overall) : getCardBgByOverall(hoveredPlayer.overall)}`}>
+                        <div className={`border rounded-lg p-2 text-xs shadow ${hoveredPlayer.version === 'motm' ? getMotmCardBgByOverall(hoveredPlayer.overall) : getCardBgByOverall(hoveredPlayer.overall)}`}>
+
                             <div className="font-bold text-center mb-1">{hoveredPlayer.name}</div>
                             <div className="text-center text-gray-500 mb-2">{hoveredPlayer.position}</div>
                             <div className="flex justify-center mb-2">
@@ -1228,11 +1230,10 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
         };
     }, [player, fromTeam, fromIndex, onDragStart, onDragEnd]);
 
-
-    const p = getDisplayPlayer(player, useMotm);
+    const p = player;
     const imageUrl = p.photo ? p.photo : PLACEHOLDER_IMG;
-    const cardBg = p.motmCard && useMotm ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
-    
+    const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
+
     const cardHighlight = getCardHighlight({ assigned, selected });
 
     return (
@@ -1343,8 +1344,9 @@ function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragSta
             }
             draggable
             onDragStart={e => {
+            
+                const p = player;
 
-                const p = getDisplayPlayer(player, useMotm);
                 e.dataTransfer.setData("application/json", JSON.stringify({
                     player: p,
                     fromTeam,
@@ -1355,16 +1357,16 @@ function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragSta
             onDragEnd={onDragEnd}
             style={{ minHeight: 36 }}
         >
+            {(() => { const p = player; return (
+                <>
+                <span className="font-semibold flex-1 truncate">{p.name}</span>
+                <span className="text-xs text-gray-500 w-10 text-center">{p.position}</span>
+                <span className="text-xs w-12 text-center">OVR: {p.overall}</span>
+                <span className="text-xs w-10 text-center">Spd: {p.speed}</span>
+                <span className="text-xs w-10 text-center">Sht: {p.shooting}</span>
+                <span className="text-xs w-10 text-center">Pas: {p.passing}</span>
+                </> ); })()}
 
-            {(() => { const p = getDisplayPlayer(player, useMotm); return (
-            <>
-            <span className="font-semibold flex-1 truncate">{p.name}</span>
-            <span className="text-xs text-gray-500 w-10 text-center">{p.position}</span>
-            <span className="text-xs w-12 text-center">OVR: {p.overall}</span>
-            <span className="text-xs w-10 text-center">Spd: {p.speed}</span>
-            <span className="text-xs w-10 text-center">Sht: {p.shooting}</span>
-            <span className="text-xs w-10 text-center">Pas: {p.passing}</span>
-            </> ); })()}
         </div>
     );
 }
@@ -1430,6 +1432,7 @@ function Home() {
             })
             .catch(() => setLoading(false));
     }, []);
+
 
     useEffect(() => {
         setSelected(prev => prev.map(sel => {
