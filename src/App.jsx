@@ -1393,7 +1393,61 @@ function Home() {
     const [showAllEarners, setShowAllEarners] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    const [motmBefore, setMotmBefore] = useState(null);
+    const [motmAfter, setMotmAfter] = useState(null);
 
+    useEffect(() => {
+        fetch('https://docs.google.com/spreadsheets/d/13PZEIB0oMzZecDfuBAphm2Ip9FiO9KN8nHS0FihOl-c/gviz/tq?tqx=out:csv')
+            .then(res => res.text())
+            .then(csv => {
+                Papa.parse(csv, {
+                    header: true,
+                    skipEmptyLines: true,
+                    transformHeader: header => header.trim(),
+                    complete: results => {
+                        const rows = results.data
+                            .filter(r => r.Date && r.Player)
+                            .map(r => ({
+                                date: r.Date,
+                                playerName: r.Player,
+                                before: {
+                                    name: r.Player,
+                                    position: r["Position"],
+                                    speed: Number(r["Speed"] || 0),
+                                    shooting: Number(r["Shooting"] || 0),
+                                    passing: Number(r["Passing"] || 0),
+                                    dribbling: Number(r["Dribbling"] || 0),
+                                    physical: Number(r["Physical"] || 0),
+                                    defending: Number(r["Defending"] || 0),
+                                    goalkeeping: Number(r["Goalkeeping"] || 0),
+                                    weakFoot: Number(r["Weak Foot"] || 0),
+                                },
+                                after: {
+                                    name: r.Player,
+                                    position: r["Updated_Position"],
+                                    speed: Number(r["Updated_Speed"] || 0),
+                                    shooting: Number(r["Updated_Shooting"] || 0),
+                                    passing: Number(r["Updated_Passing"] || 0),
+                                    dribbling: Number(r["Updated_Dribbling"] || 0),
+                                    physical: Number(r["Updated_Physical"] || 0),
+                                    defending: Number(r["Updated_Defending"] || 0),
+                                    goalkeeping: Number(r["Updated_Goalkeeping"] || 0),
+                                    weakFoot: Number(r["Updated_Weak Foot"] || 0),
+                                }
+                            }));
+                        // Find the latest MOTM for the player in data[0]
+                        if (data.length > 0) {
+                            const playerName = data[0][Object.keys(data[0])[1]];
+                            const latest = rows.find(r => r.playerName === playerName);
+                            if (latest) {
+                                setMotmBefore(latest.before);
+                                setMotmAfter(latest.after);
+                            }
+                        }
+                    }
+                });
+            });
+    }, [data]);
 
     const formatDate = (input) => {
         const date = new Date(input);
@@ -1437,7 +1491,48 @@ function Home() {
 
 
 
+    function MotmStatsCardHome({ player, title, motm }) {
+        if (!player) return null;
+        const isGK = player.position === "GK";
+        const overall = calculateOverall(player);
+        const cardBg = motm
+            ? "bg-gradient-to-br from-black via-yellow-500 to-yellow-300 border-yellow-400"
+            : "bg-gradient-to-br from-yellow-100 via-yellow-50 to-white border-yellow-300";
+        const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
 
+        return (
+            <div
+                className={[
+                    cardBg,
+                    "border rounded-xl shadow p-4 flex flex-col items-center min-w-[220px] max-w-xs w-full"
+                ].join(" ")}
+            >
+                <div className="font-bold text-blue-900 mb-1">{title}</div>
+                <div className="flex justify-center mb-2">
+                    <img
+                        src={photoUrl}
+                        alt={player.name}
+                        className="w-20 h-20 rounded-full object-cover border"
+                        style={{ background: "#eee" }}
+                        loading="lazy"
+                    />
+                </div>
+                <div className="font-semibold text-base truncate">{player.name}</div>
+                <div className="text-xs text-muted-foreground mb-2">{player.position}</div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2">
+                    <span>Speed: {player.speed || '-'}</span>
+                    <span>Shooting: {player.shooting || '-'}</span>
+                    <span>Passing: {player.passing || '-'}</span>
+                    <span>Dribbling: {player.dribbling || '-'}</span>
+                    <span>Physical: {player.physical || '-'}</span>
+                    <span>Defending: {player.defending || '-'}</span>
+                    <span>Weak Foot: {player.weakFoot || '-'}</span>
+                    {isGK && <span>Goalkeeping: {player.goalkeeping || '-'}</span>}
+                </div>
+                <div className="text-sm font-bold">Overall: {overall}</div>
+            </div>
+        );
+    }
 
     const visibleData = showAll ? data : data.slice(0, 3);
     const visibleEarners = showAllEarners ? topEarners : topEarners.slice(0, 3);
@@ -1563,10 +1658,14 @@ function Home() {
                             <div className="w-full max-w-md">
                                 <h2 className="text-base sm:text-xl font-semibold mb-2 text-center">  </h2>
                                 {/* Last week's MOTM table */}
+                                {/* Last week's MOTM table */}
                                 <table className="w-full shadow-xl rounded-2xl overflow-hidden border-4 border-blue-300 bg-blue-50/80 mb-4">
                                     <tbody>
                                         <tr>
-                                            <td className="p-4 text-center font-bold text-blue-900 text-base sm:text-lg tracking-wide">
+                                            <td
+                                                className="p-4 text-center font-bold text-blue-900 text-base sm:text-lg tracking-wide align-top"
+                                                style={{ minHeight: 480, verticalAlign: "top" }} // Make the cell taller
+                                            >
                                                 {data.length > 0 ? (
                                                     <>
                                                         Njeriu i ndeshjes për ndeshjen e kaluar, luajtur ne date: <span className="text-blue-700 underline">{formatDate(data[0][Object.keys(data[0])[0]])}</span> është <br />
@@ -1583,6 +1682,19 @@ function Home() {
                                                                     : null;
                                                             })()}
                                                         </span>
+                                                        {/* --- Add before/after cards vertically --- */}
+                                                        <div className="flex flex-col items-center gap-4 mt-6">
+                                                            <MotmStatsCardHome
+                                                                player={motmBefore}
+                                                                title="Atributet origjinale"
+                                                                motm={false}
+                                                            />
+                                                            <MotmStatsCardHome
+                                                                player={motmAfter}
+                                                                title="Atributet e javes"
+                                                                motm={true}
+                                                            />
+                                                        </div>
                                                     </>
                                                 ) : (
                                                     "Nuk ka të dhëna për MOTM."
@@ -3543,16 +3655,15 @@ function AllMotmStatsCards({ stats }) {
 
     return (
         <div className="my-8 w-full max-w-5xl mx-auto bg-blue-50 rounded-xl shadow p-6 border">
-            <h2 className="text-xl font-bold mb-4 text-center text-blue-900">Te gjithe fituesit ...</h2>
+            <h2 className="text-xl font-bold mb-4 text-center text-blue-900">Te gjithe fituesit (Atributet jane te lojtarit ne javet perkatese, kliko karten e lojtarit per me shume)</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {stats.map((row) => {
+                {stats.map((row, idx) => {
                     const player = row.after;
                     const cardBg = getMotmCardBgByOverall(calculateOverall(player));
                     const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
                     const isGK = player.position === "GK";
                     return (
                         <div
-                            key={row.playerName + '-' + row.date}
                             key={idx}
                             className={[
                                 cardBg,
