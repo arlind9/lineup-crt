@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import Papa from "papaparse";
+import { calculateOverall } from "./utils/overall";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -1784,21 +1785,6 @@ function PlayerDatabase() {
             });
     }, []);
 
-    function calculateOverall(p) {
-        const { speed, shooting, passing, dribbling, physical, defending, goalkeeping, weakFoot } = p;
-        switch (p.position) {
-            case "ST":
-                return Math.round(speed * 0.25 + shooting * 0.3 + passing * 0.1 + dribbling * 0.15 + physical * 0.1 + defending * 0.1 + weakFoot * 0.1);
-            case "MF":
-                return Math.round(speed * 0.2 + shooting * 0.2 + passing * 0.25 + dribbling * 0.2 + physical * 0.1 + defending * 0.1 + weakFoot * 0.05);
-            case "DF":
-                return Math.round(speed * 0.1 + shooting * 0.05 + passing * 0.15 + dribbling * 0.05 + physical * 0.2 + defending * 0.45 + weakFoot * 0.03);
-            case "GK":
-                return Math.round(speed * 0.03 + passing * 0.02 + physical * 0.05 + goalkeeping * 0.9 + weakFoot * 0.02);
-            default:
-                return 0;
-        }
-    }
 
     const displayPlayers = useMemo(() => expandPlayersForMotm(players, useMotm), [players, useMotm]);
 
@@ -2790,21 +2776,6 @@ function LineupCreator() {
             });
     }, []);
 
-    const calculateOverall = (p) => {
-        const { speed, shooting, passing, dribbling, physical, defending, goalkeeping, weakFoot } = p;
-        switch (p.position) {
-            case "ST":
-                return Math.round(speed * 0.25 + shooting * 0.3 + passing * 0.1 + dribbling * 0.15 + physical * 0.1 + defending * 0.1 + weakFoot * 0.1);
-            case "MF":
-                return Math.round(speed * 0.2 + shooting * 0.2 + passing * 0.25 + dribbling * 0.2 + physical * 0.1 + defending * 0.1 + weakFoot * 0.05);
-            case "DF":
-                return Math.round(speed * 0.1 + shooting * 0.05 + passing * 0.15 + dribbling * 0.05 + physical * 0.2 + defending * 0.45 + weakFoot * 0.03);
-            case "GK":
-                return Math.round(speed * 0.03 + passing * 0.02 + physical * 0.05 + goalkeeping * 0.9 + weakFoot * 0.02);
-            default:
-                return 0;
-        }
-    };
 
     const handlePlayerDrop = ({
         toTeam,
@@ -3305,53 +3276,6 @@ function MotmStatsFeature() {
     };
 
     // Consistent overall calculation as in Player Database
-    function calculateOverall(p) {
-        const {
-            position, speed, shooting, passing, dribbling, physical, defending, goalkeeping, weakFoot
-        } = p;
-        switch (position) {
-            case "ST":
-                return Math.round(
-                    speed * 0.25 +
-                    shooting * 0.3 +
-                    passing * 0.1 +
-                    dribbling * 0.15 +
-                    physical * 0.1 +
-                    defending * 0.1 +
-                    weakFoot * 0.1
-                );
-            case "MF":
-                return Math.round(
-                    speed * 0.2 +
-                    shooting * 0.2 +
-                    passing * 0.25 +
-                    dribbling * 0.2 +
-                    physical * 0.1 +
-                    defending * 0.1 +
-                    weakFoot * 0.05
-                );
-            case "DF":
-                return Math.round(
-                    speed * 0.1 +
-                    shooting * 0.05 +
-                    passing * 0.15 +
-                    dribbling * 0.05 +
-                    physical * 0.2 +
-                    defending * 0.45 +
-                    weakFoot * 0.03
-                );
-            case "GK":
-                return Math.round(
-                    speed * 0.03 +
-                    passing * 0.02 +
-                    physical * 0.05 +
-                    goalkeeping * 0.9 +
-                    weakFoot * 0.02
-                );
-            default:
-                return 0;
-        }
-    }
 
     function getCardHighlight({ assigned, selected }) {
         if (assigned) return "ring-2 ring-green-400 ring-offset-2";
@@ -3529,21 +3453,6 @@ function MotmBeforeAfterModal({ open, row, onClose }) {
     }
 
     // Helper functions (reuse from above)
-    function calculateOverall(p) {
-        const { position, speed, shooting, passing, dribbling, physical, defending, goalkeeping, weakFoot } = p;
-        switch (position) {
-            case "ST":
-                return Math.round(speed * 0.25 + shooting * 0.3 + passing * 0.1 + dribbling * 0.15 + physical * 0.1 + defending * 0.1 + weakFoot * 0.1);
-            case "MF":
-                return Math.round(speed * 0.2 + shooting * 0.2 + passing * 0.25 + dribbling * 0.2 + physical * 0.1 + defending * 0.1 + weakFoot * 0.05);
-            case "DF":
-                return Math.round(speed * 0.1 + shooting * 0.05 + passing * 0.15 + dribbling * 0.05 + physical * 0.2 + defending * 0.45 + weakFoot * 0.03);
-            case "GK":
-                return Math.round(speed * 0.03 + passing * 0.02 + physical * 0.05 + goalkeeping * 0.9 + weakFoot * 0.02);
-            default:
-                return 0;
-        }
-    }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={onClose}>
@@ -3590,53 +3499,6 @@ function AllMotmStatsCards({ stats }) {
     }
 
     // Consistent overall calculation as in Player Database
-    function calculateOverall(p) {
-        const {
-            position, speed, shooting, passing, dribbling, physical, defending, goalkeeping, weakFoot
-        } = p;
-        switch (position) {
-            case "ST":
-                return Math.round(
-                    speed * 0.25 +
-                    shooting * 0.3 +
-                    passing * 0.1 +
-                    dribbling * 0.15 +
-                    physical * 0.1 +
-                    defending * 0.1 +
-                    weakFoot * 0.1
-                );
-            case "MF":
-                return Math.round(
-                    speed * 0.2 +
-                    shooting * 0.2 +
-                    passing * 0.25 +
-                    dribbling * 0.2 +
-                    physical * 0.1 +
-                    defending * 0.1 +
-                    weakFoot * 0.05
-                );
-            case "DF":
-                return Math.round(
-                    speed * 0.1 +
-                    shooting * 0.05 +
-                    passing * 0.15 +
-                    dribbling * 0.05 +
-                    physical * 0.2 +
-                    defending * 0.45 +
-                    weakFoot * 0.03
-                );
-            case "GK":
-                return Math.round(
-                    speed * 0.03 +
-                    passing * 0.02 +
-                    physical * 0.05 +
-                    goalkeeping * 0.9 +
-                    weakFoot * 0.02
-                );
-            default:
-                return 0;
-        }
-    }
 
     if (!stats.length) return null;
 
