@@ -126,7 +126,7 @@ function expandPlayersForMotm(players, includeMotm) {
         }
     });
     return out;
-
+}
 function getDisplayPlayer(player, useMotm) {
     if (useMotm && player.motmCard) {
         return { ...player, ...player.motmCard };
@@ -1434,12 +1434,7 @@ function Home() {
 
 
 
-    useEffect(() => {
-        setSelected(prev => prev.map(sel => {
-            const base = players.find(p => p.name === sel.name) || sel;
-            return getDisplayPlayer(base, useMotm);
-        }));
-    }, [useMotm, players]);
+
 
     const visibleData = showAll ? data : data.slice(0, 3);
     const visibleEarners = showAllEarners ? topEarners : topEarners.slice(0, 3);
@@ -2530,8 +2525,13 @@ function GalleryPage() {
 }
 export default function App() {
     const [view, setView] = useState(() => {
-        return localStorage.getItem("currentView") || "home";
-    });    const [scrolled, setScrolled] = useState(false);
+        try {
+            return localStorage.getItem("currentView") || "home";
+        } catch {
+            return "home";
+        }
+    });
+    const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
