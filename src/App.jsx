@@ -1491,7 +1491,7 @@ function Home() {
 
 
 
-    function MotmStatsCardHome({ player, title, motm }) {
+    function MotmStatsCardHome({ player, title, motm, small }) {
         if (!player) return null;
         const isGK = player.position === "GK";
         const overall = calculateOverall(player);
@@ -1504,32 +1504,34 @@ function Home() {
             <div
                 className={[
                     cardBg,
-                    "border rounded-xl shadow p-4 flex flex-col items-center min-w-[220px] max-w-xs w-full"
+                    small
+                        ? "border rounded-xl shadow p-2 flex flex-col items-center min-w-[120px] max-w-[160px] w-full"
+                        : "border rounded-xl shadow p-4 flex flex-col items-center min-w-[220px] max-w-xs w-full"
                 ].join(" ")}
             >
-                <div className="font-bold text-blue-900 mb-1">{title}</div>
+                <div className="font-bold text-blue-900 mb-1 text-xs sm:text-sm">{title}</div>
                 <div className="flex justify-center mb-2">
                     <img
                         src={photoUrl}
                         alt={player.name}
-                        className="w-20 h-20 rounded-full object-cover border"
+                        className={small ? "w-10 h-10 rounded-full object-cover border" : "w-20 h-20 rounded-full object-cover border"}
                         style={{ background: "#eee" }}
                         loading="lazy"
                     />
                 </div>
-                <div className="font-semibold text-base truncate">{player.name}</div>
-                <div className="text-xs text-muted-foreground mb-2">{player.position}</div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2">
-                    <span>Speed: {player.speed || '-'}</span>
-                    <span>Shooting: {player.shooting || '-'}</span>
-                    <span>Passing: {player.passing || '-'}</span>
-                    <span>Dribbling: {player.dribbling || '-'}</span>
-                    <span>Physical: {player.physical || '-'}</span>
-                    <span>Defending: {player.defending || '-'}</span>
-                    <span>Weak Foot: {player.weakFoot || '-'}</span>
-                    {isGK && <span>Goalkeeping: {player.goalkeeping || '-'}</span>}
+                <div className={small ? "font-semibold text-xs truncate" : "font-semibold text-base truncate"}>{player.name}</div>
+                <div className={small ? "text-[10px] text-muted-foreground mb-1" : "text-xs text-muted-foreground mb-2"}>{player.position}</div>
+                <div className={small ? "grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] mb-1" : "grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2"}>
+                    <span>Spe: {player.speed || '-'}</span>
+                    <span>Sho: {player.shooting || '-'}</span>
+                    <span>Pas: {player.passing || '-'}</span>
+                    <span>Dri: {player.dribbling || '-'}</span>
+                    <span>Phy: {player.physical || '-'}</span>
+                    <span>Def: {player.defending || '-'}</span>
+                    <span>WF: {player.weakFoot || '-'}</span>
+                    {isGK && <span>Gk: {player.goalkeeping || '-'}</span>}
                 </div>
-                <div className="text-sm font-bold">Overall: {overall}</div>
+                <div className={small ? "text-xs font-bold" : "text-sm font-bold"}>Overall: {overall}</div>
             </div>
         );
     }
@@ -1683,16 +1685,18 @@ function Home() {
                                                             })()}
                                                         </span>
                                                         {/* --- Add before/after cards vertically --- */}
-                                                        <div className="flex flex-col items-center gap-4 mt-6">
+                                                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
                                                             <MotmStatsCardHome
                                                                 player={motmBefore}
                                                                 title="Atributet origjinale"
                                                                 motm={false}
+                                                                small
                                                             />
                                                             <MotmStatsCardHome
                                                                 player={motmAfter}
                                                                 title="Atributet e javes"
                                                                 motm={true}
+                                                                small
                                                             />
                                                         </div>
                                                     </>
