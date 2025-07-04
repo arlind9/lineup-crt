@@ -41,3 +41,7 @@ To generate the optimized production assets, run:
 ```bash
 npm run build
 ```
+=======
+## Deployment
+
+Run `npm run deploy` to publish the contents of the `dist` folder to the `gh-pages` branch. This command relies on the `gh-pages` package and is useful for manual deployments. The repository also includes a GitHub Actions workflow that deploys automatically when changes are pushed to `master`.
