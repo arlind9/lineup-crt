@@ -145,6 +145,13 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
         }
     }, [open]);
 
+    // When MOTM view is enabled show all players so MOTM options are visible
+    useEffect(() => {
+        if (open && useMotm) {
+            setShowAll(true);
+        }
+    }, [useMotm, open]);
+
     if (!open) return null;
 
     const sortedPlayers = [...players].sort((a, b) => {
@@ -1683,6 +1690,7 @@ function PlayerDatabase() {
             });
     }, []);
 
+=======
     // Fetch MOTM stats for players
     useEffect(() => {
         fetch('https://docs.google.com/spreadsheets/d/13PZEIB0oMzZecDfuBAphm2Ip9FiO9KN8nHS0FihOl-c/gviz/tq?tqx=out:csv')
