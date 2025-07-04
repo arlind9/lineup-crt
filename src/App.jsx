@@ -2542,11 +2542,11 @@ function GalleryPage() {
         </div>
     );
 }
-// export default function App() {
-//     const [view, setView] = useState(() => {
-//         return localStorage.getItem("currentView") || "home";
-//     });    const [scrolled, setScrolled] = useState(false);
-//     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+export default function App() {
+    const [view, setView] = useState(() => {
+        return localStorage.getItem("currentView") || "home";
+    });    const [scrolled, setScrolled] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         localStorage.setItem("currentView", view);
