@@ -214,7 +214,6 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                             <div className="text-xs text-gray-400 p-2 text-center">No available players</div>
                         ) : (
                             visiblePlayers.map(p => {
-                                const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
 
                                 const cardBg = p.motmCard && useMotm ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
                                 return (
@@ -2543,11 +2542,11 @@ function GalleryPage() {
         </div>
     );
 }
-export default function App() {
-    const [view, setView] = useState(() => {
-        return localStorage.getItem("currentView") || "home";
-    });    const [scrolled, setScrolled] = useState(false);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+// export default function App() {
+//     const [view, setView] = useState(() => {
+//         return localStorage.getItem("currentView") || "home";
+//     });    const [scrolled, setScrolled] = useState(false);
+//     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         localStorage.setItem("currentView", view);
