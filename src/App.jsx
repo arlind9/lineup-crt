@@ -126,7 +126,7 @@ function expandPlayersForMotm(players, includeMotm) {
         }
     });
     return out;
-
+}
 function getDisplayPlayer(player, useMotm) {
     if (useMotm && player.motmCard) {
         return { ...player, ...player.motmCard };
