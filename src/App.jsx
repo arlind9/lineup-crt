@@ -3348,7 +3348,6 @@ function MotmStatsFeature() {
     );
 }
 
-// Add this modal component above AllMotmStatsCards in your file
 
 function MotmBeforeAfterModal({ open, row, onClose }) {
     if (!open || !row) return null;
