@@ -3531,7 +3531,6 @@ function AllMotmStatsCards({ stats }) {
         return new Date(`${c}-${a.padStart(2, '0')}-${b.padStart(2, '0')}`);
     };
 
-    // Card background and highlight helpers (reuse from Player Database)
 
     function getCardHighlight({ assigned, selected }) {
         if (assigned) return "ring-2 ring-green-400 ring-offset-2";
@@ -3539,21 +3538,21 @@ function AllMotmStatsCards({ stats }) {
         return "";
     }
 
-    // Consistent overall calculation as in Player Database
 
     if (!stats.length) return null;
 
     return (
         <div className="my-8 w-full max-w-5xl mx-auto bg-blue-50 rounded-xl shadow p-6 border">
-            <h2 className="text-xl font-bold mb-4 text-center text-blue-900">Te gjithe fituesit (Atributet jane te lojtarit ne javet perkatese, kliko karten e lojtarit per me shume)</h2>
+            <h2 className="text-xl font-bold mb-4 text-center text-blue-900">Te gjithe fituesit ...</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {stats.map((row, idx) => {
+                {stats.map((row) => {
                     const player = row.after;
                     const cardBg = getMotmCardBgByOverall(calculateOverall(player));
                     const photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;
                     const isGK = player.position === "GK";
                     return (
                         <div
+                            key={row.playerName + '-' + row.date}
                             key={idx}
                             className={[
                                 cardBg,
@@ -3609,6 +3608,17 @@ function MOTMPage() {
     const [showAll, setShowAll] = React.useState(false);
     const [showAllEarners, setShowAllEarners] = React.useState(false);
     const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        return () => {
+            setMotmStats([]);
+            setData([]);
+            setTopEarners([]);
+            setShowAll(false);
+            setShowAllEarners(false);
+            setLoading(true);
+        };
+    }, []);
 
     // For all stats
     const [motmStats, setMotmStats] = React.useState([]);
