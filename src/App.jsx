@@ -214,8 +214,8 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                             <div className="text-xs text-gray-400 p-2 text-center">No available players</div>
                         ) : (
                             visiblePlayers.map(p => {
+                                const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
 
-                                const cardBg = p.motmCard && useMotm ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
                                 return (
                                     <div
                                         key={p.id || p.name}
@@ -1343,7 +1343,6 @@ function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragSta
             }
             draggable
             onDragStart={e => {
-            
                 const p = player;
 
                 e.dataTransfer.setData("application/json", JSON.stringify({
@@ -1431,6 +1430,7 @@ function Home() {
             })
             .catch(() => setLoading(false));
     }, []);
+
 
 
     useEffect(() => {
