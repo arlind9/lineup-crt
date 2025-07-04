@@ -1359,15 +1359,17 @@ function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragSta
             onDragEnd={onDragEnd}
             style={{ minHeight: 36 }}
         >
-            {(() => { const p = player; return (
-                <>
-                <span className="font-semibold flex-1 truncate">{p.name}</span>
-                <span className="text-xs text-gray-500 w-10 text-center">{p.position}</span>
-                <span className="text-xs w-12 text-center">OVR: {p.overall}</span>
-                <span className="text-xs w-10 text-center">Spd: {p.speed}</span>
-                <span className="text-xs w-10 text-center">Sht: {p.shooting}</span>
-                <span className="text-xs w-10 text-center">Pas: {p.passing}</span>
-                </> ); })()}
+            {(() => {
+                const p = player; return (
+                    <>
+                        <span className="font-semibold flex-1 truncate">{p.name}</span>
+                        <span className="text-xs text-gray-500 w-10 text-center">{p.position}</span>
+                        <span className="text-xs w-12 text-center">OVR: {p.overall}</span>
+                        <span className="text-xs w-10 text-center">Spd: {p.speed}</span>
+                        <span className="text-xs w-10 text-center">Sht: {p.shooting}</span>
+                        <span className="text-xs w-10 text-center">Pas: {p.passing}</span>
+                    </>);
+            })()}
 
         </div>
     );
@@ -1823,6 +1825,7 @@ function PlayerDatabase() {
                         goalkeeping: Number(cells[8]?.v || 0),
                         weakFoot: !isNaN(Number(cells[10]?.v)) ? Number(cells[10].v) : 0,
                         photo: extractPhotoUrl(cells[12]?.v) || null,
+                        id: `${cells[0]?.v}-base`, // <-- Add this line
                     };
                     player.overall = calculateOverall(player);
                     return player;
@@ -2312,8 +2315,8 @@ function PlayerDatabase() {
                         <button
                             key={pos}
                             className={`px-2 py-1 rounded text-xs font-semibold border transition ${positionFilter === pos
-                                    ? "bg-blue-500 text-white border-blue-500"
-                                    : "bg-white hover:bg-blue-100 border-gray-300"
+                                ? "bg-blue-500 text-white border-blue-500"
+                                : "bg-white hover:bg-blue-100 border-gray-300"
                                 }`}
                             onClick={() => setPositionFilter(pos)}
                             type="button"
@@ -3671,7 +3674,7 @@ function AllMotmStatsCards({ stats }) {
                     const cardBg = getMotmCardBgByOverall(calculateOverall(player));
                     const photoUrl = player.photo
                         ? player.photo
-                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`;                    const isGK = player.position === "GK";
+                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name || "Player")}&background=eee&color=888&size=128&rounded=true`; const isGK = player.position === "GK";
                     return (
                         <div
                             key={idx}
@@ -3945,7 +3948,3 @@ function MOTMPage() {
         </div>
     );
 }
-
-
-
-
