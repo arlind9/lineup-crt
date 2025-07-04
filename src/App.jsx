@@ -1450,6 +1450,7 @@ function Home() {
     function goTo(view) {
         const event = new CustomEvent("setView", { detail: view });
         window.dispatchEvent(event);
+        setTimeout(() => window.location.reload(), 0);
     }
 
     function translateRankToAlbanian(rank) {
@@ -2636,26 +2637,22 @@ export default function App() {
                     <div className="hidden sm:flex gap-4 text-lg">
                         <button
                             className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => setView("home")}
-                        >
+                            onClick={() => { setView("home"); setTimeout(() => window.location.reload(), 0); }}                        >
                             Home
                         </button>
                         <button
                             className={`hover:underline ${view === "lineup" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => setView("lineup")}
-                        >
+                            onClick={() => { setView("lineup"); setTimeout(() => window.location.reload(), 0); }}                        >
                             Lineup Creator
                         </button>
                         <button
                             className={`hover:underline ${view === "database" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => setView("database")}
-                        >
+                            onClick={() => { setView("database"); setTimeout(() => window.location.reload(), 0); }}                        >
                             Player Database
                         </button>
                         <button
                             className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => setView("motm")}
-                        >
+                            onClick={() => { setView("motm"); setTimeout(() => window.location.reload(), 0); }}                        >
                             MOTM
                         </button>
                         {/* --- Add Gallery nav button --- */}
@@ -2686,26 +2683,22 @@ export default function App() {
                             <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50 flex flex-col animate-fade-in">
                                 <button
                                     className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "home" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => setView("home")}
-                                >
+                                    onClick={() => { setView("home"); setTimeout(() => window.location.reload(), 0); }}                                >
                                     Home
                                 </button>
                                 <button
                                     className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "lineup" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => setView("lineup")}
-                                >
+                                    onClick={() => { setView("lineup"); setTimeout(() => window.location.reload(), 0); }}                                >
                                     Lineup Creator
                                 </button>
                                 <button
                                     className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "database" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => setView("database")}
-                                >
+                                    onClick={() => { setView("database"); setTimeout(() => window.location.reload(), 0); }}                                >
                                     Player Database
                                 </button>
                                 <button
                                     className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "motm" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => setView("motm")}
-                                >
+                                    onClick={() => { setView("motm"); setTimeout(() => window.location.reload(), 0); }}                                >
                                     MOTM
                                 </button>
                                 {/* --- Add Gallery nav button (mobile) --- */}
