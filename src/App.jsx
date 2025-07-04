@@ -98,7 +98,36 @@ function getCardHighlight({ assigned, selected }) {
     return "";
 }
 
-function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
+// Utility to parse dd/mm/yyyy or mm/dd/yyyy dates used in the Google sheet
+function parseSheetDate(str) {
+    const parts = String(str).split('/');
+    if (parts.length !== 3) return new Date('Invalid');
+    let [a, b, c] = parts;
+    if (Number(a) > 12) {
+        return new Date(`${c}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`);
+    }
+    return new Date(`${c}-${a.padStart(2, '0')}-${b.padStart(2, '0')}`);
+}
+
+// Expand players list to include MOTM versions when enabled
+function expandPlayersForMotm(players, includeMotm) {
+    if (!includeMotm) return players;
+    const out = [];
+    players.forEach((p) => {
+        out.push({ ...p, id: `${p.name}-base`, version: 'base' });
+        if (p.motmCard) {
+            out.push({
+                ...p,
+                ...p.motmCard,
+                id: `${p.name}-motm`,
+                version: 'motm'
+            });
+        }
+    });
+    return out;
+}
+
+function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMotm }) {
     const [search, setSearch] = useState("");
     const [showAll, setShowAll] = useState(false);
     const [hoveredPlayer, setHoveredPlayer] = useState(null);
@@ -125,6 +154,13 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
             setHoveredPlayer(null);
         }
     }, [open]);
+
+    // When MOTM view is enabled show all players so MOTM options are visible
+    useEffect(() => {
+        if (open && useMotm) {
+            setShowAll(true);
+        }
+    }, [useMotm, open]);
 
     if (!open) return null;
 
@@ -172,10 +208,10 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
                             <div className="text-xs text-gray-400 p-2 text-center">No available players</div>
                         ) : (
                             visiblePlayers.map(p => {
-                                const cardBg = getCardBgByOverall(p.overall);
+                                const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
                                 return (
                                     <div
-                                        key={p.name}
+                                        key={p.id || p.name}
                                         className={`p-2 rounded cursor-pointer flex justify-between items-center mb-1 ${cardBg} border hover:bg-blue-100 transition`}
                                         onClick={() => onSelect(p)}
                                         onMouseEnter={() => setHoveredPlayer(p)}
@@ -188,7 +224,7 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
                                             <span className="font-semibold">{p.name}</span>
                                             <span className="text-gray-500 ml-1">({p.position})</span>
                                         </span>
-                                        <span className="text-gray-400 text-xs">OVR: {p.overall}</span>
+                                        <span className="text-gray-400 text-xs">OVR: {p.overall} {p.version === 'motm' && <strong>MOTM</strong>}</span>
                                     </div>
                                 );
                             })
@@ -219,7 +255,7 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
                 </div>
                 <div className="w-56 min-w-[12rem] hidden sm:block">
                     {hoveredPlayer && (
-                        <div className={`border rounded-lg p-2 text-xs shadow ${getCardBgByOverall(hoveredPlayer.overall)}`}>
+                        <div className={`border rounded-lg p-2 text-xs shadow ${hoveredPlayer.version === 'motm' ? getMotmCardBgByOverall(hoveredPlayer.overall) : getCardBgByOverall(hoveredPlayer.overall)}`}>
                             <div className="font-bold text-center mb-1">{hoveredPlayer.name}</div>
                             <div className="text-center text-gray-500 mb-2">{hoveredPlayer.position}</div>
                             <div className="flex justify-center mb-2">
@@ -241,7 +277,7 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel }) {
                                 <span>Weak Foot: {hoveredPlayer.weakFoot}</span>
                                 <span>Goalkeeping: {hoveredPlayer.goalkeeping}</span>
                             </div>
-                            <div className="text-center font-bold">Overall: {hoveredPlayer.overall}</div>
+                            <div className="text-center font-bold">Overall: {hoveredPlayer.overall} {hoveredPlayer.version === 'motm' && <span>MOTM</span>}</div>
                         </div>
                     )}
                 </div>
@@ -649,6 +685,7 @@ function DroppableTeam({
     formation,
     onPlayerDrop,
     allPlayers,
+    useMotm,
     onFormationChange,
     globalActiveSlot,
     setGlobalActiveSlot,
@@ -1134,6 +1171,7 @@ function DroppableTeam({
                                             fromIndex={i}
                                             small
                                             assigned
+                                            useMotm={useMotm}
                                             onDragStart={handleDragStart}
                                             onDragEnd={handleDragEnd}
                                         />
@@ -1157,7 +1195,7 @@ function DroppableTeam({
 
 // Replace the DraggablePlayer component with this version for mobile minimalism
 
-function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selected, onDragStart, onDragEnd }) {
+function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selected, onDragStart, onDragEnd, useMotm }) {
     const dragRef = useRef(null);
 
     useEffect(() => {
@@ -1183,8 +1221,9 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
         };
     }, [player, fromTeam, fromIndex, onDragStart, onDragEnd]);
 
-    const imageUrl = player.photo ? player.photo : PLACEHOLDER_IMG;
-    const cardBg = getCardBgByOverall(player.overall);
+    const p = player;
+    const imageUrl = p.photo ? p.photo : PLACEHOLDER_IMG;
+    const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
     const cardHighlight = getCardHighlight({ assigned, selected });
 
     return (
@@ -1203,45 +1242,45 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
             draggable
             onDragStart={(e) => {
                 e.dataTransfer.setData("application/json", JSON.stringify({
-                    player,
+                    player: p,
                     fromTeam,
                     fromIndex
                 }));
-                if (onDragStart) onDragStart(player, fromTeam, fromIndex);
+                if (onDragStart) onDragStart(p, fromTeam, fromIndex);
             }}
             onDragEnd={onDragEnd}
         >
             {/* Minimal card for mobile: only name and OVR */}
             <div className="block sm:hidden text-center">
-                <div className="font-semibold text-xs truncate">{player.name}</div>
-                <div className="text-xs font-bold">OVR: {player.overall}</div>
+                <div className="font-semibold text-xs truncate">{p.name}</div>
+                <div className="text-xs font-bold">OVR: {p.overall}</div>
             </div>
             {/* Full card for desktop */}
             <div className="hidden sm:block">
                 <div className="flex justify-center mb-2">
                     <img
                         src={imageUrl}
-                        alt={player.name}
+                        alt={p.name}
                         className={small ? "w-10 h-10 rounded-full object-cover border" : "w-16 h-16 rounded-full object-cover border"}
                         style={{ background: "#eee" }}
                         loading="lazy"
                     />
                 </div>
-                <div className={small ? "font-semibold text-xs truncate" : "font-semibold text-base truncate"}>{player.name}</div>
-                <div className={small ? "text-[10px] text-muted-foreground" : "text-xs text-muted-foreground"}>{player.position}</div>
+                <div className={small ? "font-semibold text-xs truncate" : "font-semibold text-base truncate"}>{p.name}</div>
+                <div className={small ? "text-[10px] text-muted-foreground" : "text-xs text-muted-foreground"}>{p.position}</div>
                 {!small && (
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                        <span>Speed: {player.speed}</span>
-                        <span>Shooting: {player.shooting}</span>
-                        <span>Passing: {player.passing}</span>
-                        <span>Dribbling: {player.dribbling}</span>
-                        <span>Physical: {player.physical}</span>
-                        <span>Defending: {player.defending}</span>
-                        <span>Weak Foot: {player.weakFoot}</span>
-                        <span>Goalkeeping: {player.goalkeeping}</span>
+                        <span>Speed: {p.speed}</span>
+                        <span>Shooting: {p.shooting}</span>
+                        <span>Passing: {p.passing}</span>
+                        <span>Dribbling: {p.dribbling}</span>
+                        <span>Physical: {p.physical}</span>
+                        <span>Defending: {p.defending}</span>
+                        <span>Weak Foot: {p.weakFoot}</span>
+                        <span>Goalkeeping: {p.goalkeeping}</span>
                     </div>
                 )}
-                <div className={small ? "text-xs font-bold pt-0" : "text-sm font-bold pt-1"}>Overall: {player.overall}</div>
+                <div className={small ? "text-xs font-bold pt-0" : "text-sm font-bold pt-1"}>Overall: {p.overall} {p.version === 'motm' && <span>MOTM</span>}</div>
             </div>
             <style>{`
                 @media (max-width: 640px) {
@@ -1263,7 +1302,7 @@ function DraggablePlayer({ player, fromTeam, fromIndex, small, assigned, selecte
     );
 }
 
-function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragStart, onDragEnd }) {
+function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragStart, onDragEnd, useMotm }) {
     const dragRef = useRef(null);
 
     useEffect(() => {
@@ -1294,22 +1333,26 @@ function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragSta
             }
             draggable
             onDragStart={e => {
+                const p = player;
                 e.dataTransfer.setData("application/json", JSON.stringify({
-                    player,
+                    player: p,
                     fromTeam,
                     fromIndex
                 }));
-                if (onDragStart) onDragStart(player, fromTeam, fromIndex);
+                if (onDragStart) onDragStart(p, fromTeam, fromIndex);
             }}
             onDragEnd={onDragEnd}
             style={{ minHeight: 36 }}
         >
-            <span className="font-semibold flex-1 truncate">{player.name}</span>
-            <span className="text-xs text-gray-500 w-10 text-center">{player.position}</span>
-            <span className="text-xs w-12 text-center">OVR: {player.overall}</span>
-            <span className="text-xs w-10 text-center">Spd: {player.speed}</span>
-            <span className="text-xs w-10 text-center">Sht: {player.shooting}</span>
-            <span className="text-xs w-10 text-center">Pas: {player.passing}</span>
+            {(() => { const p = player; return (
+                <>
+                <span className="font-semibold flex-1 truncate">{p.name}</span>
+                <span className="text-xs text-gray-500 w-10 text-center">{p.position}</span>
+                <span className="text-xs w-12 text-center">OVR: {p.overall}</span>
+                <span className="text-xs w-10 text-center">Spd: {p.speed}</span>
+                <span className="text-xs w-10 text-center">Sht: {p.shooting}</span>
+                <span className="text-xs w-10 text-center">Pas: {p.passing}</span>
+                </> ); })()}
         </div>
     );
 }
@@ -1375,6 +1418,7 @@ function Home() {
             })
             .catch(() => setLoading(false));
     }, []);
+
 
     const visibleData = showAll ? data : data.slice(0, 3);
     const visibleEarners = showAllEarners ? topEarners : topEarners.slice(0, 3);
@@ -1620,6 +1664,7 @@ function PlayerDatabase() {
     const [viewMode, setViewMode] = useState("big");
     const [modalPlayer, setModalPlayer] = useState(null);
     const [addCompareModalOpen, setAddCompareModalOpen] = useState(false);
+    const [useMotm, setUseMotm] = useState(false);
 
     useEffect(() => {
         fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
@@ -1645,6 +1690,48 @@ function PlayerDatabase() {
                     return player;
                 });
                 setPlayers(rows);
+            });
+    }, []);
+
+
+    // Fetch MOTM stats and attach latest "after" card to each player
+    useEffect(() => {
+        fetch('https://docs.google.com/spreadsheets/d/13PZEIB0oMzZecDfuBAphm2Ip9FiO9KN8nHS0FihOl-c/gviz/tq?tqx=out:csv')
+            .then(res => res.text())
+            .then(csv => {
+                Papa.parse(csv, {
+                    header: true,
+                    skipEmptyLines: true,
+                    transformHeader: h => h.trim(),
+                    complete: results => {
+                        const latest = {};
+                        results.data
+                            .filter(r => r.Date && r.Player)
+                            .forEach(r => {
+                                const cur = latest[r.Player];
+                                if (!cur || parseSheetDate(r.Date) > parseSheetDate(cur.Date)) {
+                                    latest[r.Player] = r;
+                                }
+                            });
+                        setPlayers(prev => prev.map(p => {
+                            const row = latest[p.name];
+                            if (!row) return p;
+                            const after = {
+                                position: row["Updated_Position"],
+                                speed: Number(row["Updated_Speed"] || 0),
+                                shooting: Number(row["Updated_Shooting"] || 0),
+                                passing: Number(row["Updated_Passing"] || 0),
+                                dribbling: Number(row["Updated_Dribbling"] || 0),
+                                physical: Number(row["Updated_Physical"] || 0),
+                                defending: Number(row["Updated_Defending"] || 0),
+                                goalkeeping: Number(row["Updated_Goalkeeping"] || 0),
+                                weakFoot: Number(row["Updated_Weak Foot"] || 0)
+                            };
+                            const overall = calculateOverall({ ...p, ...after, position: after.position });
+                            return { ...p, motmCard: { ...after, overall } };
+                        }));
+                    }
+                });
             });
     }, []);
 
@@ -1693,7 +1780,8 @@ function PlayerDatabase() {
         }
     }
 
-    const filtered = players
+    const displayPlayers = useMemo(() => expandPlayersForMotm(players, useMotm), [players, useMotm]);
+    const filtered = displayPlayers
         .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
         .filter((p) => positionFilter === "All" || p.position === positionFilter)
         .sort((a, b) => b[sortBy] - a[sortBy]);
@@ -1716,37 +1804,39 @@ function PlayerDatabase() {
 
     function PlayerModal({ player, onClose }) {
         if (!player) return null;
+        const p = player;
+        const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                <div className="bg-white rounded-xl shadow-2xl border p-6 max-w-xs w-full relative">
+                <div className={[cardBg, "rounded-xl shadow-2xl border p-6 max-w-xs w-full relative"].join(' ')}>
                     <button
                         className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg font-bold"
                         onClick={onClose}
                         aria-label="Close"
                         type="button"
                     >×</button>
-                    <div className="font-bold text-xl mb-1 text-center">{player.name}</div>
-                    <div className="text-center text-sm text-gray-500 mb-2">{player.position}</div>
+                    <div className="font-bold text-xl mb-1 text-center">{p.name}</div>
+                    <div className="text-center text-sm text-gray-500 mb-2">{p.position}</div>
                     <div className="flex justify-center mb-2">
                         <img
-                            src={player.photo ? player.photo : PLACEHOLDER_IMG}
-                            alt={player.name}
+                            src={p.photo ? p.photo : PLACEHOLDER_IMG}
+                            alt={p.name}
                             className="w-24 h-24 rounded-full object-cover border"
                             style={{ background: "#eee" }}
                             loading="lazy"
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm mb-2">
-                        <span>Speed: {player.speed}</span>
-                        <span>Shooting: {player.shooting}</span>
-                        <span>Passing: {player.passing}</span>
-                        <span>Dribbling: {player.dribbling}</span>
-                        <span>Physical: {player.physical}</span>
-                        <span>Defending: {player.defending}</span>
-                        <span>Weak Foot: {player.weakFoot}</span>
-                        <span>Goalkeeping: {player.goalkeeping}</span>
+                        <span>Speed: {p.speed}</span>
+                        <span>Shooting: {p.shooting}</span>
+                        <span>Passing: {p.passing}</span>
+                        <span>Dribbling: {p.dribbling}</span>
+                        <span>Physical: {p.physical}</span>
+                        <span>Defending: {p.defending}</span>
+                        <span>Weak Foot: {p.weakFoot}</span>
+                        <span>Goalkeeping: {p.goalkeeping}</span>
                     </div>
-                    <div className="text-base font-bold text-center">Overall: {player.overall}</div>
+                    <div className="text-base font-bold text-center">Overall: {p.overall} {p.version === 'motm' && <span>MOTM</span>}</div>
                 </div>
             </div>
         );
@@ -1783,7 +1873,7 @@ function PlayerDatabase() {
                         ) : (
                             filtered.map(p => (
                                 <div
-                                    key={p.name}
+                                    key={p.id || p.name}
                                     className="p-2 rounded hover:bg-blue-100 cursor-pointer flex justify-between items-center"
                                     onClick={() => { onSelect(p); onClose(); }}
                                 >
@@ -1791,7 +1881,7 @@ function PlayerDatabase() {
                                         <span className="font-semibold">{p.name}</span>
                                         <span className="text-gray-500 ml-1">({p.position})</span>
                                     </span>
-                                    <span className="text-gray-400 text-xs">OVR: {p.overall}</span>
+                                    <span className="text-gray-400 text-xs">OVR: {p.overall} {p.version === 'motm' && <strong>MOTM</strong>}</span>
                                 </div>
                             ))
                         )}
@@ -2038,6 +2128,14 @@ function PlayerDatabase() {
                     onChange={e => setSearch(e.target.value)}
                     className="w-48"
                 />
+                <label className="flex items-center text-xs font-semibold gap-1">
+                    <input
+                        type="checkbox"
+                        checked={useMotm}
+                        onChange={e => setUseMotm(e.target.checked)}
+                    />
+                    MOTM
+                </label>
                 {/* Mobile: Dropdown */}
                 <select
                     className="block sm:hidden border rounded px-2 py-1 text-xs font-semibold"
@@ -2074,7 +2172,7 @@ function PlayerDatabase() {
             <AddPlayerToCompareModal
                 open={addCompareModalOpen}
                 onClose={() => setAddCompareModalOpen(false)}
-                players={players}
+                players={displayPlayers}
                 alreadySelected={selected}
                 onSelect={p => toggleSelect(p)}
             />
@@ -2109,12 +2207,12 @@ function PlayerDatabase() {
                     style={{ minHeight: 200 }}
                 >
                     {filtered.map((p) => {
-                        const cardBg = getCardBgByOverall(p.overall);
+                        const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
                         const isSelected = selected.some(sel => sel.name === p.name);
                         const cardHighlight = getCardHighlight({ assigned: false, selected: isSelected });
                         return (
                             <div
-                                key={p.name}
+                                key={p.id || p.name}
                                 className={[
                                     cardBg,
                                     "border rounded-xl shadow p-4 cursor-pointer transition-all duration-150",
@@ -2155,7 +2253,7 @@ function PlayerDatabase() {
                                         <span>Goalkeeping: {p.goalkeeping}</span>
                                     </div>
                                 )}
-                                <div className="text-sm font-bold">Overall: {p.overall}</div>
+                                <div className="text-sm font-bold">Overall: {p.overall} {p.version === 'motm' && <span className='ml-1'>MOTM</span>}</div>
                                 {isSelected && (
                                     <div className="text-xs text-blue-700 font-semibold mt-1">Selected</div>
                                 )}
@@ -2615,6 +2713,7 @@ function LineupCreator() {
     const [playerSelectModal, setPlayerSelectModal] = useState({ open: false });
     const [compareHover, setCompareHover] = useState(null);
     const [activeDrag, setActiveDrag] = useState(null);
+    const [useMotm, setUseMotm] = useState(false);
 
     const [{ mode, formationA, formationB, teamA, teamB }, setPersistedState] = useState(getInitialState);
 
@@ -2777,6 +2876,10 @@ function LineupCreator() {
         setCompareHover(null);
     };
 
+    const playersDisplay = useMemo(() => expandPlayersForMotm(players, useMotm), [players, useMotm]);
+    const displayTeamA = teamA;
+    const displayTeamB = teamB;
+
     function handleClearAll() {
         setTeamA(Array(PLAYER_COUNTS[mode]).fill(null));
         setTeamB(Array(PLAYER_COUNTS[mode]).fill(null));
@@ -2792,7 +2895,7 @@ function LineupCreator() {
             return arr;
         }
 
-        const shuffledPlayers = shuffle(players);
+        const shuffledPlayers = shuffle(playersDisplay);
 
         function pickBest(pos, pool, taken) {
             const candidates = pool
@@ -2837,6 +2940,10 @@ function LineupCreator() {
                     <option value="9v9">9v9</option>
                     <option value="6v6">6v6</option>
                 </select>
+                <label className="ml-4 flex items-center text-sm font-semibold gap-1">
+                    <input type="checkbox" checked={useMotm} onChange={e => setUseMotm(e.target.checked)} />
+                    MOTM
+                </label>
             </div>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
 
@@ -2844,11 +2951,12 @@ function LineupCreator() {
                 <DroppableTeam
                     id="teamA"
                     label="Team A"
-                    players={teamA}
+                    players={displayTeamA}
                     onPlayerDrop={handlePlayerDrop}
                     formation={formationA}
                     onFormationChange={setFormationA}
-                    allPlayers={players}
+                    allPlayers={playersDisplay}
+                    useMotm={useMotm}
                     globalActiveSlot={globalActiveSlot}
                     setGlobalActiveSlot={setGlobalActiveSlot}
                     playerSelectModal={playerSelectModal}
@@ -2861,11 +2969,12 @@ function LineupCreator() {
                 <DroppableTeam
                     id="teamB"
                     label="Team B"
-                    players={teamB}
+                    players={displayTeamB}
                     onPlayerDrop={handlePlayerDrop}
                     formation={formationB}
                     onFormationChange={setFormationB}
-                    allPlayers={players}
+                    allPlayers={playersDisplay}
+                    useMotm={useMotm}
                     globalActiveSlot={globalActiveSlot}
                     setGlobalActiveSlot={setGlobalActiveSlot}
                     playerSelectModal={playerSelectModal}
@@ -2909,15 +3018,15 @@ function LineupCreator() {
             {showComparison && (
                 <>
                     <MirroredTeamAttributesBarChart
-                        teamAPlayers={teamA}
-                        teamBPlayers={teamB}
+                        teamAPlayers={displayTeamA}
+                        teamBPlayers={displayTeamB}
                         teamALabel="Team A"
                         teamBLabel="Team B"
                         onHide={() => setShowComparison(false)}
                     />
                     <MirroredPositionOVRBarChart
-                        teamAPlayers={teamA}
-                        teamBPlayers={teamB}
+                        teamAPlayers={displayTeamA}
+                        teamBPlayers={displayTeamB}
                         teamALabel="Team A"
                         teamBLabel="Team B"
                     />
@@ -2945,6 +3054,7 @@ function LineupCreator() {
                             small={false}
                             assigned={false}
                             selected={false}
+                            useMotm={useMotm}
                         />
                     ) : null}
                 </DragOverlay>
@@ -2955,6 +3065,7 @@ function LineupCreator() {
                     players={playerSelectModal.eligiblePlayers || []}
                     onSelect={playerSelectModal.onSelect || (() => { })}
                     slotLabel={playerSelectModal.slotLabel}
+                    useMotm={useMotm}
                 />
             </DndContext>
         </div>
