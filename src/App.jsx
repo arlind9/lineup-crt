@@ -1805,6 +1805,8 @@ function PlayerDatabase() {
     const [modalPlayer, setModalPlayer] = useState(null);
     const [addCompareModalOpen, setAddCompareModalOpen] = useState(false);
     const [useMotm, setUseMotm] = useState(false);
+    const [page, setPage] = useState(1);
+    const PAGE_SIZE = 12;
 
     useEffect(() => {
         fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
@@ -1825,7 +1827,7 @@ function PlayerDatabase() {
                         goalkeeping: Number(cells[8]?.v || 0),
                         weakFoot: !isNaN(Number(cells[10]?.v)) ? Number(cells[10].v) : 0,
                         photo: extractPhotoUrl(cells[12]?.v) || null,
-                        id: `${cells[0]?.v}-base`, // <-- Add this line
+                        id: `${cells[0]?.v}-base`,
                     };
                     player.overall = calculateOverall(player);
                     return player;
@@ -1833,7 +1835,6 @@ function PlayerDatabase() {
                 setPlayers(rows);
             });
     }, []);
-
 
     // Fetch MOTM stats and attach ALL motm cards to each player
     useEffect(() => {
@@ -1928,13 +1929,19 @@ function PlayerDatabase() {
             });
     }, []);
 
-
     const displayPlayers = useMemo(() => expandPlayersForMotm(players, useMotm), [players, useMotm]);
 
     const filtered = displayPlayers
         .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
         .filter((p) => positionFilter === "All" || p.position === positionFilter)
         .sort((a, b) => b[sortBy] - a[sortBy]);
+
+    // Pagination logic
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    useEffect(() => {
+        if (page > totalPages) setPage(totalPages || 1);
+    }, [filtered.length, totalPages, page]);
+    const pagedPlayers = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
     function toggleSelect(player) {
         setSelected((prev) => {
@@ -2001,6 +2008,40 @@ function PlayerDatabase() {
                         )}
                     </div>
                 </div>
+            </div>
+        );
+    }
+
+    function PageSelector() {
+        if (totalPages <= 1) return null;
+        return (
+            <div className="flex justify-center items-center gap-2 my-4">
+                <button
+                    className="px-2 py-1 rounded bg-gray-200 text-gray-700 font-semibold disabled:opacity-50"
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
+                    type="button"
+                >
+                    &lt; Prev
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                        key={i + 1}
+                        className={`px-2 py-1 rounded font-semibold ${page === i + 1 ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700"}`}
+                        onClick={() => setPage(i + 1)}
+                        type="button"
+                    >
+                        {i + 1}
+                    </button>
+                ))}
+                <button
+                    className="px-2 py-1 rounded bg-gray-200 text-gray-700 font-semibold disabled:opacity-50"
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === totalPages}
+                    type="button"
+                >
+                    Next &gt;
+                </button>
             </div>
         );
     }
@@ -2201,7 +2242,7 @@ function PlayerDatabase() {
             const points = getPoints(player, idx);
             return (
                 <polygon
-                    key={player.name}
+                    key={player.id || player.name}
                     points={pointsToString(points)}
                     fill={colors[idx] + "33"}
                     stroke={colors[idx]}
@@ -2214,7 +2255,7 @@ function PlayerDatabase() {
             const points = getPoints(player, idx);
             return points.map(([x, y], i) => (
                 <circle
-                    key={player.name + "-dot-" + i}
+                    key={(player.id || player.name) + "-dot-" + i}
                     cx={x}
                     cy={y}
                     r={4}
@@ -2326,7 +2367,7 @@ function PlayerDatabase() {
                     ))}
                 </div>
             </div>
-            {/* --- Existing view mode and player grid/list code follows --- */}
+            <PageSelector />
             {selected.length > 0 && (
                 <div className="mb-4">
                     <RadarCompare players={selected} />
@@ -2344,7 +2385,7 @@ function PlayerDatabase() {
                     className="bg-white rounded-xl border shadow divide-y"
                     style={{ minHeight: 200 }}
                 >
-                    {filtered.map((p) => (
+                    {pagedPlayers.map((p) => (
                         <div
                             key={p.id || p.name}
                             className={`flex items-center px-4 py-3 cursor-pointer hover:bg-blue-50 ${selected.some(sel => sel.id === p.id) ? "bg-blue-100" : ""}`}
@@ -2369,7 +2410,7 @@ function PlayerDatabase() {
                     className={`grid grid-cols-1 ${viewMode === "small" ? "sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6" : "sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"} gap-3`}
                     style={{ minHeight: 200 }}
                 >
-                    {filtered.map((p) => {
+                    {pagedPlayers.map((p) => {
                         const cardBg = p.version === 'motm' ? getMotmCardBgByOverall(p.overall) : getCardBgByOverall(p.overall);
 
                         const isSelected = selected.some(sel => sel.id === p.id);
@@ -2429,7 +2470,8 @@ function PlayerDatabase() {
                                             )}
                                         </span>
                                     )}
-                                </div>                                {isSelected && (
+                                </div>
+                                {isSelected && (
                                     <div className="text-xs text-blue-700 font-semibold mt-1">Selected</div>
                                 )}
                             </div>
@@ -2437,6 +2479,7 @@ function PlayerDatabase() {
                     })}
                 </div>
             )}
+            <PageSelector />
         </div>
     );
 }
