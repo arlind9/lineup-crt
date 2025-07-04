@@ -1742,14 +1742,36 @@ function PlayerDatabase() {
                                     weakFoot: Number(r["Updated_Weak Foot"] || 0)
                                 });
                             });
-                        setPlayers(prev => prev.map(p => {
-                            const motmCards = (motmByPlayer[p.name] || []).map((after, idx) => ({
-                                ...after,
-                                overall: calculateOverall({ ...p, ...after, position: after.position }),
-                                date: after.date
-                            }));
-                            return { ...p, motmCards };
-                        }));
+
+                        setPlayers(prev => {
+                            // Build a map of base players by name
+                            const baseByName = {};
+                            prev.forEach(p => { baseByName[p.name] = p; });
+
+                            // Get all unique player names from both base and MOTM
+                            const allNames = new Set([
+                                ...Object.keys(baseByName),
+                                ...Object.keys(motmByPlayer)
+                            ]);
+
+                            // Build the merged player list
+                            return Array.from(allNames).map(name => {
+                                const base = baseByName[name] || {
+                                    name,
+                                    position: motmByPlayer[name]?.[0]?.position || "",
+                                    speed: 0, shooting: 0, passing: 0, dribbling: 0,
+                                    physical: 0, defending: 0, goalkeeping: 0, weakFoot: 0,
+                                    photo: null,
+                                    overall: 0
+                                };
+                                const motmCards = (motmByPlayer[name] || []).map((after, idx) => ({
+                                    ...after,
+                                    overall: calculateOverall({ ...base, ...after, position: after.position }),
+                                    date: after.date
+                                }));
+                                return { ...base, motmCards };
+                            });
+                        });
                     }
                 });
             });
