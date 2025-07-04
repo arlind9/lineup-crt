@@ -1507,34 +1507,33 @@ function Home() {
             <div
                 className={[
                     cardBg,
-                    small
-                        ? "border rounded-xl shadow p-2 flex flex-col items-center min-w-[120px] max-w-[160px] w-full"
-                        : "border rounded-xl shadow p-4 flex flex-col items-center min-w-[220px] max-w-xs w-full"
+                    "border rounded-xl shadow flex flex-col items-center min-w-[100px] max-w-[130px] w-full p-2 overflow-hidden"
                 ].join(" ")}
+                style={{ minHeight: 0, maxHeight: 230 }}
             >
-                <div className="font-bold text-blue-900 mb-1 text-xs sm:text-sm">{title}</div>
-                <div className="flex justify-center mb-2">
+                <div className="font-bold text-blue-900 mb-1 text-xs sm:text-sm text-center w-full break-words">{title}</div>
+                <div className="flex justify-center mb-1">
                     <img
                         src={photoUrl}
                         alt={player.name}
-                        className={small ? "w-10 h-10 rounded-full object-cover border" : "w-20 h-20 rounded-full object-cover border"}
+                        className="w-10 h-10 rounded-full object-cover border"
                         style={{ background: "#eee" }}
                         loading="lazy"
                     />
                 </div>
-                <div className={small ? "font-semibold text-xs truncate" : "font-semibold text-base truncate"}>{player.name}</div>
-                <div className={small ? "text-[10px] text-muted-foreground mb-1" : "text-xs text-muted-foreground mb-2"}>{player.position}</div>
-                <div className={small ? "grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] mb-1" : "grid grid-cols-2 gap-x-4 gap-y-1 text-xs mb-2"}>
-                    <span>Spe: {player.speed || '-'}</span>
-                    <span>Sho: {player.shooting || '-'}</span>
-                    <span>Pas: {player.passing || '-'}</span>
-                    <span>Dri: {player.dribbling || '-'}</span>
-                    <span>Phy: {player.physical || '-'}</span>
-                    <span>Def: {player.defending || '-'}</span>
-                    <span>WF: {player.weakFoot || '-'}</span>
-                    {isGK && <span>Gk: {player.goalkeeping || '-'}</span>}
+                <div className="font-semibold text-sm truncate w-full text-center">{player.name}</div>
+                <div className="text-[12px] text-muted-foreground mb-1 w-full text-center">{player.position}</div>
+                <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[12px] mb-1 w-full">
+                    <span className="truncate">Spe: {player.speed || '-'}</span>
+                    <span className="truncate">Sho: {player.shooting || '-'}</span>
+                    <span className="truncate">Pas: {player.passing || '-'}</span>
+                    <span className="truncate">Dri: {player.dribbling || '-'}</span>
+                    <span className="truncate">Phy: {player.physical || '-'}</span>
+                    <span className="truncate">Def: {player.defending || '-'}</span>
+                    <span className="truncate">WF: {player.weakFoot || '-'}</span>
+                    {isGK && <span className="truncate">Gk: {player.goalkeeping || '-'}</span>}
                 </div>
-                <div className={small ? "text-xs font-bold" : "text-sm font-bold"}>Overall: {overall}</div>
+                <div className="text-sm font-bold w-full text-center">Overall: {overall}</div>
             </div>
         );
     }
@@ -1691,13 +1690,13 @@ function Home() {
                                                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
                                                             <MotmStatsCardHome
                                                                 player={motmBefore}
-                                                                title="Atributet origjinale"
+                                                                title="Att. Baze"
                                                                 motm={false}
                                                                 small
                                                             />
                                                             <MotmStatsCardHome
                                                                 player={motmAfter}
-                                                                title="Atributet e javes"
+                                                                title="Att. e javes"
                                                                 motm={true}
                                                                 small
                                                             />
@@ -3556,7 +3555,7 @@ function MotmStatsFeature() {
             <h2 className="text-xl font-bold mb-4 text-center text-blue-900">MOTM per kete jave</h2>
             {latest ? (
                 <div className="flex flex-col sm:flex-row gap-6 justify-center items-start mt-4">
-                    <MotmStatsCard player={before} title="Atributet origjinale" motm={false} />
+                    <MotmStatsCard player={before} title="Atributet Baze" motm={false} />
                     <MotmStatsCard player={latest} title="Atributet e javes" motm />
                 </div>
             ) : (
@@ -3633,7 +3632,7 @@ function MotmBeforeAfterModal({ open, row, onClose }) {
                     {row.playerName} - {row.date}
                 </div>
                 <div className="flex flex-col sm:flex-row gap-6 justify-center items-start mt-2">
-                    <MotmStatsCard player={row.before} title="Atributet origjinale" motm={false} />
+                    <MotmStatsCard player={row.before} title="Atributet Baze" motm={false} />
                     <MotmStatsCard player={row.after} title="Atributet e javes" motm />
                 </div>
             </div>
