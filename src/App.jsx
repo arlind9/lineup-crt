@@ -1865,8 +1865,19 @@ function PlayerDatabase() {
                         <span>Weak Foot: {p.weakFoot}</span>
                         <span>Goalkeeping: {p.goalkeeping}</span>
                     </div>
-                    <div className="text-base font-bold text-center">Overall: {p.overall} {p.version === 'motm' && <span>MOTM</span>}</div>
-
+                    <div className="text-sm font-bold">
+                        Overall: {p.overall}
+                        {p.version === 'motm' && (
+                            <span className='ml-1'>
+                                MOTM
+                                {p.motmDate && (
+                                    <span className="ml-1 text-xs text-gray-600 font-normal">
+                                        ({p.motmDate})
+                                    </span>
+                                )}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
         );
@@ -2284,8 +2295,19 @@ function PlayerDatabase() {
                                         <span>Goalkeeping: {p.goalkeeping}</span>
                                     </div>
                                 )}
-                                <div className="text-sm font-bold">Overall: {p.overall} {p.version === 'motm' && <span className='ml-1'>MOTM</span>}</div>
-                                {isSelected && (
+                                <div className="text-sm font-bold">
+                                    Overall: {p.overall}
+                                    {p.version === 'motm' && (
+                                        <span className='ml-1'>
+                                            MOTM
+                                            {p.motmDate && (
+                                                <span className="ml-1 text-xs text-gray-600 font-normal">
+                                                    ({p.motmDate})
+                                                </span>
+                                            )}
+                                        </span>
+                                    )}
+                                </div>                                {isSelected && (
                                     <div className="text-xs text-blue-700 font-semibold mt-1">Selected</div>
                                 )}
                             </div>
