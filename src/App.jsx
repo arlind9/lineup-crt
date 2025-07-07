@@ -2774,6 +2774,7 @@ export default function App() {
 
     return (
         <div className="min-h-screen relative overflow-hidden bg-gray-50/90 text-gray-800">
+
             {view === "home" && <SoccerBackground />}
             <header
                 className={
