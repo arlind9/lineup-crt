@@ -3145,8 +3145,8 @@ function LineupCreator() {
                     <option value="6v6">6v6</option>
                 </select>
                 <label className="ml-4 flex items-center text-sm font-semibold gap-1">
-                    <input type="checkbox" checked={useMotm} onChange={e => setUseMotm(e.target.checked)} />
-                    MOTM
+                    {/*<input type="checkbox" checked={useMotm} onChange={e => setUseMotm(e.target.checked)} />*/}
+                    {/*MOTM*/}
                 </label>
             </div>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
