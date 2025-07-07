@@ -3,7 +3,6 @@ import Papa from "papaparse";
 import { calculateOverall } from "./utils/overall";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import SoccerBackground from "./components/SoccerBackground";
 import {
     DndContext,
     closestCenter,
@@ -2618,6 +2617,7 @@ function GalleryThumbnail({ url, caption, onClick }) {
 }
 
 // --- Update GalleryPage component ---
+// --- Stylized GalleryPage component ---
 function GalleryPage() {
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -2670,8 +2670,8 @@ function GalleryPage() {
 
     if (!images.length) {
         return (
-            <div className="w-full flex flex-col items-center">
-                <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Gallery</h1>
+            <div className="gallery-container w-full flex flex-col items-center">
+                <h1 className="gallery-title text-center">Gallery</h1>
                 <div className="text-gray-500 text-center">No images found.</div>
             </div>
         );
@@ -2714,27 +2714,81 @@ function GalleryPage() {
     }
 
     return (
-        <div className="w-full flex flex-col items-center">
-            <h1 className="text-3xl font-bold mb-6 text-center text-blue-900">Gallery</h1>
-            <PageSelector />
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
-                {pagedImages.map((img, idx) => (
-                    <GalleryThumbnail
-                        key={idx + (page - 1) * PAGE_SIZE}
-                        url={img.url}
-                        caption={img.caption}
-                        onClick={() => setModal({ open: true, image: img.url, caption: img.caption })}
-                    />
-                ))}
+        <>
+            <div className="gallery-container w-full flex flex-col items-center">
+                <h1 className="gallery-title text-center">Gallery</h1>
+                <PageSelector />
+                <div className="gallery-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-full max-w-5xl">
+                    {pagedImages.map((img, idx) => (
+                        <GalleryThumbnail
+                            key={idx + (page - 1) * PAGE_SIZE}
+                            url={img.url}
+                            caption={img.caption}
+                            onClick={() => setModal({ open: true, image: img.url, caption: img.caption })}
+                        />
+                    ))}
+                </div>
+                <PageSelector />
+                <GalleryImageModal
+                    open={modal.open}
+                    image={modal.image}
+                    caption={modal.caption}
+                    onClose={() => setModal({ open: false, image: null, caption: "" })}
+                />
             </div>
-            <PageSelector />
-            <GalleryImageModal
-                open={modal.open}
-                image={modal.image}
-                caption={modal.caption}
-                onClose={() => setModal({ open: false, image: null, caption: "" })}
-            />
-        </div>
+            <style>
+                {`
+            .gallery-container {
+                background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+                border-radius: 1.5rem;
+                box-shadow: 0 4px 32px 0 rgba(60, 80, 180, 0.08);
+                padding: 2rem 1rem 2.5rem 1rem;
+                margin-bottom: 2rem;
+                border: 1px solid #e0e7ef;
+            }
+            .gallery-title {
+                font-size: 2.5rem;
+                font-weight: 900;
+                color: #3730a3;
+                letter-spacing: 0.01em;
+                margin-bottom: 2rem;
+                text-shadow: 0 2px 8px #e0e7ff;
+            }
+            .gallery-grid {
+                gap: 2rem;
+            }
+            .gallery-thumb-outer {
+                transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
+                box-shadow: 0 2px 12px 0 rgba(60, 80, 180, 0.07);
+                border-radius: 1rem;
+                background: #fff;
+                border: 1.5px solid #e0e7ef;
+                overflow: hidden;
+                position: relative;
+                cursor: pointer;
+                animation: fadeIn 0.7s;
+            }
+            .gallery-thumb-outer:hover, .gallery-thumb-outer:focus {
+                transform: scale(1.045) translateY(-2px);
+                box-shadow: 0 6px 24px 0 rgba(60, 80, 180, 0.13);
+                border-color: #a5b4fc;
+                z-index: 2;
+            }
+            .gallery-modal {
+                box-shadow: 0 8px 48px 0 rgba(60, 80, 180, 0.18);
+                border-radius: 1.5rem;
+                border: 2.5px solid #a5b4fc;
+                background: #fff;
+                padding: 2rem 1.5rem;
+                animation: fadeIn 0.3s;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: scale(0.98);}
+                to { opacity: 1; transform: scale(1);}
+            }
+            `}
+            </style>
+        </>
     );
 }
 export default function App() {
@@ -2773,9 +2827,7 @@ export default function App() {
     }, [view]);
 
     return (
-        <div className="min-h-screen relative overflow-hidden bg-gray-50/90 text-gray-800">
-
-            {view === "home" && <SoccerBackground />}
+        <div className="min-h-screen bg-gray-50 text-gray-800">
             <header
                 className={
                     "z-50 sticky top-0 left-0 w-full transition-all duration-300 bg-white shadow " +
@@ -3993,4 +4045,69 @@ function MOTMPage() {
             <AllMotmStatsCards stats={motmStats} />
         </div>
     );
+
+
+    <style>
+    {`
+    /* Gallery page container */
+    .gallery-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+        border-radius: 1.5rem;
+        box-shadow: 0 4px 32px 0 rgba(60, 80, 180, 0.08);
+        padding: 2rem 1rem 2.5rem 1rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e0e7ef;
+    }
+
+    /* Gallery title */
+    .gallery-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #3730a3;
+        letter-spacing: 0.01em;
+        margin-bottom: 2rem;
+        text-shadow: 0 2px 8px #e0e7ff;
+    }
+
+    /* Gallery grid */
+    .gallery-grid {
+        gap: 2rem;
+    }
+
+    /* Gallery thumbnail */
+    .gallery-thumb-outer {
+        transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
+        box-shadow: 0 2px 12px 0 rgba(60, 80, 180, 0.07);
+        border-radius: 1rem;
+        background: #fff;
+        border: 1.5px solid #e0e7ef;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        animation: fadeIn 0.7s;
+    }
+    .gallery-thumb-outer:hover, .gallery-thumb-outer:focus {
+        transform: scale(1.045) translateY(-2px);
+        box-shadow: 0 6px 24px 0 rgba(60, 80, 180, 0.13);
+        border-color: #a5b4fc;
+        z-index: 2;
+    }
+
+    /* Modal styling */
+    .gallery-modal {
+        box-shadow: 0 8px 48px 0 rgba(60, 80, 180, 0.18);
+        border-radius: 1.5rem;
+        border: 2.5px solid #a5b4fc;
+        background: #fff;
+        padding: 2rem 1.5rem;
+        animation: fadeIn 0.3s;
+    }
+
+    /* Fade-in animation */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.98);}
+        to { opacity: 1; transform: scale(1);}
+    }
+    `}
+    </style>
 }
