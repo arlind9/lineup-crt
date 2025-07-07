@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import Papa from "papaparse";
 import { calculateOverall } from "./utils/overall";
 import html2canvas from "html2canvas"; 
+import ReviewAndRequestPage from "./ReviewAndRequestPage";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -2407,21 +2408,21 @@ function PlayerDatabase() {
         const allOutfield = players.every(p => p.position !== "GK");
         const attrs = allOutfield
             ? [
-                { key: "speed", label: "Speed", max: 100 },
-                { key: "shooting", label: "Shooting", max: 100 },
-                { key: "passing", label: "Passing", max: 100 },
-                { key: "dribbling", label: "Dribbling", max: 100 },
-                { key: "physical", label: "Physical", max: 100 },
-                { key: "defending", label: "Defending", max: 100 }
+                { key: "speed", label: "Speed", max: 99 },
+                { key: "shooting", label: "Shooting", max: 99 },
+                { key: "passing", label: "Passing", max: 99 },
+                { key: "dribbling", label: "Dribbling", max: 99 },
+                { key: "physical", label: "Physical", max: 99 },
+                { key: "defending", label: "Defending", max: 99 }
             ]
             : [
-                { key: "speed", label: "Speed", max: 100 },
-                { key: "shooting", label: "Shooting", max: 100 },
-                { key: "passing", label: "Passing", max: 100 },
-                { key: "dribbling", label: "Dribbling", max: 100 },
-                { key: "physical", label: "Physical", max: 100 },
-                { key: "defending", label: "Defending", max: 100 },
-                { key: "goalkeeping", label: "Goalkeeping", max: 100 }
+                { key: "speed", label: "Speed", max: 99 },
+                { key: "shooting", label: "Shooting", max: 99 },
+                { key: "passing", label: "Passing", max: 99 },
+                { key: "dribbling", label: "Dribbling", max: 99 },
+                { key: "physical", label: "Physical", max: 99 },
+                { key: "defending", label: "Defending", max: 99 },
+                { key: "goalkeeping", label: "Goalkeeping", max: 99 }
             ];
 
         const colors = [
@@ -3146,6 +3147,12 @@ export default function App() {
                             Card Creator
                         </button>
                         <button
+                            className={`hover:underline ${view === "review" ? "font-bold text-blue-700" : ""}`}
+                            onClick={() => setView("review")}
+                        >
+                            Review & Request
+                        </button>
+                        <button
                             className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`}
                             onClick={() => { setView("motm"); setTimeout(() => window.location.reload(), 0); }}                        >
                             MOTM
@@ -3197,6 +3204,12 @@ export default function App() {
                                     Card Creator
                                 </button>
                                 <button
+                                    className={`text-left px-4 py-3 hover:bg-blue-50 ${view === "review" ? "font-bold text-blue-700" : ""}`}
+                                    onClick={() => setView("review")}
+                                >
+                                    Review & Request
+                                </button>
+                                <button
                                     className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "motm" ? "font-bold text-blue-700" : ""}`}
                                     onClick={() => { setView("motm"); setTimeout(() => window.location.reload(), 0); }}                                >
                                     MOTM
@@ -3219,6 +3232,7 @@ export default function App() {
                 {view === "database" && <PlayerDatabase />}
                 {view === "motm" && <MOTMPage />}
                 {view === "cardcreator" && <CardCreatorPage />}
+                {view === "review" && <ReviewAndRequestPage />}
                 {view === "gallery" && <GalleryPage />}
             </main>
         </div>
