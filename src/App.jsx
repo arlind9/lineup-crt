@@ -3,7 +3,6 @@ import Papa from "papaparse";
 import { calculateOverall } from "./utils/overall";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import SoccerBackground from "./components/SoccerBackground";
 import {
     DndContext,
     closestCenter,
@@ -2773,9 +2772,7 @@ export default function App() {
     }, [view]);
 
     return (
-        <div className="min-h-screen relative overflow-hidden bg-gray-50/90 text-gray-800">
-
-            {view === "home" && <SoccerBackground />}
+        <div className="min-h-screen bg-gray-50 text-gray-800">
             <header
                 className={
                     "z-50 sticky top-0 left-0 w-full transition-all duration-300 bg-white shadow " +
