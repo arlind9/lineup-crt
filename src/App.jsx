@@ -75,9 +75,10 @@ function extractPhotoUrl(cellValue) {
 }
 
 function getCardBgByOverall(overall) {
-    if (overall >= 90) return "bg-gradient-to-br from-[#e5e4e2] via-[#b3e0fc] to-[#f8fafc] border-blue-300";
-    if (overall >= 80) return "bg-gradient-to-br from-yellow-200 via-yellow-100 to-white border-yellow-400";
-    return "bg-gradient-to-br from-gray-200 via-gray-100 to-white border-gray-300";
+    if (overall >= 90) return "bg-gradient-to-br from-[#e5e4e2] via-[#b3e0fc] to-[#f8fafc] border-blue-300"; // Platinum
+    if (overall >= 80) return "bg-gradient-to-br from-yellow-300 via-yellow-100 to-white border-yellow-400"; // Gold
+    if (overall >= 70) return "bg-gradient-to-br from-gray-300 via-gray-100 to-white border-gray-400"; // Silver
+    return "bg-gradient-to-br from-orange-200 via-yellow-50 to-white border-orange-300"; // Bronze
 }
 
 // Special darker gradient for MOTM winner cards
