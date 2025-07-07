@@ -2261,7 +2261,7 @@ function PlayerDatabase() {
                         <span>Physical: {p.physical}</span>
                         <span>Defending: {p.defending}</span>
                         <span>Weak Foot: {p.weakFoot}</span>
-                        <span>Goalkeeping: {p.goalkeeping}</span>
+                        <span>GK: {p.goalkeeping}</span>
                     </div>
                     <div className="text-sm font-bold">
                         Overall: {p.overall}
@@ -2689,9 +2689,10 @@ function PlayerDatabase() {
                                 key={p.id || p.name}
                                 className={[
                                     cardBg,
-                                    "border rounded-xl shadow p-4 cursor-pointer transition-all duration-150",
+                                    "border rounded-xl shadow p-2 cursor-pointer transition-all duration-150",
                                     isSelected ? "hover:bg-blue-50" : "hover:bg-blue-50",
-                                    cardHighlight
+                                    cardHighlight,
+                                    "min-w-[170px] max-w-[200px] w-full mx-auto"
                                 ].join(" ")}
                                 onClick={e => { e.stopPropagation(); toggleSelect(p); }}
                             >
@@ -2724,7 +2725,7 @@ function PlayerDatabase() {
                                         <span>Physical: {p.physical}</span>
                                         <span>Defending: {p.defending}</span>
                                         <span>Weak Foot: {p.weakFoot}</span>
-                                        <span>Goalkeeping: {p.goalkeeping}</span>
+                                        <span>GK: {p.goalkeeping}</span>
                                     </div>
                                 )}
                                 <div className="text-sm font-bold">
