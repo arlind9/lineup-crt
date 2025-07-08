@@ -360,6 +360,7 @@ export default function ReviewAndRequestPage() {
                                                     type="number"
                                                     min={45}
                                                     max={99}
+                                                    step={1}
                                                     value={reviewingPlayer._review_speed ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_speed: e.target.value }))}
                                                     className="py-1 px-1 text-xs w-14"
@@ -369,7 +370,9 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Shooting:</span>
                                                 <Input
                                                     type="number"
+                                                    min={45}
                                                     max={99}
+                                                    step={1}
                                                     value={reviewingPlayer._review_shooting ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_shooting: e.target.value }))}
                                                     className="py-1 px-1 text-xs w-14"
@@ -379,7 +382,9 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Passing:</span>
                                                 <Input
                                                     type="number"
+                                                    min={45}
                                                     max={99}
+                                                    step={1}
                                                     value={reviewingPlayer._review_passing ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_passing: e.target.value }))}
                                                     className="py-1 px-1 text-xs w-14"
@@ -389,7 +394,9 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Dribbling:</span>
                                                 <Input
                                                     type="number"
+                                                    min={45}
                                                     max={99}
+                                                    step={1}
                                                     value={reviewingPlayer._review_dribbling ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_dribbling: e.target.value }))}
                                                     className="py-1 px-1 text-xs w-14"
@@ -399,7 +406,9 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Physical:</span>
                                                 <Input
                                                     type="number"
+                                                    min={45}
                                                     max={99}
+                                                    step={1}
                                                     value={reviewingPlayer._review_physical ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_physical: e.target.value }))}
                                                     className="py-1 px-1 text-xs w-14"
@@ -409,7 +418,9 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Defending:</span>
                                                 <Input
                                                     type="number"
+                                                    min={45}
                                                     max={99}
+                                                    step={1}
                                                     value={reviewingPlayer._review_defending ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_defending: e.target.value }))}
                                                     className="py-1 px-1 text-xs w-14"
@@ -419,7 +430,9 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Weak Foot:</span>
                                                 <Input
                                                     type="number"
-                                                    max={99}
+                                                    min={0}
+                                                    max={50}
+                                                    step={10}
                                                     value={reviewingPlayer._review_weakFoot ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_weakFoot: e.target.value }))}
                                                     className="py-1 px-1 text-xs w-14"
@@ -429,7 +442,9 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">GK:</span>
                                                 <Input
                                                     type="number"
+                                                    min={45}
                                                     max={99}
+                                                    step={1}
                                                     value={reviewingPlayer._review_goalkeeping ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_goalkeeping: e.target.value }))}
                                                     className="py-1 px-1 text-xs w-14"
@@ -619,15 +634,16 @@ export default function ReviewAndRequestPage() {
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold mb-1">Weak Foot</label>
-                                        <Input
-                                            name="weakFoot"
-                                            type="number"
-                                            min={0}
-                                            max={50}
-                                            value={request.weakFoot}
-                                            onChange={handleRequestChange}
-                                            className="w-full"
-                                        />
+                                            <Input
+                                                name="weakFoot"
+                                                type="number"
+                                                min={0}
+                                                max={50}
+                                                step={10}
+                                                value={request.weakFoot}
+                                                onChange={handleRequestChange}
+                                                className="w-full"
+                                            />
                                     </div>
                                 </div>
                                 <div>
