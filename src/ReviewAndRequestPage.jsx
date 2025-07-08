@@ -326,7 +326,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Shooting:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_shooting ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_shooting: e.target.value }))}
@@ -337,7 +336,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Passing:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_passing ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_passing: e.target.value }))}
@@ -348,7 +346,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Dribbling:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_dribbling ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_dribbling: e.target.value }))}
@@ -359,7 +356,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Physical:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_physical ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_physical: e.target.value }))}
@@ -370,7 +366,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Defending:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_defending ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_defending: e.target.value }))}
@@ -381,7 +376,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Weak Foot:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_weakFoot ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_weakFoot: e.target.value }))}
@@ -392,7 +386,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">GK:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_goalkeeping ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_goalkeeping: e.target.value }))}
