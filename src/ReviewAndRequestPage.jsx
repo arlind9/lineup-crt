@@ -83,10 +83,19 @@ export default function ReviewAndRequestPage() {
     const [search, setSearch] = useState("");
     const [showRequestForm, setShowRequestForm] = useState(false);
     const [request, setRequest] = useState({
-        name: "",
+        reviewer_name: "",
+        player: "",
         position: "ST",
-        notes: "",
-        contact: "",
+        speed: "",
+        shooting: "",
+        passing: "",
+        dribbling: "",
+        physical: "",
+        defending: "",
+        goalkeeping: "",
+        preferredFoot: "",
+        weakFoot: "",
+        review_text: "",
     });
     const [submitted, setSubmitted] = useState(false);
     const [reviewingPlayer, setReviewingPlayer] = useState(null);
@@ -126,8 +135,42 @@ export default function ReviewAndRequestPage() {
 
     function handleRequestSubmit(e) {
         e.preventDefault();
-        // Here you would send the request to your backend or email service.
-        setSubmitted(true);
+
+        if (!request.reviewer_name.trim() || !request.player.trim()) {
+            alert("Please enter your name and the player's name.");
+            return;
+        }
+
+        const requestData = {
+            Reviewer_name: request.reviewer_name,
+            Player: request.player,
+            Position: request.position,
+            Speed: request.speed,
+            Shooting: request.shooting,
+            Passing: request.passing,
+            Dribbling: request.dribbling,
+            Physical: request.physical,
+            Defending: request.defending,
+            Goalkeeping: request.goalkeeping,
+            "Preferred Foot": request.preferredFoot,
+            "Weak Foot": request.weakFoot,
+            review_text: request.review_text,
+        };
+
+        fetch("https://sheetdb.io/api/v1/qp88ee4m90ict", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ data: [requestData] }),
+        })
+        .then((res) => {
+            if (!res.ok) throw new Error("Failed to submit request");
+            setSubmitted(true);
+        })
+        .catch(() => {
+            alert("There was an error submitting your request. Please try again.");
+        });
     }
 
     function handlePlayerCardClick(player) {
@@ -326,7 +369,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Shooting:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_shooting ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_shooting: e.target.value }))}
@@ -337,7 +379,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Passing:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_passing ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_passing: e.target.value }))}
@@ -348,7 +389,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Dribbling:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_dribbling ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_dribbling: e.target.value }))}
@@ -359,7 +399,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Physical:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_physical ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_physical: e.target.value }))}
@@ -370,7 +409,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Defending:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_defending ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_defending: e.target.value }))}
@@ -381,7 +419,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">Weak Foot:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_weakFoot ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_weakFoot: e.target.value }))}
@@ -392,7 +429,6 @@ export default function ReviewAndRequestPage() {
                                                 <span className="w-16 text-gray-600">GK:</span>
                                                 <Input
                                                     type="number"
-                                                    min={45}
                                                     max={99}
                                                     value={reviewingPlayer._review_goalkeeping ?? ""}
                                                     onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_goalkeeping: e.target.value }))}
@@ -434,7 +470,7 @@ export default function ReviewAndRequestPage() {
             {/* Request Form Modal */}
             {showRequestForm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-                    <div className="bg-white rounded-xl shadow-xl border p-6 max-w-md w-full relative">
+                    <div className="bg-white rounded-xl shadow-xl border p-6 max-w-2xl w-full relative">
                         <button
                             className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg font-bold"
                             onClick={() => { setShowRequestForm(false); setSubmitted(false); }}
@@ -448,47 +484,160 @@ export default function ReviewAndRequestPage() {
                             </div>
                         ) : (
                             <form onSubmit={handleRequestSubmit} className="space-y-3">
-                                <div>
+                                <div className="mb-2">
+                                    <label className="block font-semibold mb-1">Your Name</label>
+                                    <Input
+                                        name="reviewer_name"
+                                        value={request.reviewer_name}
+                                        onChange={handleRequestChange}
+                                        required
+                                        placeholder="Your name"
+                                    />
+                                </div>
+                                <div className="mb-2">
                                     <label className="block font-semibold mb-1">Player Name</label>
                                     <Input
-                                        name="name"
-                                        value={request.name}
+                                        name="player"
+                                        value={request.player}
                                         onChange={handleRequestChange}
                                         required
                                         placeholder="Full name"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block font-semibold mb-1">Position</label>
-                                    <select
-                                        name="position"
-                                        value={request.position}
-                                        onChange={handleRequestChange}
-                                        className="border rounded px-2 py-1 w-full"
-                                    >
-                                        <option value="ST">ST</option>
-                                        <option value="MF">MF</option>
-                                        <option value="DF">DF</option>
-                                        <option value="GK">GK</option>
-                                    </select>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 mb-2">
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1">Position</label>
+                                        <select
+                                            name="position"
+                                            value={request.position}
+                                            onChange={handleRequestChange}
+                                            className="border rounded px-2 py-1 w-full"
+                                        >
+                                            <option value="ST">ST</option>
+                                            <option value="MF">MF</option>
+                                            <option value="DF">DF</option>
+                                            <option value="GK">GK</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1">Speed</label>
+                                        <Input
+                                            name="speed"
+                                            type="number"
+                                            min={0}
+                                            max={99}
+                                            value={request.speed}
+                                            onChange={handleRequestChange}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1">Shooting</label>
+                                        <Input
+                                            name="shooting"
+                                            type="number"
+                                            min={0}
+                                            max={99}
+                                            value={request.shooting}
+                                            onChange={handleRequestChange}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1">Passing</label>
+                                        <Input
+                                            name="passing"
+                                            type="number"
+                                            min={0}
+                                            max={99}
+                                            value={request.passing}
+                                            onChange={handleRequestChange}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1">Dribbling</label>
+                                        <Input
+                                            name="dribbling"
+                                            type="number"
+                                            min={0}
+                                            max={99}
+                                            value={request.dribbling}
+                                            onChange={handleRequestChange}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1">Physical</label>
+                                        <Input
+                                            name="physical"
+                                            type="number"
+                                            min={0}
+                                            max={99}
+                                            value={request.physical}
+                                            onChange={handleRequestChange}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1">Defending</label>
+                                        <Input
+                                            name="defending"
+                                            type="number"
+                                            min={0}
+                                            max={99}
+                                            value={request.defending}
+                                            onChange={handleRequestChange}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1">Goalkeeping</label>
+                                        <Input
+                                            name="goalkeeping"
+                                            type="number"
+                                            min={0}
+                                            max={99}
+                                            value={request.goalkeeping}
+                                            onChange={handleRequestChange}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1">Preferred Foot</label>
+                                        <select
+                                            name="preferredFoot"
+                                            value={request.preferredFoot}
+                                            onChange={handleRequestChange}
+                                            className="border rounded px-2 py-1 w-full"
+                                        >
+                                            <option value="">-</option>
+                                            <option value="Right">Right</option>
+                                            <option value="Left">Left</option>
+                                            <option value="Both">Both</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1">Weak Foot</label>
+                                        <Input
+                                            name="weakFoot"
+                                            type="number"
+                                            min={0}
+                                            max={50}
+                                            value={request.weakFoot}
+                                            onChange={handleRequestChange}
+                                            className="w-full"
+                                        />
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="block font-semibold mb-1">Notes (optional)</label>
                                     <textarea
-                                        name="notes"
-                                        value={request.notes}
+                                        name="review_text"
+                                        value={request.review_text}
                                         onChange={handleRequestChange}
                                         className="border rounded px-2 py-1 w-full"
                                         placeholder="Any extra info (e.g. phone, who is requesting, etc)"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block font-semibold mb-1">Your Contact (optional)</label>
-                                    <Input
-                                        name="contact"
-                                        value={request.contact}
-                                        onChange={handleRequestChange}
-                                        placeholder="Email or phone"
                                     />
                                 </div>
                                 <div className="flex gap-2 mt-2">
