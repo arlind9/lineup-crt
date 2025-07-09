@@ -292,12 +292,7 @@ export default function ReviewAndRequestPage() {
             {reviewingPlayer && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-2">
                     <div
-                        className="bg-white rounded-xl shadow-xl border w-full max-w-lg relative flex flex-col"
-                        style={{
-                            maxHeight: "100dvh",
-                            height: "100%",
-                            overflow: "hidden",
-                        }}
+                        className="bg-white rounded-xl shadow-xl border w-full max-w-lg relative flex flex-col h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-h-[90vh] overflow-hidden"
                     >
                         {/* Sticky header for close button */}
                         <div className="sticky top-0 bg-white z-10 flex justify-end p-2 border-b">
@@ -792,12 +787,7 @@ export default function ReviewAndRequestPage() {
             {showRequestForm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-2">
                     <div
-                        className="bg-white rounded-xl shadow-xl border p-2 sm:p-6 max-w-lg w-full relative flex flex-col"
-                        style={{
-                            maxHeight: "100dvh",
-                            height: "100dvh",
-                            overflow: "hidden",
-                        }}
+                        className="bg-white rounded-xl shadow-xl border p-2 sm:p-6 max-w-lg w-full relative flex flex-col h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-h-[90vh] overflow-hidden"
                     >
                         <button
                             className="absolute top-2 right-2 z-20 bg-white rounded-full p-2 text-gray-400 hover:text-gray-700 text-lg font-bold shadow"
