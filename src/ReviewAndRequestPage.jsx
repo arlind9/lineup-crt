@@ -227,6 +227,12 @@ export default function ReviewAndRequestPage() {
         });
     }
 
+    function handleOverlayClick(e, closeFn) {
+        if (e.target === e.currentTarget) {
+            closeFn();
+        }
+    }
+
     const filteredPlayers = players.filter((p) =>
         p.name?.toLowerCase().includes(search.toLowerCase())
     );
@@ -290,18 +296,27 @@ export default function ReviewAndRequestPage() {
             </div>
             {/* Review Modal */}
             {reviewingPlayer && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-2">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-2"
+                    onClick={e => handleOverlayClick(e, () => setReviewingPlayer(null))}
+                >
                     <div
                         className="bg-white rounded-xl shadow-xl border w-full max-w-lg relative flex flex-col h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-h-[90vh] overflow-hidden"
+                        onClick={e => e.stopPropagation()}
                     >
                         {/* Sticky header for close button */}
                         <div className="sticky top-0 bg-white z-10 flex justify-end p-2 border-b">
                             <button
-                                className="text-gray-400 hover:text-gray-700 text-lg font-bold"
+                                className="text-gray-400 hover:text-gray-700 text-lg font-bold flex items-center justify-center"
                                 onClick={() => setReviewingPlayer(null)}
                                 aria-label="Close"
                                 type="button"
-                            >×</button>
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" strokeLinecap="round" />
+                                    <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" strokeLinecap="round" />
+                                </svg>
+                            </button>
                         </div>
                         <div className="overflow-y-auto p-2 sm:p-4 flex-1">
                             <h2 className="text-base sm:text-lg font-bold mb-2 text-center text-blue-900">
@@ -785,16 +800,25 @@ export default function ReviewAndRequestPage() {
             )}
             {/* Request Form Modal */}
             {showRequestForm && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-2">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-2"
+                    onClick={e => handleOverlayClick(e, () => { setShowRequestForm(false); setSubmitted(false); })}
+                >
                     <div
                         className="bg-white rounded-xl shadow-xl border p-2 sm:p-6 max-w-lg w-full relative flex flex-col h-[100dvh] max-h-[100dvh] sm:h-auto sm:max-h-[90vh] overflow-hidden"
+                        onClick={e => e.stopPropagation()}
                     >
                         <button
-                            className="absolute top-2 right-2 z-20 bg-white rounded-full p-2 text-gray-400 hover:text-gray-700 text-lg font-bold shadow"
+                            className="absolute top-2 right-2 z-20 bg-white rounded-full p-2 text-gray-400 hover:text-gray-700 text-lg font-bold shadow flex items-center justify-center"
                             onClick={() => { setShowRequestForm(false); setSubmitted(false); }}
                             aria-label="Close"
                             type="button"
-                        >×</button>
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" strokeLinecap="round"/>
+                                <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                        </button>
                         <div className="overflow-y-auto flex-1 w-full">
                             <h2 className="text-base sm:text-lg font-bold mb-2 text-center text-blue-900">Request New Player Addition</h2>
                             {submitted ? (
