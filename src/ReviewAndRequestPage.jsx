@@ -791,316 +791,53 @@ export default function ReviewAndRequestPage() {
             {/* Request Form Modal */}
             {showRequestForm && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-2">
-                    <div className="bg-white rounded-xl shadow-xl border p-4 sm:p-6 max-w-lg w-full relative">
+                    <div
+                        className="bg-white rounded-xl shadow-xl border p-2 sm:p-6 max-w-lg w-full relative flex flex-col"
+                        style={{
+                            maxHeight: "100dvh",
+                            height: "100dvh",
+                            overflow: "hidden",
+                        }}
+                    >
                         <button
-                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg font-bold"
+                            className="absolute top-2 right-2 z-20 bg-white rounded-full p-2 text-gray-400 hover:text-gray-700 text-lg font-bold shadow"
                             onClick={() => { setShowRequestForm(false); setSubmitted(false); }}
                             aria-label="Close"
                             type="button"
                         >×</button>
-                        <h2 className="text-base sm:text-lg font-bold mb-2 text-center text-blue-900">Request New Player Addition</h2>
-                        {submitted ? (
-                            <div className="text-green-700 text-center font-semibold py-8">
-                                Thank you! Your request has been submitted.
-                            </div>
-                        ) : (
-                            <form onSubmit={handleRequestSubmit} className="space-y-3">
-                                <div className="mb-2">
-                                    <label className="block font-semibold mb-1">Your Name</label>
-                                    <Input
-                                        name="reviewer_name"
-                                        value={request.reviewer_name}
-                                        onChange={handleRequestChange}
-                                        required
-                                        placeholder="Your name"
-                                    />
+                        <div className="overflow-y-auto flex-1 w-full">
+                            <h2 className="text-base sm:text-lg font-bold mb-2 text-center text-blue-900">Request New Player Addition</h2>
+                            {submitted ? (
+                                <div className="text-green-700 text-center font-semibold py-8">
+                                    Thank you! Your request has been submitted.
                                 </div>
-                                <div className="mb-2">
-                                    <label className="block font-semibold mb-1">Player Name</label>
-                                    <Input
-                                        name="player"
-                                        value={request.player}
-                                        onChange={handleRequestChange}
-                                        required
-                                        placeholder="Full name"
-                                    />
-                                </div>
-                                <div className="flex flex-col items-center">
-                                    {/* Player Card with Attribute Selectors */}
-                                    <div
-                                        className={`w-full flex flex-col items-center justify-start rounded-xl border shadow-sm p-3 mb-2 ${getCardBgByOverall(
-                                            calculateOverall({
-                                                position: request.position,
-                                                speed: Number(request.speed) || 0,
-                                                shooting: Number(request.shooting) || 0,
-                                                passing: Number(request.passing) || 0,
-                                                dribbling: Number(request.dribbling) || 0,
-                                                physical: Number(request.physical) || 0,
-                                                defending: Number(request.defending) || 0,
-                                                goalkeeping: Number(request.goalkeeping) || 0,
-                                                weakFoot: Number(request.weakFoot) || 0,
-                                            })
-                                        )}`}
-                                        style={{ minWidth: 0, maxWidth: 400 }}
-                                    >
-                                        <img
-                                            src={PLACEHOLDER_IMG}
-                                            alt={request.player || "Player"}
-                                            className="w-20 h-20 rounded-full object-cover border border-gray-200 mb-2 bg-gray-100"
-                                            style={{ background: "#f3f3f3" }}
+                            ) : (
+                                <form onSubmit={handleRequestSubmit} className="space-y-3">
+                                    <div className="mb-2">
+                                        <label className="block font-semibold mb-1">Your Name</label>
+                                        <Input
+                                            name="reviewer_name"
+                                            value={request.reviewer_name}
+                                            onChange={handleRequestChange}
+                                            required
+                                            placeholder="Your name"
                                         />
-                                        <div className="w-full text-center">
-                                            <div className="font-bold text-base text-gray-900">{request.player || "Player Name"}</div>
-                                            <div className="text-sm text-gray-600 mb-2">{request.position}</div>
-                                        </div>
-                                        <div className="w-full grid grid-cols-2 gap-y-1 text-sm mb-2">
-                                            <span className="text-gray-700 flex items-center">
-                                                Speed:
-                                                <button
-                                                    type="button"
-                                                    className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("speed", request.speed - 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >-</button>
-                                                <Input
-                                                    name="speed"
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    value={request.speed}
-                                                    onChange={e => handleAttributeChange("speed", e.target.value, 45, 99)}
-                                                    className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("speed", request.speed + 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >+</button>
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Shooting:
-                                                <button
-                                                    type="button"
-                                                    className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("shooting", request.shooting - 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >-</button>
-                                                <Input
-                                                    name="shooting"
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    value={request.shooting}
-                                                    onChange={e => handleAttributeChange("shooting", e.target.value, 45, 99)}
-                                                    className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("shooting", request.shooting + 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >+</button>
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Passing:
-                                                <button
-                                                    type="button"
-                                                    className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("passing", request.passing - 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >-</button>
-                                                <Input
-                                                    name="passing"
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    value={request.passing}
-                                                    onChange={e => handleAttributeChange("passing", e.target.value, 45, 99)}
-                                                    className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("passing", request.passing + 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >+</button>
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Dribbling:
-                                                <button
-                                                    type="button"
-                                                    className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("dribbling", request.dribbling - 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >-</button>
-                                                <Input
-                                                    name="dribbling"
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    value={request.dribbling}
-                                                    onChange={e => handleAttributeChange("dribbling", e.target.value, 45, 99)}
-                                                    className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("dribbling", request.dribbling + 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >+</button>
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Physical:
-                                                <button
-                                                    type="button"
-                                                    className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("physical", request.physical - 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >-</button>
-                                                <Input
-                                                    name="physical"
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    value={request.physical}
-                                                    onChange={e => handleAttributeChange("physical", e.target.value, 45, 99)}
-                                                    className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("physical", request.physical + 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >+</button>
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Defending:
-                                                <button
-                                                    type="button"
-                                                    className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("defending", request.defending - 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >-</button>
-                                                <Input
-                                                    name="defending"
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    value={request.defending}
-                                                    onChange={e => handleAttributeChange("defending", e.target.value, 45, 99)}
-                                                    className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("defending", request.defending + 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >+</button>
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Weak Foot:
-                                                <button
-                                                    type="button"
-                                                    className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("weakFoot", request.weakFoot - 10, 10, 50, 10)}
-                                                    tabIndex={-1}
-                                                >-</button>
-                                                <Input
-                                                    name="weakFoot"
-                                                    type="number"
-                                                    min={10}
-                                                    max={50}
-                                                    step={10}
-                                                    value={request.weakFoot}
-                                                    onChange={e => handleAttributeChange("weakFoot", e.target.value, 10, 50, 10)}
-                                                    className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("weakFoot", request.weakFoot + 10, 10, 50, 10)}
-                                                    tabIndex={-1}
-                                                >+</button>
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                GK:
-                                                <button
-                                                    type="button"
-                                                    className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("goalkeeping", request.goalkeeping - 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >-</button>
-                                                <Input
-                                                    name="goalkeeping"
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    value={request.goalkeeping}
-                                                    onChange={e => handleAttributeChange("goalkeeping", e.target.value, 45, 99)}
-                                                    className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
-                                                    onClick={() => handleAttributeChange("goalkeeping", request.goalkeeping + 1, 45, 99)}
-                                                    tabIndex={-1}
-                                                >+</button>
-                                            </span>
-                                        </div>
-                                        <div className="w-full grid grid-cols-2 gap-x-2 mb-2">
-                                            <div>
-                                                <label className="block text-xs font-semibold mb-1">Position</label>
-                                                <select
-                                                    name="position"
-                                                    value={request.position}
-                                                    onChange={handleRequestChange}
-                                                    className="border rounded px-2 py-1 w-full"
-                                                >
-                                                    <option value="ST">ST</option>
-                                                    <option value="MF">MF</option>
-                                                    <option value="DF">DF</option>
-                                                    <option value="GK">GK</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block text-xs font-semibold mb-1">Preferred Foot</label>
-                                                <select
-                                                    name="preferredFoot"
-                                                    value={request.preferredFoot}
-                                                    onChange={handleRequestChange}
-                                                    className="border rounded px-2 py-1 w-full"
-                                                >
-                                                    <option value="">-</option>
-                                                    <option value="Right">Right</option>
-                                                    <option value="Left">Left</option>
-                                                    <option value="Both">Both</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div className="w-full text-left font-bold text-lg mt-1">
-                                            <span
-                                                className={
-                                                    (() => {
-                                                        const ovr = calculateOverall({
-                                                            position: request.position,
-                                                            speed: Number(request.speed) || 0,
-                                                            shooting: Number(request.shooting) || 0,
-                                                            passing: Number(request.passing) || 0,
-                                                            dribbling: Number(request.dribbling) || 0,
-                                                            physical: Number(request.physical) || 0,
-                                                            defending: Number(request.defending) || 0,
-                                                            goalkeeping: Number(request.goalkeeping) || 0,
-                                                            weakFoot: Number(request.weakFoot) || 0,
-                                                        });
-                                                        if (ovr >= 90) return "text-blue-700";
-                                                        if (ovr >= 80) return "text-yellow-700";
-                                                        if (ovr >= 70) return "text-gray-700";
-                                                        return "text-orange-700";
-                                                    })()
-                                                }
-                                            >
-                                                Overall: {calculateOverall({
+                                    </div>
+                                    <div className="mb-2">
+                                        <label className="block font-semibold mb-1">Player Name</label>
+                                        <Input
+                                            name="player"
+                                            value={request.player}
+                                            onChange={handleRequestChange}
+                                            required
+                                            placeholder="Full name"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        {/* Player Card with Attribute Selectors */}
+                                        <div
+                                            className={`w-full flex flex-col items-center justify-start rounded-xl border shadow-sm p-3 mb-2 ${getCardBgByOverall(
+                                                calculateOverall({
                                                     position: request.position,
                                                     speed: Number(request.speed) || 0,
                                                     shooting: Number(request.shooting) || 0,
@@ -1110,38 +847,310 @@ export default function ReviewAndRequestPage() {
                                                     defending: Number(request.defending) || 0,
                                                     goalkeeping: Number(request.goalkeeping) || 0,
                                                     weakFoot: Number(request.weakFoot) || 0,
-                                                })}
-                                            </span>
+                                                })
+                                            )}`}
+                                            style={{ minWidth: 0, maxWidth: 400 }}
+                                        >
+                                            <img
+                                                src={PLACEHOLDER_IMG}
+                                                alt={request.player || "Player"}
+                                                className="w-20 h-20 rounded-full object-cover border border-gray-200 mb-2 bg-gray-100"
+                                                style={{ background: "#f3f3f3" }}
+                                            />
+                                            <div className="w-full text-center">
+                                                <div className="font-bold text-base text-gray-900">{request.player || "Player Name"}</div>
+                                                <div className="text-sm text-gray-600 mb-2">{request.position}</div>
+                                            </div>
+                                            <div className="w-full grid grid-cols-2 gap-y-1 text-sm mb-2">
+                                                <span className="text-gray-700 flex items-center">
+                                                    Speed:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("speed", request.speed - 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        name="speed"
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        value={request.speed}
+                                                        onChange={e => handleAttributeChange("speed", e.target.value, 45, 99)}
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("speed", request.speed + 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                <span className="text-gray-700 flex items-center">
+                                                    Shooting:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("shooting", request.shooting - 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        name="shooting"
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        value={request.shooting}
+                                                        onChange={e => handleAttributeChange("shooting", e.target.value, 45, 99)}
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("shooting", request.shooting + 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                <span className="text-gray-700 flex items-center">
+                                                    Passing:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("passing", request.passing - 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        name="passing"
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        value={request.passing}
+                                                        onChange={e => handleAttributeChange("passing", e.target.value, 45, 99)}
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("passing", request.passing + 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                <span className="text-gray-700 flex items-center">
+                                                    Dribbling:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("dribbling", request.dribbling - 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        name="dribbling"
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        value={request.dribbling}
+                                                        onChange={e => handleAttributeChange("dribbling", e.target.value, 45, 99)}
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("dribbling", request.dribbling + 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                <span className="text-gray-700 flex items-center">
+                                                    Physical:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("physical", request.physical - 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        name="physical"
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        value={request.physical}
+                                                        onChange={e => handleAttributeChange("physical", e.target.value, 45, 99)}
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("physical", request.physical + 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                <span className="text-gray-700 flex items-center">
+                                                    Defending:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("defending", request.defending - 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        name="defending"
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        value={request.defending}
+                                                        onChange={e => handleAttributeChange("defending", e.target.value, 45, 99)}
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("defending", request.defending + 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                <span className="text-gray-700 flex items-center">
+                                                    Weak Foot:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("weakFoot", request.weakFoot - 10, 10, 50, 10)}
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        name="weakFoot"
+                                                        type="number"
+                                                        min={10}
+                                                        max={50}
+                                                        step={10}
+                                                        value={request.weakFoot}
+                                                        onChange={e => handleAttributeChange("weakFoot", e.target.value, 10, 50, 10)}
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("weakFoot", request.weakFoot + 10, 10, 50, 10)}
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                <span className="text-gray-700 flex items-center">
+                                                    GK:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("goalkeeping", request.goalkeeping - 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        name="goalkeeping"
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        value={request.goalkeeping}
+                                                        onChange={e => handleAttributeChange("goalkeeping", e.target.value, 45, 99)}
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700"
+                                                        onClick={() => handleAttributeChange("goalkeeping", request.goalkeeping + 1, 45, 99)}
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                            </div>
+                                            <div className="w-full grid grid-cols-2 gap-x-2 mb-2">
+                                                <div>
+                                                    <label className="block text-xs font-semibold mb-1">Position</label>
+                                                    <select
+                                                        name="position"
+                                                        value={request.position}
+                                                        onChange={handleRequestChange}
+                                                        className="border rounded px-2 py-1 w-full"
+                                                    >
+                                                        <option value="ST">ST</option>
+                                                        <option value="MF">MF</option>
+                                                        <option value="DF">DF</option>
+                                                        <option value="GK">GK</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold mb-1">Preferred Foot</label>
+                                                    <select
+                                                        name="preferredFoot"
+                                                        value={request.preferredFoot}
+                                                        onChange={handleRequestChange}
+                                                        className="border rounded px-2 py-1 w-full"
+                                                    >
+                                                        <option value="">-</option>
+                                                        <option value="Right">Right</option>
+                                                        <option value="Left">Left</option>
+                                                        <option value="Both">Both</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="w-full text-left font-bold text-lg mt-1">
+                                                <span
+                                                    className={
+                                                        (() => {
+                                                            const ovr = calculateOverall({
+                                                                position: request.position,
+                                                                speed: Number(request.speed) || 0,
+                                                                shooting: Number(request.shooting) || 0,
+                                                                passing: Number(request.passing) || 0,
+                                                                dribbling: Number(request.dribbling) || 0,
+                                                                physical: Number(request.physical) || 0,
+                                                                defending: Number(request.defending) || 0,
+                                                                goalkeeping: Number(request.goalkeeping) || 0,
+                                                                weakFoot: Number(request.weakFoot) || 0,
+                                                            });
+                                                            if (ovr >= 90) return "text-blue-700";
+                                                            if (ovr >= 80) return "text-yellow-700";
+                                                            if (ovr >= 70) return "text-gray-700";
+                                                            return "text-orange-700";
+                                                        })()
+                                                    }
+                                                >
+                                                    Overall: {calculateOverall({
+                                                        position: request.position,
+                                                        speed: Number(request.speed) || 0,
+                                                        shooting: Number(request.shooting) || 0,
+                                                        passing: Number(request.passing) || 0,
+                                                        dribbling: Number(request.dribbling) || 0,
+                                                        physical: Number(request.physical) || 0,
+                                                        defending: Number(request.defending) || 0,
+                                                        goalkeeping: Number(request.goalkeeping) || 0,
+                                                        weakFoot: Number(request.weakFoot) || 0,
+                                                    })}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <label className="block font-semibold mb-1">Notes (optional)</label>
-                                    <textarea
-                                        name="review_text"
-                                        value={request.review_text}
-                                        onChange={handleRequestChange}
-                                        className="border rounded px-2 py-1 w-full"
-                                        placeholder="Any extra info (e.g. phone, who is requesting, etc)"
-                                    />
-                                </div>
-                                <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                                    <button
-                                        type="submit"
-                                        className="w-full sm:w-auto px-4 py-2 rounded bg-blue-500 text-white font-semibold hover:bg-blue-600 transition"
-                                    >
-                                        Submit Request
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="w-full sm:w-auto px-4 py-2 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition"
-                                        onClick={() => setShowRequestForm(false)}
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
-                        )}
+                                    <div>
+                                        <label className="block font-semibold mb-1">Notes (optional)</label>
+                                        <textarea
+                                            name="review_text"
+                                            value={request.review_text}
+                                            onChange={handleRequestChange}
+                                            className="border rounded px-2 py-1 w-full"
+                                            placeholder="Any extra info (e.g. phone, who is requesting, etc)"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                                        <button
+                                            type="submit"
+                                            className="w-full sm:w-auto px-4 py-2 rounded bg-blue-500 text-white font-semibold hover:bg-blue-600 transition"
+                                        >
+                                            Submit Request
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="w-full sm:w-auto px-4 py-2 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition"
+                                            onClick={() => setShowRequestForm(false)}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
