@@ -172,13 +172,13 @@ export default function ReviewAndRequestPage() {
             },
             body: JSON.stringify({ data: [requestData] }),
         })
-        .then((res) => {
-            if (!res.ok) throw new Error("Failed to submit request");
-            setSubmitted(true);
-        })
-        .catch(() => {
-            alert("There was an error submitting your request. Please try again.");
-        });
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to submit request");
+                setSubmitted(true);
+            })
+            .catch(() => {
+                alert("There was an error submitting your request. Please try again.");
+            });
     }
 
     function handlePlayerCardClick(player) {
@@ -218,13 +218,13 @@ export default function ReviewAndRequestPage() {
             },
             body: JSON.stringify({ data: [reviewData] }),
         })
-        .then((res) => {
-            if (!res.ok) throw new Error("Failed to submit review");
-            setReviewSubmitted(true);
-        })
-        .catch(() => {
-            alert("There was an error submitting your review. Please try again.");
-        });
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to submit review");
+                setReviewSubmitted(true);
+            })
+            .catch(() => {
+                alert("There was an error submitting your review. Please try again.");
+            });
     }
 
     function handleOverlayClick(e, closeFn) {
@@ -262,7 +262,7 @@ export default function ReviewAndRequestPage() {
                     return (
                         <div
                             key={idx}
-                            className={`border rounded-lg p-2 sm:p-3 shadow flex flex-col sm:flex-row gap-2 sm:gap-3 items-center cursor-pointer hover:bg-blue-50 transition ${getCardBgByOverall(overall)}`}
+                            className={`border rounded-lg p-1 sm:p-2 shadow flex flex-col sm:flex-row gap-1 sm:gap-2 items-center cursor-pointer hover:bg-blue-50 transition ${getCardBgByOverall(overall)}`}
                             onClick={() => handlePlayerCardClick(p)}
                             tabIndex={0}
                             role="button"
@@ -271,23 +271,23 @@ export default function ReviewAndRequestPage() {
                             <img
                                 src={p.photo || PLACEHOLDER_IMG}
                                 alt={p.name}
-                                className="w-16 h-16 sm:w-12 sm:h-12 rounded-full object-cover border"
+                                className="w-14 h-14 sm:w-10 sm:h-10 rounded-full object-cover border"
                                 style={{ background: "#eee" }}
                                 loading="lazy"
                             />
                             <div className="w-full">
-                                <div className="font-bold">{p.name}</div>
-                                <div className="text-xs text-gray-500 mb-1">{p.position}</div>
-                                <div className="text-xs grid grid-cols-2 gap-x-2">
-                                    <span>Speed: {p.speed}</span>
-                                    <span>Shooting: {p.shooting}</span>
-                                    <span>Passing: {p.passing}</span>
-                                    <span>Dribbling: {p.dribbling}</span>
-                                    <span>Physical: {p.physical}</span>
-                                    <span>Defending: {p.defending}</span>
-                                    <span>Weak Foot: {p.weakFoot}</span>
+                                <div className="font-bold text-sm">{p.name}</div>
+                                <div className="text-xs text-gray-500 mb-0.5">{p.position}</div>
+                                <div className="text-[11px] grid grid-cols-2 gap-x-1">
+                                    <span>SPE: {p.speed}</span>
+                                    <span>SHO: {p.shooting}</span>
+                                    <span>PAS: {p.passing}</span>
+                                    <span>DRI: {p.dribbling}</span>
+                                    <span>PHY: {p.physical}</span>
+                                    <span>DEF: {p.defending}</span>
+                                    <span>WF: {p.weakFoot}</span>
                                     <span>GK: {p.goalkeeping}</span>
-                                    <span className="col-span-2 font-semibold text-sm mt-1">Overall: {overall}</span>
+                                    <span className="col-span-2 font-semibold text-xs mt-0.5">Overall: {overall}</span>
                                 </div>
                             </div>
                         </div>
@@ -355,13 +355,13 @@ export default function ReviewAndRequestPage() {
                                                 <div className="text-sm text-gray-600 mb-2">{reviewingPlayer.position}</div>
                                             </div>
                                             <div className="w-full grid grid-cols-2 gap-y-1 text-sm mb-2">
-                                                <span className="text-gray-700">Speed: {reviewingPlayer.speed}</span>
-                                                <span className="text-gray-700">Shooting: {reviewingPlayer.shooting}</span>
-                                                <span className="text-gray-700">Passing: {reviewingPlayer.passing}</span>
-                                                <span className="text-gray-700">Dribbling: {reviewingPlayer.dribbling}</span>
-                                                <span className="text-gray-700">Physical: {reviewingPlayer.physical}</span>
-                                                <span className="text-gray-700">Defending: {reviewingPlayer.defending}</span>
-                                                <span className="text-gray-700">Weak Foot: {reviewingPlayer.weakFoot}</span>
+                                                <span className="text-gray-700">SPE: {reviewingPlayer.speed}</span>
+                                                <span className="text-gray-700">SHO: {reviewingPlayer.shooting}</span>
+                                                <span className="text-gray-700">PAS: {reviewingPlayer.passing}</span>
+                                                <span className="text-gray-700">DRI: {reviewingPlayer.dribbling}</span>
+                                                <span className="text-gray-700">PHY: {reviewingPlayer.physical}</span>
+                                                <span className="text-gray-700">DEF: {reviewingPlayer.defending}</span>
+                                                <span className="text-gray-700">WF: {reviewingPlayer.weakFoot}</span>
                                                 <span className="text-gray-700">GK: {reviewingPlayer.goalkeeping}</span>
                                             </div>
                                             <div className="w-full text-left font-bold text-lg mt-1">
@@ -370,10 +370,10 @@ export default function ReviewAndRequestPage() {
                                                         calculateOverall(reviewingPlayer) >= 90
                                                             ? "text-blue-700"
                                                             : calculateOverall(reviewingPlayer) >= 80
-                                                            ? "text-yellow-700"
-                                                            : calculateOverall(reviewingPlayer) >= 70
-                                                            ? "text-gray-700"
-                                                            : "text-orange-700"
+                                                                ? "text-yellow-700"
+                                                                : calculateOverall(reviewingPlayer) >= 70
+                                                                    ? "text-gray-700"
+                                                                    : "text-orange-700"
                                                     }
                                                 >
                                                     Overall: {calculateOverall(reviewingPlayer)}
@@ -410,9 +410,8 @@ export default function ReviewAndRequestPage() {
                                                 <div className="text-sm text-gray-600 mb-2">{reviewingPlayer.position}</div>
                                             </div>
                                             <div className="w-full grid grid-cols-2 gap-y-1 text-sm mb-2">
-                                                {/* Speed */}
                                                 <span className="text-gray-700 flex items-center">
-                                                    Speed:
+                                                    SPE:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
@@ -450,9 +449,8 @@ export default function ReviewAndRequestPage() {
                                                         tabIndex={-1}
                                                     >+</button>
                                                 </span>
-                                                {/* Shooting */}
                                                 <span className="text-gray-700 flex items-center">
-                                                    Shooting:
+                                                    SHO:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
@@ -490,9 +488,8 @@ export default function ReviewAndRequestPage() {
                                                         tabIndex={-1}
                                                     >+</button>
                                                 </span>
-                                                {/* Passing */}
                                                 <span className="text-gray-700 flex items-center">
-                                                    Passing:
+                                                    PAS:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
@@ -530,9 +527,8 @@ export default function ReviewAndRequestPage() {
                                                         tabIndex={-1}
                                                     >+</button>
                                                 </span>
-                                                {/* Dribbling */}
                                                 <span className="text-gray-700 flex items-center">
-                                                    Dribbling:
+                                                    DRI:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
@@ -570,9 +566,8 @@ export default function ReviewAndRequestPage() {
                                                         tabIndex={-1}
                                                     >+</button>
                                                 </span>
-                                                {/* Physical */}
                                                 <span className="text-gray-700 flex items-center">
-                                                    Physical:
+                                                    PHY:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
@@ -610,9 +605,8 @@ export default function ReviewAndRequestPage() {
                                                         tabIndex={-1}
                                                     >+</button>
                                                 </span>
-                                                {/* Defending */}
                                                 <span className="text-gray-700 flex items-center">
-                                                    Defending:
+                                                    DEF:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
@@ -650,9 +644,8 @@ export default function ReviewAndRequestPage() {
                                                         tabIndex={-1}
                                                     >+</button>
                                                 </span>
-                                                {/* Weak Foot */}
                                                 <span className="text-gray-700 flex items-center">
-                                                    Weak Foot:
+                                                    WF:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
@@ -690,7 +683,6 @@ export default function ReviewAndRequestPage() {
                                                         tabIndex={-1}
                                                     >+</button>
                                                 </span>
-                                                {/* GK */}
                                                 <span className="text-gray-700 flex items-center">
                                                     GK:
                                                     <button
@@ -815,8 +807,8 @@ export default function ReviewAndRequestPage() {
                             type="button"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" strokeLinecap="round"/>
-                                <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" strokeLinecap="round"/>
+                                <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" strokeLinecap="round" />
+                                <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" strokeLinecap="round" />
                             </svg>
                         </button>
                         <div className="overflow-y-auto flex-1 w-full">
@@ -850,7 +842,7 @@ export default function ReviewAndRequestPage() {
                                     <div className="flex flex-col items-center">
                                         {/* Player Card with Attribute Selectors */}
                                         <div
-                                            className={`w-full flex flex-col items-center justify-start rounded-xl border shadow-sm p-3 mb-2 ${getCardBgByOverall(
+                                            className={`w-full flex flex-col items-center justify-start rounded-xl border shadow-sm p-1 sm:p-2 mb-2 ${getCardBgByOverall(
                                                 calculateOverall({
                                                     position: request.position,
                                                     speed: Number(request.speed) || 0,
@@ -863,21 +855,21 @@ export default function ReviewAndRequestPage() {
                                                     weakFoot: Number(request.weakFoot) || 0,
                                                 })
                                             )}`}
-                                            style={{ minWidth: 0, maxWidth: 400 }}
+                                            style={{ minWidth: 0, maxWidth: 350 }}
                                         >
                                             <img
                                                 src={PLACEHOLDER_IMG}
                                                 alt={request.player || "Player"}
-                                                className="w-20 h-20 rounded-full object-cover border border-gray-200 mb-2 bg-gray-100"
+                                                className="w-14 h-14 rounded-full object-cover border border-gray-200 mb-1 bg-gray-100"
                                                 style={{ background: "#f3f3f3" }}
                                             />
                                             <div className="w-full text-center">
-                                                <div className="font-bold text-base text-gray-900">{request.player || "Player Name"}</div>
-                                                <div className="text-sm text-gray-600 mb-2">{request.position}</div>
+                                                <div className="font-bold text-sm text-gray-900">{request.player || "Player Name"}</div>
+                                                <div className="text-xs text-gray-600 mb-1">{request.position}</div>
                                             </div>
-                                            <div className="w-full grid grid-cols-2 gap-y-1 text-sm mb-2">
+                                            <div className="w-full grid grid-cols-2 gap-y-1 text-[11px] mb-1">
                                                 <span className="text-gray-700 flex items-center">
-                                                    Speed:
+                                                    SPE:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
@@ -901,7 +893,7 @@ export default function ReviewAndRequestPage() {
                                                     >+</button>
                                                 </span>
                                                 <span className="text-gray-700 flex items-center">
-                                                    Shooting:
+                                                    SHO:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
@@ -925,7 +917,7 @@ export default function ReviewAndRequestPage() {
                                                     >+</button>
                                                 </span>
                                                 <span className="text-gray-700 flex items-center">
-                                                    Passing:
+                                                    PAS:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
@@ -949,7 +941,7 @@ export default function ReviewAndRequestPage() {
                                                     >+</button>
                                                 </span>
                                                 <span className="text-gray-700 flex items-center">
-                                                    Dribbling:
+                                                    DRI:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
@@ -973,7 +965,7 @@ export default function ReviewAndRequestPage() {
                                                     >+</button>
                                                 </span>
                                                 <span className="text-gray-700 flex items-center">
-                                                    Physical:
+                                                    PHY:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
@@ -997,7 +989,7 @@ export default function ReviewAndRequestPage() {
                                                     >+</button>
                                                 </span>
                                                 <span className="text-gray-700 flex items-center">
-                                                    Defending:
+                                                    DEF:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
@@ -1021,7 +1013,7 @@ export default function ReviewAndRequestPage() {
                                                     >+</button>
                                                 </span>
                                                 <span className="text-gray-700 flex items-center">
-                                                    Weak Foot:
+                                                    WF:
                                                     <button
                                                         type="button"
                                                         className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700"
@@ -1070,7 +1062,7 @@ export default function ReviewAndRequestPage() {
                                                     >+</button>
                                                 </span>
                                             </div>
-                                            <div className="w-full grid grid-cols-2 gap-x-2 mb-2">
+                                            <div className="w-full grid grid-cols-2 gap-x-2 mb-1">
                                                 <div>
                                                     <label className="block text-xs font-semibold mb-1">Position</label>
                                                     <select
@@ -1100,7 +1092,7 @@ export default function ReviewAndRequestPage() {
                                                     </select>
                                                 </div>
                                             </div>
-                                            <div className="w-full text-left font-bold text-lg mt-1">
+                                            <div className="w-full text-left font-bold text-xs mt-0.5">
                                                 <span
                                                     className={
                                                         (() => {

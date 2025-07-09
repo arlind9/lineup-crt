@@ -1440,9 +1440,22 @@ function Home() {
                                     weakFoot: Number(r["Updated_Weak Foot"] || 0),
                                 }
                             }));
-                        // Find the latest MOTM for the player in data[0]
+
+                        // Sort rows by date descending
+                        const parseDate = (str) => {
+                            const parts = str.split('/');
+                            if (parts.length !== 3) return new Date('Invalid');
+                            let [a, b, c] = parts;
+                            if (Number(a) > 12) {
+                                return new Date(`${c}-${b.padStart(2, '0')}-${a.padStart(2, '0')}`);
+                            }
+                            return new Date(`${c}-${a.padStart(2, '0')}-${b.padStart(2, '0')}`);
+                        };
+                        rows.sort((a, b) => parseDate(b.date) - parseDate(a.date));
+
                         if (data.length > 0) {
                             const playerName = data[0][Object.keys(data[0])[1]];
+                            // Find the latest MOTM entry for this player
                             const latest = rows.find(r => r.playerName === playerName);
                             if (latest) {
                                 setMotmBefore(latest.before);
