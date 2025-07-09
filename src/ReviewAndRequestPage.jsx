@@ -291,224 +291,91 @@ export default function ReviewAndRequestPage() {
             {/* Review Modal */}
             {reviewingPlayer && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-2">
-                    <div className="bg-white rounded-xl shadow-xl border p-2 sm:p-4 max-w-lg w-full relative">
-                        <button
-                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg font-bold"
-                            onClick={() => setReviewingPlayer(null)}
-                            aria-label="Close"
-                            type="button"
-                        >×</button>
-                        <h2 className="text-base sm:text-lg font-bold mb-2 text-center text-blue-900">
-                            Leave a Review for {reviewingPlayer.name}
-                        </h2>
-                        {reviewSubmitted ? (
-                            <div className="text-green-700 text-center font-semibold py-8">
-                                Thank you! Your review has been submitted.
-                            </div>
-                        ) : (
-                            <form onSubmit={handleReviewSubmit} className="space-y-2">
-                                <div className="mb-2">
-                                    <label className="block font-semibold mb-1">Your Name</label>
-                                    <Input
-                                        type="text"
-                                        value={reviewerName}
-                                        onChange={e => setReviewerName(e.target.value)}
-                                        required
-                                        placeholder="Enter your name"
-                                    />
+                    <div
+                        className="bg-white rounded-xl shadow-xl border w-full max-w-lg relative flex flex-col"
+                        style={{
+                            maxHeight: "100dvh",
+                            height: "100%",
+                            overflow: "hidden",
+                        }}
+                    >
+                        {/* Sticky header for close button */}
+                        <div className="sticky top-0 bg-white z-10 flex justify-end p-2 border-b">
+                            <button
+                                className="text-gray-400 hover:text-gray-700 text-lg font-bold"
+                                onClick={() => setReviewingPlayer(null)}
+                                aria-label="Close"
+                                type="button"
+                            >×</button>
+                        </div>
+                        <div className="overflow-y-auto p-2 sm:p-4 flex-1">
+                            <h2 className="text-base sm:text-lg font-bold mb-2 text-center text-blue-900">
+                                Leave a Review for {reviewingPlayer.name}
+                            </h2>
+                            {reviewSubmitted ? (
+                                <div className="text-green-700 text-center font-semibold py-8">
+                                    Thank you! Your review has been submitted.
                                 </div>
-                                <div className="flex flex-col md:flex-row gap-2 justify-center items-stretch">
-                                    {/* Original Attributes Card */}
-                                    <div
-                                        className={`flex-1 flex flex-col items-center justify-start rounded-xl border shadow-sm p-3 mb-2 ${getCardBgByOverall(calculateOverall(reviewingPlayer))}`}
-                                        style={{ minWidth: 0 }}
-                                    >
-                                        <img
-                                            src={reviewingPlayer.photo || PLACEHOLDER_IMG}
-                                            alt={reviewingPlayer.name}
-                                            className="w-20 h-20 rounded-full object-cover border border-gray-200 mb-2 bg-gray-100"
-                                            style={{ background: "#f3f3f3" }}
+                            ) : (
+                                <form onSubmit={handleReviewSubmit} className="space-y-2">
+                                    <div className="mb-2">
+                                        <label className="block font-semibold mb-1">Your Name</label>
+                                        <Input
+                                            type="text"
+                                            value={reviewerName}
+                                            onChange={e => setReviewerName(e.target.value)}
+                                            required
+                                            placeholder="Enter your name"
                                         />
-                                        <div className="w-full text-center">
-                                            <div className="font-bold text-base text-gray-900">{reviewingPlayer.name}</div>
-                                            <div className="text-sm text-gray-600 mb-2">{reviewingPlayer.position}</div>
-                                        </div>
-                                        <div className="w-full grid grid-cols-2 gap-y-1 text-sm mb-2">
-                                            <span className="text-gray-700">Speed: {reviewingPlayer.speed}</span>
-                                            <span className="text-gray-700">Shooting: {reviewingPlayer.shooting}</span>
-                                            <span className="text-gray-700">Passing: {reviewingPlayer.passing}</span>
-                                            <span className="text-gray-700">Dribbling: {reviewingPlayer.dribbling}</span>
-                                            <span className="text-gray-700">Physical: {reviewingPlayer.physical}</span>
-                                            <span className="text-gray-700">Defending: {reviewingPlayer.defending}</span>
-                                            <span className="text-gray-700">Weak Foot: {reviewingPlayer.weakFoot}</span>
-                                            <span className="text-gray-700">GK: {reviewingPlayer.goalkeeping}</span>
-                                        </div>
-                                        <div className="w-full text-left font-bold text-lg mt-1">
-                                            <span
-                                                className={
-                                                    calculateOverall(reviewingPlayer) >= 90
-                                                        ? "text-blue-700"
-                                                        : calculateOverall(reviewingPlayer) >= 80
-                                                        ? "text-yellow-700"
-                                                        : calculateOverall(reviewingPlayer) >= 70
-                                                        ? "text-gray-700"
-                                                        : "text-orange-700"
-                                                }
-                                            >
-                                                Overall: {calculateOverall(reviewingPlayer)}
-                                            </span>
-                                        </div>
                                     </div>
-                                    {/* Divider */}
-                                    <div className="hidden md:block w-px bg-gray-200 mx-0"></div>
-                                    {/* Reviewer Input Card */}
-                                    <div
-                                        className={`flex-1 flex flex-col items-center justify-start rounded-xl border shadow-sm p-3 mb-2 ${getCardBgByOverall(
-                                            calculateOverall({
-                                                ...reviewingPlayer,
-                                                speed: Number(reviewingPlayer._review_speed ?? reviewingPlayer.speed),
-                                                shooting: Number(reviewingPlayer._review_shooting ?? reviewingPlayer.shooting),
-                                                passing: Number(reviewingPlayer._review_passing ?? reviewingPlayer.passing),
-                                                dribbling: Number(reviewingPlayer._review_dribbling ?? reviewingPlayer.dribbling),
-                                                physical: Number(reviewingPlayer._review_physical ?? reviewingPlayer.physical),
-                                                defending: Number(reviewingPlayer._review_defending ?? reviewingPlayer.defending),
-                                                goalkeeping: Number(reviewingPlayer._review_goalkeeping ?? reviewingPlayer.goalkeeping),
-                                                weakFoot: Number(reviewingPlayer._review_weakFoot ?? reviewingPlayer.weakFoot),
-                                            })
-                                        )}`}
-                                        style={{ minWidth: 0 }}
-                                    >
-                                        <img
-                                            src={reviewingPlayer.photo || PLACEHOLDER_IMG}
-                                            alt={reviewingPlayer.name}
-                                            className="w-20 h-20 rounded-full object-cover border border-gray-200 mb-2 bg-gray-100"
-                                            style={{ background: "#f3f3f3" }}
-                                        />
-                                        <div className="w-full text-center">
-                                            <div className="font-bold text-base text-gray-900">{reviewingPlayer.name}</div>
-                                            <div className="text-sm text-gray-600 mb-2">{reviewingPlayer.position}</div>
+                                    <div className="flex flex-col md:flex-row gap-2 justify-center items-stretch">
+                                        {/* Original Attributes Card */}
+                                        <div
+                                            className={`flex-1 flex flex-col items-center justify-start rounded-xl border shadow-sm p-3 mb-2 ${getCardBgByOverall(calculateOverall(reviewingPlayer))}`}
+                                            style={{ minWidth: 0 }}
+                                        >
+                                            <img
+                                                src={reviewingPlayer.photo || PLACEHOLDER_IMG}
+                                                alt={reviewingPlayer.name}
+                                                className="w-20 h-20 rounded-full object-cover border border-gray-200 mb-2 bg-gray-100"
+                                                style={{ background: "#f3f3f3" }}
+                                            />
+                                            <div className="w-full text-center">
+                                                <div className="font-bold text-base text-gray-900">{reviewingPlayer.name}</div>
+                                                <div className="text-sm text-gray-600 mb-2">{reviewingPlayer.position}</div>
+                                            </div>
+                                            <div className="w-full grid grid-cols-2 gap-y-1 text-sm mb-2">
+                                                <span className="text-gray-700">Speed: {reviewingPlayer.speed}</span>
+                                                <span className="text-gray-700">Shooting: {reviewingPlayer.shooting}</span>
+                                                <span className="text-gray-700">Passing: {reviewingPlayer.passing}</span>
+                                                <span className="text-gray-700">Dribbling: {reviewingPlayer.dribbling}</span>
+                                                <span className="text-gray-700">Physical: {reviewingPlayer.physical}</span>
+                                                <span className="text-gray-700">Defending: {reviewingPlayer.defending}</span>
+                                                <span className="text-gray-700">Weak Foot: {reviewingPlayer.weakFoot}</span>
+                                                <span className="text-gray-700">GK: {reviewingPlayer.goalkeeping}</span>
+                                            </div>
+                                            <div className="w-full text-left font-bold text-lg mt-1">
+                                                <span
+                                                    className={
+                                                        calculateOverall(reviewingPlayer) >= 90
+                                                            ? "text-blue-700"
+                                                            : calculateOverall(reviewingPlayer) >= 80
+                                                            ? "text-yellow-700"
+                                                            : calculateOverall(reviewingPlayer) >= 70
+                                                            ? "text-gray-700"
+                                                            : "text-orange-700"
+                                                    }
+                                                >
+                                                    Overall: {calculateOverall(reviewingPlayer)}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="w-full grid grid-cols-2 gap-y-1 text-sm mb-2">
-                                            <span className="text-gray-700 flex items-center">
-                                                Speed:
-                                                <Input
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    step={1}
-                                                    value={reviewingPlayer._review_speed ?? ""}
-                                                    onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_speed: e.target.value }))}
-                                                    className="ml-1 py-0.5 px-1 text-xs w-14"
-                                                />
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Shooting:
-                                                <Input
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    step={1}
-                                                    value={reviewingPlayer._review_shooting ?? ""}
-                                                    onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_shooting: e.target.value }))}
-                                                    className="ml-1 py-0.5 px-1 text-xs w-14"
-                                                />
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Passing:
-                                                <Input
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    step={1}
-                                                    value={reviewingPlayer._review_passing ?? ""}
-                                                    onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_passing: e.target.value }))}
-                                                    className="ml-1 py-0.5 px-1 text-xs w-14"
-                                                />
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Dribbling:
-                                                <Input
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    step={1}
-                                                    value={reviewingPlayer._review_dribbling ?? ""}
-                                                    onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_dribbling: e.target.value }))}
-                                                    className="ml-1 py-0.5 px-1 text-xs w-14"
-                                                />
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Physical:
-                                                <Input
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    step={1}
-                                                    value={reviewingPlayer._review_physical ?? ""}
-                                                    onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_physical: e.target.value }))}
-                                                    className="ml-1 py-0.5 px-1 text-xs w-14"
-                                                />
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Defending:
-                                                <Input
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    step={1}
-                                                    value={reviewingPlayer._review_defending ?? ""}
-                                                    onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_defending: e.target.value }))}
-                                                    className="ml-1 py-0.5 px-1 text-xs w-14"
-                                                />
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                Weak Foot:
-                                                <Input
-                                                    type="number"
-                                                    min={0}
-                                                    max={50}
-                                                    step={10}
-                                                    value={reviewingPlayer._review_weakFoot ?? ""}
-                                                    onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_weakFoot: e.target.value }))}
-                                                    className="ml-1 py-0.5 px-1 text-xs w-14"
-                                                />
-                                            </span>
-                                            <span className="text-gray-700 flex items-center">
-                                                GK:
-                                                <Input
-                                                    type="number"
-                                                    min={45}
-                                                    max={99}
-                                                    step={1}
-                                                    value={reviewingPlayer._review_goalkeeping ?? ""}
-                                                    onChange={e => setReviewingPlayer(prev => ({ ...prev, _review_goalkeeping: e.target.value }))}
-                                                    className="ml-1 py-0.5 px-1 text-xs w-14"
-                                                />
-                                            </span>
-                                        </div>
-                                        <div className="w-full text-left font-bold text-lg mt-1">
-                                            <span
-                                                className={
-                                                    (() => {
-                                                        const ovr = calculateOverall({
-                                                            ...reviewingPlayer,
-                                                            speed: Number(reviewingPlayer._review_speed ?? reviewingPlayer.speed),
-                                                            shooting: Number(reviewingPlayer._review_shooting ?? reviewingPlayer.shooting),
-                                                            passing: Number(reviewingPlayer._review_passing ?? reviewingPlayer.passing),
-                                                            dribbling: Number(reviewingPlayer._review_dribbling ?? reviewingPlayer.dribbling),
-                                                            physical: Number(reviewingPlayer._review_physical ?? reviewingPlayer.physical),
-                                                            defending: Number(reviewingPlayer._review_defending ?? reviewingPlayer.defending),
-                                                            goalkeeping: Number(reviewingPlayer._review_goalkeeping ?? reviewingPlayer.goalkeeping),
-                                                            weakFoot: Number(reviewingPlayer._review_weakFoot ?? reviewingPlayer.weakFoot),
-                                                        });
-                                                        if (ovr >= 90) return "text-blue-700";
-                                                        if (ovr >= 80) return "text-yellow-700";
-                                                        if (ovr >= 70) return "text-gray-700";
-                                                        return "text-orange-700";
-                                                    })()
-                                                }
-                                            >
-                                                Overall: {calculateOverall({
+                                        {/* Divider */}
+                                        <div className="hidden md:block w-px bg-gray-200 mx-0"></div>
+                                        {/* Reviewer Input Card */}
+                                        <div
+                                            className={`flex-1 flex flex-col items-center justify-start rounded-xl border shadow-sm p-3 mb-2 ${getCardBgByOverall(
+                                                calculateOverall({
                                                     ...reviewingPlayer,
                                                     speed: Number(reviewingPlayer._review_speed ?? reviewingPlayer.speed),
                                                     shooting: Number(reviewingPlayer._review_shooting ?? reviewingPlayer.shooting),
@@ -518,37 +385,406 @@ export default function ReviewAndRequestPage() {
                                                     defending: Number(reviewingPlayer._review_defending ?? reviewingPlayer.defending),
                                                     goalkeeping: Number(reviewingPlayer._review_goalkeeping ?? reviewingPlayer.goalkeeping),
                                                     weakFoot: Number(reviewingPlayer._review_weakFoot ?? reviewingPlayer.weakFoot),
-                                                })}
-                                            </span>
+                                                })
+                                            )}`}
+                                            style={{ minWidth: 0 }}
+                                        >
+                                            <img
+                                                src={reviewingPlayer.photo || PLACEHOLDER_IMG}
+                                                alt={reviewingPlayer.name}
+                                                className="w-20 h-20 rounded-full object-cover border border-gray-200 mb-2 bg-gray-100"
+                                                style={{ background: "#f3f3f3" }}
+                                            />
+                                            <div className="w-full text-center">
+                                                <div className="font-bold text-base text-gray-900">{reviewingPlayer.name}</div>
+                                                <div className="text-sm text-gray-600 mb-2">{reviewingPlayer.position}</div>
+                                            </div>
+                                            <div className="w-full grid grid-cols-2 gap-y-1 text-sm mb-2">
+                                                {/* Speed */}
+                                                <span className="text-gray-700 flex items-center">
+                                                    Speed:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_speed: Math.max(45, Number(prev._review_speed ?? prev.speed) - 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        step={1}
+                                                        value={reviewingPlayer._review_speed ?? reviewingPlayer.speed}
+                                                        onChange={e =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_speed: Math.max(45, Math.min(99, Number(e.target.value))),
+                                                            }))
+                                                        }
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_speed: Math.min(99, Number(prev._review_speed ?? prev.speed) + 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                {/* Shooting */}
+                                                <span className="text-gray-700 flex items-center">
+                                                    Shooting:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_shooting: Math.max(45, Number(prev._review_shooting ?? prev.shooting) - 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        step={1}
+                                                        value={reviewingPlayer._review_shooting ?? reviewingPlayer.shooting}
+                                                        onChange={e =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_shooting: Math.max(45, Math.min(99, Number(e.target.value))),
+                                                            }))
+                                                        }
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_shooting: Math.min(99, Number(prev._review_shooting ?? prev.shooting) + 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                {/* Passing */}
+                                                <span className="text-gray-700 flex items-center">
+                                                    Passing:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_passing: Math.max(45, Number(prev._review_passing ?? prev.passing) - 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        step={1}
+                                                        value={reviewingPlayer._review_passing ?? reviewingPlayer.passing}
+                                                        onChange={e =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_passing: Math.max(45, Math.min(99, Number(e.target.value))),
+                                                            }))
+                                                        }
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_passing: Math.min(99, Number(prev._review_passing ?? prev.passing) + 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                {/* Dribbling */}
+                                                <span className="text-gray-700 flex items-center">
+                                                    Dribbling:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_dribbling: Math.max(45, Number(prev._review_dribbling ?? prev.dribbling) - 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        step={1}
+                                                        value={reviewingPlayer._review_dribbling ?? reviewingPlayer.dribbling}
+                                                        onChange={e =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_dribbling: Math.max(45, Math.min(99, Number(e.target.value))),
+                                                            }))
+                                                        }
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_dribbling: Math.min(99, Number(prev._review_dribbling ?? prev.dribbling) + 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                {/* Physical */}
+                                                <span className="text-gray-700 flex items-center">
+                                                    Physical:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_physical: Math.max(45, Number(prev._review_physical ?? prev.physical) - 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        step={1}
+                                                        value={reviewingPlayer._review_physical ?? reviewingPlayer.physical}
+                                                        onChange={e =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_physical: Math.max(45, Math.min(99, Number(e.target.value))),
+                                                            }))
+                                                        }
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_physical: Math.min(99, Number(prev._review_physical ?? prev.physical) + 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                {/* Defending */}
+                                                <span className="text-gray-700 flex items-center">
+                                                    Defending:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_defending: Math.max(45, Number(prev._review_defending ?? prev.defending) - 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        step={1}
+                                                        value={reviewingPlayer._review_defending ?? reviewingPlayer.defending}
+                                                        onChange={e =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_defending: Math.max(45, Math.min(99, Number(e.target.value))),
+                                                            }))
+                                                        }
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_defending: Math.min(99, Number(prev._review_defending ?? prev.defending) + 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                {/* Weak Foot */}
+                                                <span className="text-gray-700 flex items-center">
+                                                    Weak Foot:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_weakFoot: Math.max(10, Number(prev._review_weakFoot ?? prev.weakFoot) - 10),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        type="number"
+                                                        min={10}
+                                                        max={50}
+                                                        step={10}
+                                                        value={reviewingPlayer._review_weakFoot ?? reviewingPlayer.weakFoot}
+                                                        onChange={e =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_weakFoot: Math.max(10, Math.min(50, Math.round(Number(e.target.value) / 10) * 10)),
+                                                            }))
+                                                        }
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_weakFoot: Math.min(50, Number(prev._review_weakFoot ?? prev.weakFoot) + 10),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                                {/* GK */}
+                                                <span className="text-gray-700 flex items-center">
+                                                    GK:
+                                                    <button
+                                                        type="button"
+                                                        className="ml-1 px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_goalkeeping: Math.max(45, Number(prev._review_goalkeeping ?? prev.goalkeeping) - 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >-</button>
+                                                    <Input
+                                                        type="number"
+                                                        min={45}
+                                                        max={99}
+                                                        step={1}
+                                                        value={reviewingPlayer._review_goalkeeping ?? reviewingPlayer.goalkeeping}
+                                                        onChange={e =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_goalkeeping: Math.max(45, Math.min(99, Number(e.target.value))),
+                                                            }))
+                                                        }
+                                                        className="mx-1 py-0.5 px-1 text-xs w-14 text-center"
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        className="px-2 py-0.5 rounded bg-gray-200 text-gray-700 sm:hidden"
+                                                        onClick={() =>
+                                                            setReviewingPlayer(prev => ({
+                                                                ...prev,
+                                                                _review_goalkeeping: Math.min(99, Number(prev._review_goalkeeping ?? prev.goalkeeping) + 1),
+                                                            }))
+                                                        }
+                                                        tabIndex={-1}
+                                                    >+</button>
+                                                </span>
+                                            </div>
+                                            <div className="w-full text-left font-bold text-lg mt-1">
+                                                <span
+                                                    className={
+                                                        (() => {
+                                                            const ovr = calculateOverall({
+                                                                ...reviewingPlayer,
+                                                                speed: Number(reviewingPlayer._review_speed ?? reviewingPlayer.speed),
+                                                                shooting: Number(reviewingPlayer._review_shooting ?? reviewingPlayer.shooting),
+                                                                passing: Number(reviewingPlayer._review_passing ?? reviewingPlayer.passing),
+                                                                dribbling: Number(reviewingPlayer._review_dribbling ?? reviewingPlayer.dribbling),
+                                                                physical: Number(reviewingPlayer._review_physical ?? reviewingPlayer.physical),
+                                                                defending: Number(reviewingPlayer._review_defending ?? reviewingPlayer.defending),
+                                                                goalkeeping: Number(reviewingPlayer._review_goalkeeping ?? reviewingPlayer.goalkeeping),
+                                                                weakFoot: Number(reviewingPlayer._review_weakFoot ?? reviewingPlayer.weakFoot),
+                                                            });
+                                                            if (ovr >= 90) return "text-blue-700";
+                                                            if (ovr >= 80) return "text-yellow-700";
+                                                            if (ovr >= 70) return "text-gray-700";
+                                                            return "text-orange-700";
+                                                        })()
+                                                    }
+                                                >
+                                                    Overall: {calculateOverall({
+                                                        ...reviewingPlayer,
+                                                        speed: Number(reviewingPlayer._review_speed ?? reviewingPlayer.speed),
+                                                        shooting: Number(reviewingPlayer._review_shooting ?? reviewingPlayer.shooting),
+                                                        passing: Number(reviewingPlayer._review_passing ?? reviewingPlayer.passing),
+                                                        dribbling: Number(reviewingPlayer._review_dribbling ?? reviewingPlayer.dribbling),
+                                                        physical: Number(reviewingPlayer._review_physical ?? reviewingPlayer.physical),
+                                                        defending: Number(reviewingPlayer._review_defending ?? reviewingPlayer.defending),
+                                                        goalkeeping: Number(reviewingPlayer._review_goalkeeping ?? reviewingPlayer.goalkeeping),
+                                                        weakFoot: Number(reviewingPlayer._review_weakFoot ?? reviewingPlayer.weakFoot),
+                                                    })}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="mt-2">
-                                    <label className="block font-semibold mb-1">Your Review <span className="text-gray-400 font-normal">(optional)</span></label>
-                                    <textarea
-                                        value={reviewText}
-                                        onChange={e => setReviewText(e.target.value)}
-                                        className="border rounded px-2 py-1 w-full text-sm"
-                                        placeholder="Write your review here..."
-                                    />
-                                </div>
-                                <div className="flex flex-col sm:flex-row gap-2 mt-2 justify-end">
-                                    <button
-                                        type="submit"
-                                        className="w-full sm:w-auto px-4 py-2 rounded bg-blue-500 text-white font-semibold hover:bg-blue-600 transition"
-                                    >
-                                        Submit Review
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="w-full sm:w-auto px-4 py-2 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition"
-                                        onClick={() => setReviewingPlayer(null)}
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
-                        )}
+                                    <div className="mt-2">
+                                        <label className="block font-semibold mb-1">Your Review <span className="text-gray-400 font-normal">(optional)</span></label>
+                                        <textarea
+                                            value={reviewText}
+                                            onChange={e => setReviewText(e.target.value)}
+                                            className="border rounded px-2 py-1 w-full text-sm"
+                                            placeholder="Write your review here..."
+                                        />
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row gap-2 mt-2 justify-end">
+                                        <button
+                                            type="submit"
+                                            className="w-full sm:w-auto px-4 py-2 rounded bg-blue-500 text-white font-semibold hover:bg-blue-600 transition"
+                                        >
+                                            Submit Review
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="w-full sm:w-auto px-4 py-2 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition"
+                                            onClick={() => setReviewingPlayer(null)}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
