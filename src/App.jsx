@@ -135,12 +135,7 @@ function expandPlayersForMotm(players, includeMotm) {
     });
     return out;
 }
-function getDisplayPlayer(player, useMotm) {
-    if (useMotm && player.motmCard) {
-        return { ...player, ...player.motmCard };
-    }
-    return player;
-}
+
 
 function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMotm }) {
     const [search, setSearch] = useState("");

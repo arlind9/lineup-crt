@@ -560,6 +560,7 @@ function MOTMPage() {
             <AllMotmStatsCards stats={motmStats} />
         </div>
     );
+}
 
 
  
