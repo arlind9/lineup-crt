@@ -18,6 +18,11 @@ function LoadingSpinner({ className = "" }) {
 
 function extractPhotoUrl(cellValue) {
     if (!cellValue) return null;
+    const match = typeof cellValue === 'string' && cellValue.match(/=IMAGE\("([^"\)]+)"\)/i);
+    return match ? match[1] : cellValue;
+}
+
+function getCardBgByOverall(overall) {
     if (overall >= 90) return 'bg-gradient-to-br from-[#e5e4e2] via-[#b3e0fc] to-[#f8fafc] border-blue-300';
     if (overall >= 80) return 'bg-gradient-to-br from-yellow-300 via-yellow-100 to-white border-yellow-400';
     if (overall >= 70) return 'bg-gradient-to-br from-gray-300 via-gray-100 to-white border-gray-400';
@@ -556,4 +561,73 @@ function MOTMPage() {
         </div>
     );
 }
+
+
+ 
+
+
+    <style>
+    {`
+    /* Gallery page container */
+    .gallery-container {
+        background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+        border-radius: 1.5rem;
+        box-shadow: 0 4px 32px 0 rgba(60, 80, 180, 0.08);
+        padding: 2rem 1rem 2.5rem 1rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e0e7ef;
+    }
+
+    /* Gallery title */
+    .gallery-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #3730a3;
+        letter-spacing: 0.01em;
+        margin-bottom: 2rem;
+        text-shadow: 0 2px 8px #e0e7ff;
+    }
+
+    /* Gallery grid */
+    .gallery-grid {
+        gap: 2rem;
+    }
+
+    /* Gallery thumbnail */
+    .gallery-thumb-outer {
+        transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
+        box-shadow: 0 2px 12px 0 rgba(60, 80, 180, 0.07);
+        border-radius: 1rem;
+        background: #fff;
+        border: 1.5px solid #e0e7ef;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        animation: fadeIn 0.7s;
+    }
+    .gallery-thumb-outer:hover, .gallery-thumb-outer:focus {
+        transform: scale(1.045) translateY(-2px);
+        box-shadow: 0 6px 24px 0 rgba(60, 80, 180, 0.13);
+        border-color: #a5b4fc;
+        z-index: 2;
+    }
+
+    /* Modal styling */
+    .gallery-modal {
+        box-shadow: 0 8px 48px 0 rgba(60, 80, 180, 0.18);
+        border-radius: 1.5rem;
+        border: 2.5px solid #a5b4fc;
+        background: #fff;
+        padding: 2rem 1.5rem;
+        animation: fadeIn 0.3s;
+    }
+
+    /* Fade-in animation */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.98);}
+        to { opacity: 1; transform: scale(1);}
+    }
+    `}
+    </style>
+
 export default MOTMPage;
