@@ -194,8 +194,8 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
             <div
                 ref={modalRef}
-                className={`w-full max-w-2xl bg-white rounded-xl shadow-xl border p-4 ${glass} relative flex flex-col sm:flex-row gap-4`}
-                style={{ minWidth: 480 }}
+                className={`w-full max-w-[95vw] sm:max-w-2xl bg-white rounded-xl shadow-xl border p-2 sm:p-4 ${glass} relative flex flex-col sm:flex-row gap-2 sm:gap-4`}
+                style={{ minWidth: 0 }}
             >
                 <button
                     className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 text-lg font-bold"
@@ -214,7 +214,7 @@ function PlayerSelectModal({ open, onClose, players, onSelect, slotLabel, useMot
                         onChange={e => setSearch(e.target.value)}
                         className="mb-3"
                     />
-                    <div className="flex-1 max-h-80 min-h-[120px] overflow-y-auto">
+                    <div className="flex-1 max-h-[60vh] min-h-[120px] overflow-y-auto">
                         {visiblePlayers.length === 0 ? (
                             <div className="text-xs text-gray-400 p-2 text-center">No available players</div>
                         ) : (
