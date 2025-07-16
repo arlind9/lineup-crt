@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import Papa from "papaparse";
 import { calculateOverall } from "./utils/overall";
+import VibesFCPage from "./VibesFCPage";
 import GalleryPage from "./GalleryPage";
 import ReviewAndRequestPage from "./ReviewAndRequestPage";
 import MOTMPage from "./MOTMPage";
@@ -136,9 +137,6 @@ function expandPlayersForMotm(players, includeMotm) {
     });
     return out;
 }
-
-
-
 
 function TeamAttributesBarChart({ players }) {
     const filled = players.filter(Boolean);
@@ -532,10 +530,6 @@ function getPlayerWithPositionAttributes(player, newPosition) {
     return { ...player, position: newPosition, overall };
 }
 
-
-
-
-
 function ListPlayer({ player, fromTeam, fromIndex, assigned, selected, onDragStart, onDragEnd, useMotm }) {
     const dragRef = useRef(null);
 
@@ -723,8 +717,6 @@ function Home() {
             })
             .catch(() => setLoading(false));
     }, []);
-
-
 
     function MotmStatsCardHome({ player, title, motm, small }) {
         if (!player) return null;
@@ -1026,8 +1018,6 @@ function Home() {
         </div>
     );
 }
-
-
 
 function PlayerDatabase() {
     const [players, setPlayers] = useState([]);
@@ -1866,6 +1856,10 @@ export default function App() {
     });
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [vibesView, setVibesView] = useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get("vibes") === "1";
+    });
 
     // Update URL when view changes
     useEffect(() => {
@@ -1880,6 +1874,7 @@ export default function App() {
     useEffect(() => {
         const onPopState = () => {
             const params = new URLSearchParams(window.location.search);
+            setVibesView(params.get("vibes") === "1");
             setView(params.get("view") || "home");
         };
         window.addEventListener("popstate", onPopState);
@@ -1906,6 +1901,22 @@ export default function App() {
         setMobileMenuOpen(false);
     }, [view]);
 
+    function goVibesFC() {
+        setVibesView(true);
+        const params = new URLSearchParams(window.location.search);
+        params.set("vibes", "1");
+        window.history.pushState({}, "", `${window.location.pathname}?${params.toString()}`);
+    }
+
+    function goMainApp(viewName) {
+        setVibesView(false);
+        setView(viewName);
+        const params = new URLSearchParams(window.location.search);
+        params.delete("vibes");
+        params.set("view", viewName);
+        window.history.pushState({}, "", `${window.location.pathname}?${params.toString()}`);
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 text-gray-800">
             <header
@@ -1920,142 +1931,53 @@ export default function App() {
                 }}
             >
                 <nav className="container mx-auto flex justify-between items-center transition-all duration-300 relative">
-                    <h1
-                        className={
-                            "font-bold transition-all duration-300 " +
-                            (scrolled
-                                ? "text-lg"
-                                : "text-xl")
-                        }
-                        style={{
-                            letterSpacing: scrolled ? "0.01em" : "0.02em",
-                        }}
-                    >
-                        Grupi i Futbollit
-                    </h1>
-                    <div className="hidden sm:flex gap-4 text-lg">
+                    <div className="flex items-center gap-6">
                         <button
-                            className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => setView("home")}
+                            className={`text-2xl font-extrabold tracking-widest transition-all duration-300 ${vibesView ? "text-yellow-400 drop-shadow" : "text-blue-800"}`}
+                            style={{ letterSpacing: "0.08em" }}
+                            onClick={goVibesFC}
                         >
-                            Home
+                            Vibes FC
                         </button>
-                        <button
-                            className={`hover:underline ${view === "lineup" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => setView("lineup")}
+                        <h1
+                            className={`font-bold transition-all duration-300 cursor-pointer ${!vibesView ? "text-xl" : "text-gray-400/60"}`}
+                            style={{ letterSpacing: "0.02em" }}
+                            onClick={() => goMainApp("home")}
                         >
-                            Lineup Creator
-                        </button>
-                        <button
-                            className={`hover:underline ${view === "database" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => setView("database")}
-                        >
-                            Player Database
-                        </button>
-                        <button
-                            className={`hover:underline ${view === "cardcreator" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => setView("cardcreator")}
-                        >
-                            Card Creator
-                        </button>
-                        <button
-                            className={`hover:underline ${view === "review" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => setView("review")}
-                        >
-                            Review & Request
-                        </button>
-                        <button
-                            className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => setView("motm")}
-                        >
-                            MOTM
-                        </button>
-                        <button
-                            className={`hover:underline ${view === "gallery" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => setView("gallery")}
-                        >
-                            Gallery
-                        </button>
+                            Grupi i Futbollit
+                        </h1>
                     </div>
-                    <div className="sm:hidden flex items-center">
-                        <button
-                            className="p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            onClick={() => setMobileMenuOpen((v) => !v)}
-                            aria-label="Open menu"
-                        >
-                            <svg
-                                className="w-7 h-7 text-blue-700"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
-                        {mobileMenuOpen && (
-                            <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50 flex flex-col animate-fade-in">
-                                <button
-                                    className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "home" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => setView("home")}
-                                >
-                                    Home
-                                </button>
-                                <button
-                                    className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "lineup" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => setView("lineup")}
-                                >
-                                    Lineup Creator
-                                </button>
-                                <button
-                                    className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "database" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => setView("database")}
-                                >
-                                    Player Database
-                                </button>
-                                <button
-                                    className={`text-left px-4 py-3 hover:bg-blue-50 ${view === "cardcreator" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => setView("cardcreator")}
-                                >
-                                    Card Creator
-                                </button>
-                                <button
-                                    className={`text-left px-4 py-3 hover:bg-blue-50 ${view === "review" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => setView("review")}
-                                >
-                                    Review & Request
-                                </button>
-                                <button
-                                    className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "motm" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => setView("motm")}
-                                >
-                                    MOTM
-                                </button>
-                                <button
-                                    className={`text-left px-4 py-3 hover:bg-blue-50 ${view === "gallery" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => setView("gallery")}
-                                >
-                                    Gallery
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                    {!vibesView && (
+                        <div className="hidden sm:flex gap-4 text-lg">
+                            <button className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("home")}>Home</button>
+                            <button className={`hover:underline ${view === "lineup" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("lineup")}>Lineup Creator</button>
+                            <button className={`hover:underline ${view === "database" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("database")}>Player Database</button>
+                            <button className={`hover:underline ${view === "cardcreator" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("cardcreator")}>Card Creator</button>
+                            <button className={`hover:underline ${view === "review" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("review")}>Review & Request</button>
+                            <button className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("motm")}>MOTM</button>
+                            <button className={`hover:underline ${view === "gallery" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("gallery")}>Gallery</button>
+                        </div>
+                    )}
                 </nav>
             </header>
             <main className="container mx-auto p-4">
-                {view === "home" && <Home />}
-                {view === "lineup" && <LineupCreatorPage />}
-                {view === "database" && <PlayerDatabase />}
-                {view === "motm" && <MOTMPage />}
-                {view === "cardcreator" && <CardCreatorPage />}
-                {view === "review" && <ReviewAndRequestPage />}
-                {view === "gallery" && <GalleryPage />}
-            </main>
+                {vibesView ? (
+                    <VibesFCPage />
+                ) : (
+                    <>
+                        {view === "home" && <Home />}
+                        {view === "lineup" && <LineupCreatorPage />}
+                        {view === "database" && <PlayerDatabase />}
+                        {view === "motm" && <MOTMPage />}
+                        {view === "cardcreator" && <CardCreatorPage />}
+                        {view === "review" && <ReviewAndRequestPage />}
+                        {view === "gallery" && <GalleryPage />}
+                    </>
+                )}
+            </main> 
         </div>
     );
 }
-
-
 
 function AttributeBarChart({ playerA, playerB }) {
     const attrs = [
@@ -2246,4 +2168,3 @@ function MirroredPositionOVRBarChart({ teamAPlayers, teamBPlayers, teamALabel = 
         </div>
     );
 }
-

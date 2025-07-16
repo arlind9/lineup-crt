@@ -49,6 +49,103 @@ const FORMATIONS_BY_COUNT = {
     "11v11": ["4-4-2", "4-3-3", "3-5-2", "3-4-3", "5-4-1", "4-5-1", "5-3-2"],
 };
 
+
+function MirroredTeamAttributesBarChart({ teamAPlayers, teamBPlayers, teamALabel = "Team A", teamBLabel = "Team B", onHide }) {
+    const attributes = [
+        { key: "overall", label: "Overall" },
+        { key: "speed", label: "Speed" },
+        { key: "shooting", label: "Shooting" },
+        { key: "passing", label: "Passing" },
+        { key: "dribbling", label: "Dribbling" },
+        { key: "physical", label: "Physical" },
+        { key: "defending", label: "Defending" },
+        { key: "goalkeeping", label: "Goalkeeping" },
+        { key: "weakFoot", label: "Weak Foot" }
+    ];
+
+    function getAvg(players, key) {
+        const filled = players.filter(Boolean);
+        if (key === "goalkeeping") {
+            const gks = filled.filter(p => p.position === "GK");
+            return gks.length
+                ? Math.round(gks.reduce((sum, p) => sum + (p.goalkeeping || 0), 0) / gks.length)
+                : 0;
+        }
+        if (["speed", "shooting", "passing", "dribbling", "physical", "defending"].includes(key)) {
+            const nonGKs = filled.filter(p => p.position !== "GK");
+            return nonGKs.length
+                ? Math.round(nonGKs.reduce((sum, p) => sum + (p[key] || 0), 0) / nonGKs.length)
+                : 0;
+        }
+        if (!filled.length) return 0;
+        return Math.round(filled.reduce((sum, p) => sum + (p[key] || 0), 0) / filled.length);
+    }
+
+    const caps = { weakFoot: 50 };
+    const avgsA = {}, avgsB = {};
+    attributes.forEach(attr => {
+        avgsA[attr.key] = getAvg(teamAPlayers, attr.key);
+        avgsB[attr.key] = getAvg(teamBPlayers, attr.key);
+    });
+
+    return (
+        <div className="mb-6 max-w-2xl mx-auto bg-white rounded-xl shadow p-4 border relative">
+            {onHide && (
+                <button
+                    onClick={onHide}
+                    className="absolute top-2 right-2 px-2 py-0.5 rounded text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold shadow transition"
+                    aria-label="Hide attribute comparison"
+                    type="button"
+                >
+                    Hide
+                </button>
+            )}
+            <div className="text-base font-bold mb-2 text-center text-gray-700">Attribute Comparison</div>
+            <div className="flex justify-between text-xs font-semibold mb-2">
+                <span className="w-24 text-left text-blue-700">{teamALabel}</span>
+                <span className="w-24 text-right text-red-700">{teamBLabel}</span>
+            </div>
+            <div>
+                {attributes.map(attr => {
+                    const cap = caps[attr.key] || 100;
+                    const percentA = (avgsA[attr.key] / cap) * 100;
+                    const percentB = (avgsB[attr.key] / cap) * 100;
+                    const aBold = avgsA[attr.key] > avgsB[attr.key];
+                    const bBold = avgsB[attr.key] > avgsA[attr.key];
+                    return (
+                        <div key={attr.key} className="flex items-center gap-2 w-full py-1 border-b last:border-b-0 border-gray-100">
+                            <span className={`w-8 text-right text-xs ${aBold ? "font-bold text-blue-800" : "text-blue-700"}`}>{avgsA[attr.key]}</span>
+                            <div className="flex-1 flex justify-end">
+                                <div
+                                    className="h-3 rounded-l"
+                                    style={{
+                                        width: `${percentA}%`,
+                                        minWidth: avgsA[attr.key] > 0 ? 12 : 0,
+                                        background: "linear-gradient(to left, #3b82f6, #60a5fa)",
+                                        transition: "width 0.3s"
+                                    }}
+                                />
+                            </div>
+                            <span className="w-20 text-xs text-gray-700 text-center font-medium">{attr.label}</span>
+                            <div className="flex-1 flex">
+                                <div
+                                    className="h-3 rounded-r"
+                                    style={{
+                                        width: `${percentB}%`,
+                                        minWidth: avgsB[attr.key] > 0 ? 12 : 0,
+                                        background: "linear-gradient(to right, #ef4444, #f87171)",
+                                        transition: "width 0.3s"
+                                    }}
+                                />
+                            </div>
+                            <span className={`w-8 text-left text-xs ${bBold ? "font-bold text-red-800" : "text-red-700"}`}>{avgsB[attr.key]}</span>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
 function expandPlayersForMotm(players, includeMotm) {
     if (!includeMotm) return players;
     const out = [];
@@ -69,6 +166,70 @@ function expandPlayersForMotm(players, includeMotm) {
     return out;
 }
 
+
+function MirroredPositionOVRBarChart({ teamAPlayers, teamBPlayers, teamALabel = "Team A", teamBLabel = "Team B" }) {
+    const positions = [
+        { key: "ST", label: "Attackers (ST)" },
+        { key: "MF", label: "Midfielders (MF)" },
+        { key: "DF", label: "Defenders (DF)" },
+        { key: "GK", label: "Goalkeepers (GK)" }
+    ];
+
+    function avg(players, pos) {
+        const filtered = players.filter(p => p && p.position === pos);
+        if (!filtered.length) return 0;
+        return Math.round(filtered.reduce((sum, p) => sum + (p.overall || 0), 0) / filtered.length);
+    }
+
+    return (
+        <div className="mb-6 max-w-2xl mx-auto bg-white rounded-xl shadow p-4 border">
+            <div className="text-base font-bold mb-2 text-center text-gray-700">OVR by Position</div>
+            <div className="flex justify-between text-xs font-semibold mb-2">
+                <span className="w-24 text-left text-blue-700">{teamALabel}</span>
+                <span className="w-24 text-right text-red-700">{teamBLabel}</span>
+            </div>
+            <div>
+                {positions.map(pos => {
+                    const ovrA = avg(teamAPlayers, pos.key);
+                    const ovrB = avg(teamBPlayers, pos.key);
+                    const percentA = (ovrA / 100) * 100;
+                    const percentB = (ovrB / 100) * 100;
+                    const aBold = ovrA > ovrB;
+                    const bBold = ovrB > ovrA;
+                    return (
+                        <div key={pos.key} className="flex items-center gap-2 w-full py-1 border-b last:border-b-0 border-gray-100">
+                            <span className={`w-8 text-right text-xs ${aBold ? "font-bold text-blue-800" : "text-blue-700"}`}>{ovrA || "-"}</span>
+                            <div className="flex-1 flex justify-end">
+                                <div
+                                    className="h-3 rounded-l"
+                                    style={{
+                                        width: `${percentA}%`,
+                                        minWidth: ovrA > 0 ? 12 : 0,
+                                        background: "linear-gradient(to left, #3b82f6, #60a5fa)",
+                                        transition: "width 0.3s"
+                                    }}
+                                />
+                            </div>
+                            <span className="w-32 text-xs text-gray-700 text-center font-medium">{pos.label}</span>
+                            <div className="flex-1 flex">
+                                <div
+                                    className="h-3 rounded-r"
+                                    style={{
+                                        width: `${percentB}%`,
+                                        minWidth: ovrB > 0 ? 12 : 0,
+                                        background: "linear-gradient(to right, #ef4444, #f87171)",
+                                        transition: "width 0.3s"
+                                    }}
+                                />
+                            </div>
+                            <span className={`w-8 text-left text-xs ${bBold ? "font-bold text-red-800" : "text-red-700"}`}>{ovrB || "-"}</span>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
 function PlayerAttributeCompareTable({ playerA, playerB, onClose }) {
     if (!playerA || !playerB) return null;
     const attrs = [
