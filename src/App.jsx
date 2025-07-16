@@ -1858,7 +1858,8 @@ function GalleryThumbnail({ url, caption, onClick }) {
 export default function App() {
     const [view, setView] = useState(() => {
         try {
-            return localStorage.getItem("currentView") || "home";
+            const params = new URLSearchParams(window.location.search);
+            return params.get("view") || localStorage.getItem("currentView") || "home";
         } catch {
             return "home";
         }
@@ -1866,9 +1867,24 @@ export default function App() {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+    // Update URL when view changes
     useEffect(() => {
         localStorage.setItem("currentView", view);
+        const params = new URLSearchParams(window.location.search);
+        params.set("view", view);
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.pushState({ view }, "", newUrl);
     }, [view]);
+
+    // Listen for browser navigation (back/forward)
+    useEffect(() => {
+        const onPopState = () => {
+            const params = new URLSearchParams(window.location.search);
+            setView(params.get("view") || "home");
+        };
+        window.addEventListener("popstate", onPopState);
+        return () => window.removeEventListener("popstate", onPopState);
+    }, []);
 
     useEffect(() => {
         function onScroll() {
@@ -1920,17 +1936,20 @@ export default function App() {
                     <div className="hidden sm:flex gap-4 text-lg">
                         <button
                             className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => { setView("home"); setTimeout(() => window.location.reload(), 0); }}                        >
+                            onClick={() => setView("home")}
+                        >
                             Home
                         </button>
                         <button
                             className={`hover:underline ${view === "lineup" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => { setView("lineup"); setTimeout(() => window.location.reload(), 0); }}                        >
+                            onClick={() => setView("lineup")}
+                        >
                             Lineup Creator
                         </button>
                         <button
                             className={`hover:underline ${view === "database" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => { setView("database"); setTimeout(() => window.location.reload(), 0); }}                        >
+                            onClick={() => setView("database")}
+                        >
                             Player Database
                         </button>
                         <button
@@ -1947,7 +1966,8 @@ export default function App() {
                         </button>
                         <button
                             className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`}
-                            onClick={() => { setView("motm"); setTimeout(() => window.location.reload(), 0); }}                        >
+                            onClick={() => setView("motm")}
+                        >
                             MOTM
                         </button>
                         <button
@@ -1977,17 +1997,20 @@ export default function App() {
                             <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50 flex flex-col animate-fade-in">
                                 <button
                                     className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "home" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => { setView("home"); setTimeout(() => window.location.reload(), 0); }}                                >
+                                    onClick={() => setView("home")}
+                                >
                                     Home
                                 </button>
                                 <button
                                     className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "lineup" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => { setView("lineup"); setTimeout(() => window.location.reload(), 0); }}                                >
+                                    onClick={() => setView("lineup")}
+                                >
                                     Lineup Creator
                                 </button>
                                 <button
                                     className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "database" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => { setView("database"); setTimeout(() => window.location.reload(), 0); }}                                >
+                                    onClick={() => setView("database")}
+                                >
                                     Player Database
                                 </button>
                                 <button
@@ -2004,10 +2027,10 @@ export default function App() {
                                 </button>
                                 <button
                                     className={`text-left px-4 py-3 hover:bg-blue-50 border-b ${view === "motm" ? "font-bold text-blue-700" : ""}`}
-                                    onClick={() => { setView("motm"); setTimeout(() => window.location.reload(), 0); }}                                >
+                                    onClick={() => setView("motm")}
+                                >
                                     MOTM
                                 </button>
-                                {/* --- Add Gallery nav button (mobile) --- */}
                                 <button
                                     className={`text-left px-4 py-3 hover:bg-blue-50 ${view === "gallery" ? "font-bold text-blue-700" : ""}`}
                                     onClick={() => setView("gallery")}
