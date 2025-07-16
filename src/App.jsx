@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import Papa from "papaparse";
 import { calculateOverall } from "./utils/overall";
-import VibesFCPage from "./VibesFCPage";
 import GalleryPage from "./GalleryPage";
 import ReviewAndRequestPage from "./ReviewAndRequestPage";
 import MOTMPage from "./MOTMPage";
@@ -1856,10 +1855,6 @@ export default function App() {
     });
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [vibesView, setVibesView] = useState(() => {
-        const params = new URLSearchParams(window.location.search);
-        return params.get("vibes") === "1";
-    });
 
     // Update URL when view changes
     useEffect(() => {
@@ -1870,16 +1865,7 @@ export default function App() {
         window.history.pushState({ view }, "", newUrl);
     }, [view]);
 
-    // Listen for browser navigation (back/forward)
-    useEffect(() => {
-        const onPopState = () => {
-            const params = new URLSearchParams(window.location.search);
-            setVibesView(params.get("vibes") === "1");
-            setView(params.get("view") || "home");
-        };
-        window.addEventListener("popstate", onPopState);
-        return () => window.removeEventListener("popstate", onPopState);
-    }, []);
+
 
     useEffect(() => {
         function onScroll() {
@@ -1901,22 +1887,6 @@ export default function App() {
         setMobileMenuOpen(false);
     }, [view]);
 
-    function goVibesFC() {
-        setVibesView(true);
-        const params = new URLSearchParams(window.location.search);
-        params.set("vibes", "1");
-        window.history.pushState({}, "", `${window.location.pathname}?${params.toString()}`);
-    }
-
-    function goMainApp(viewName) {
-        setVibesView(false);
-        setView(viewName);
-        const params = new URLSearchParams(window.location.search);
-        params.delete("vibes");
-        params.set("view", viewName);
-        window.history.pushState({}, "", `${window.location.pathname}?${params.toString()}`);
-    }
-
     return (
         <div className="min-h-screen bg-gray-50 text-gray-800">
             <header
@@ -1932,49 +1902,36 @@ export default function App() {
             >
                 <nav className="container mx-auto flex justify-between items-center transition-all duration-300 relative">
                     <div className="flex items-center gap-6">
-                        <button
-                            className={`text-2xl font-extrabold tracking-widest transition-all duration-300 ${vibesView ? "text-yellow-400 drop-shadow" : "text-blue-800"}`}
-                            style={{ letterSpacing: "0.08em" }}
-                            onClick={goVibesFC}
-                        >
-                            Vibes FC
-                        </button>
+
                         <h1
-                            className={`font-bold transition-all duration-300 cursor-pointer ${!vibesView ? "text-xl" : "text-gray-400/60"}`}
+                            className="font-bold transition-all duration-300 cursor-pointer text-xl"
                             style={{ letterSpacing: "0.02em" }}
-                            onClick={() => goMainApp("home")}
+                            onClick={() => setView("home")}
                         >
                             Grupi i Futbollit
                         </h1>
                     </div>
-                    {!vibesView && (
-                        <div className="hidden sm:flex gap-4 text-lg">
-                            <button className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("home")}>Home</button>
-                            <button className={`hover:underline ${view === "lineup" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("lineup")}>Lineup Creator</button>
-                            <button className={`hover:underline ${view === "database" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("database")}>Player Database</button>
-                            <button className={`hover:underline ${view === "cardcreator" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("cardcreator")}>Card Creator</button>
-                            <button className={`hover:underline ${view === "review" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("review")}>Review & Request</button>
-                            <button className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("motm")}>MOTM</button>
-                            <button className={`hover:underline ${view === "gallery" ? "font-bold text-blue-700" : ""}`} onClick={() => goMainApp("gallery")}>Gallery</button>
-                        </div>
+                    <div className="hidden sm:flex gap-4 text-lg">
+                        <button className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("home")}>Home</button>
+                        <button className={`hover:underline ${view === "lineup" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("lineup")}>Lineup Creator</button>
+                        <button className={`hover:underline ${view === "database" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("database")}>Player Database</button>
+                        <button className={`hover:underline ${view === "cardcreator" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("cardcreator")}>Card Creator</button>
+                        <button className={`hover:underline ${view === "review" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("review")}>Review & Request</button>
+                        <button className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("motm")}>MOTM</button>
+                        <button className={`hover:underline ${view === "gallery" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("gallery")}>Gallery</button>
+                    </div>
                     )}
                 </nav>
             </header>
             <main className="container mx-auto p-4">
-                {vibesView ? (
-                    <VibesFCPage />
-                ) : (
-                    <>
-                        {view === "home" && <Home />}
-                        {view === "lineup" && <LineupCreatorPage />}
-                        {view === "database" && <PlayerDatabase />}
-                        {view === "motm" && <MOTMPage />}
-                        {view === "cardcreator" && <CardCreatorPage />}
-                        {view === "review" && <ReviewAndRequestPage />}
-                        {view === "gallery" && <GalleryPage />}
-                    </>
-                )}
-            </main> 
+                {view === "home" && <Home />}
+                {view === "lineup" && <LineupCreatorPage />}
+                {view === "database" && <PlayerDatabase />}
+                {view === "motm" && <MOTMPage />}
+                {view === "cardcreator" && <CardCreatorPage />}
+                {view === "review" && <ReviewAndRequestPage />}
+                {view === "gallery" && <GalleryPage />}
+            </main>
         </div>
     );
 }
