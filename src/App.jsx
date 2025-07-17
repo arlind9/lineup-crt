@@ -1921,6 +1921,16 @@ export default function App() {
                         <button className={`hover:underline ${view === "gallery" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("gallery")}>Gallery</button>
                     </div>
                 </nav>
+                {/* Mobile navigation */}
+                <div className="flex sm:hidden gap-2 justify-center py-2 bg-white border-t border-gray-200">
+                    <button className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("home")}>Home</button>
+                    <button className={`hover:underline ${view === "lineup" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("lineup")}>Lineup</button>
+                    <button className={`hover:underline ${view === "database" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("database")}>Database</button>
+                    <button className={`hover:underline ${view === "cardcreator" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("cardcreator")}>Cards</button>
+                    <button className={`hover:underline ${view === "review" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("review")}>Review</button>
+                    <button className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("motm")}>MOTM</button>
+                    <button className={`hover:underline ${view === "gallery" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("gallery")}>Gallery</button>
+                </div>
             </header>
             <main className="container mx-auto p-4">
                 {view === "home" && <Home />}
