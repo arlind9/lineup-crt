@@ -1920,7 +1920,6 @@ export default function App() {
                         <button className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("motm")}>MOTM</button>
                         <button className={`hover:underline ${view === "gallery" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("gallery")}>Gallery</button>
                     </div>
-                    )}
                 </nav>
             </header>
             <main className="container mx-auto p-4">
