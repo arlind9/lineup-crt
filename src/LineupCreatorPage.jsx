@@ -505,8 +505,7 @@ function DroppableTeam({
     const formationPositions = formationMap[formation] || formationMap["3-3-3"];
 
     function isPositionCompatible(slotPos, playerPos) {
-        if (slotPos === "GK") return playerPos === "GK";
-        if (playerPos === "GK") return false;
+        // Allow any position to be assigned to any slot
         return true;
     }
 
