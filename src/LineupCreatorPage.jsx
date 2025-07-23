@@ -16,6 +16,7 @@ import {
 // --- All helper constants and functions used by LineupCreator ---
 const glass = "backdrop-blur-md bg-white/80 shadow-lg border border-gray-200";
 const PLACEHOLDER_IMG = "https://ui-avatars.com/api/?name=Player&background=eee&color=888&size=128&rounded=true";
+const NUM_SUBS = 8;
 
 const formationMap = {
     "2-2-1": ["GK", "DF", "DF", "MF", "MF", "ST"],
@@ -1156,6 +1157,7 @@ function LineupCreator() {
 
     const STORAGE_KEY = "lineupCreatorStateV1";
 
+    // 1. Add subs to state and persistence
     function getInitialState() {
         try {
             const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -1166,6 +1168,8 @@ function LineupCreator() {
                     formationB: saved.formationB || FORMATIONS_BY_COUNT[saved.mode || DEFAULT_MODE][0],
                     teamA: Array.isArray(saved.teamA) ? saved.teamA : Array(PLAYER_COUNTS[saved.mode || DEFAULT_MODE]).fill(null),
                     teamB: Array.isArray(saved.teamB) ? saved.teamB : Array(PLAYER_COUNTS[saved.mode || DEFAULT_MODE]).fill(null),
+                    subsA: Array.isArray(saved.subsA) ? saved.subsA : Array(NUM_SUBS).fill(null),
+                    subsB: Array.isArray(saved.subsB) ? saved.subsB : Array(NUM_SUBS).fill(null),
                 };
             }
         } catch { }
@@ -1175,6 +1179,8 @@ function LineupCreator() {
             formationB: FORMATIONS_BY_COUNT[DEFAULT_MODE][0],
             teamA: Array(PLAYER_COUNTS[DEFAULT_MODE]).fill(null),
             teamB: Array(PLAYER_COUNTS[DEFAULT_MODE]).fill(null),
+            subsA: Array(NUM_SUBS).fill(null),
+            subsB: Array(NUM_SUBS).fill(null),
         };
     }
 
@@ -1186,12 +1192,14 @@ function LineupCreator() {
     const [activeDrag, setActiveDrag] = useState(null);
     const [useMotm, setUseMotm] = useState(false);
 
-    const [{ mode, formationA, formationB, teamA, teamB }, setPersistedState] = useState(getInitialState);
+    const [{ mode, formationA, formationB, teamA, teamB, subsA, subsB }, setPersistedState] = useState(getInitialState);
 
     const setTeamA = (newTeamA) => setPersistedState(s => ({ ...s, teamA: newTeamA }));
     const setTeamB = (newTeamB) => setPersistedState(s => ({ ...s, teamB: newTeamB }));
     const setFormationA = (f) => setPersistedState(s => ({ ...s, formationA: f }));
     const setFormationB = (f) => setPersistedState(s => ({ ...s, formationB: f }));
+    const setSubsA = (newSubsA) => setPersistedState(s => ({ ...s, subsA: newSubsA }));
+    const setSubsB = (newSubsB) => setPersistedState(s => ({ ...s, subsB: newSubsB }));
     const setModeAndResetTeams = (newMode) => {
         setPersistedState(s => ({
             ...s,
@@ -1200,15 +1208,17 @@ function LineupCreator() {
             formationB: FORMATIONS_BY_COUNT[newMode][0],
             teamA: Array(PLAYER_COUNTS[newMode]).fill(null),
             teamB: Array(PLAYER_COUNTS[newMode]).fill(null),
+            subsA: Array(NUM_SUBS).fill(null),
+            subsB: Array(NUM_SUBS).fill(null),
         }));
     };
 
     useEffect(() => {
         localStorage.setItem(
             STORAGE_KEY,
-            JSON.stringify({ mode, formationA, formationB, teamA, teamB })
+            JSON.stringify({ mode, formationA, formationB, teamA, teamB, subsA, subsB })
         );
-    }, [mode, formationA, formationB, teamA, teamB]);
+    }, [mode, formationA, formationB, teamA, teamB, subsA, subsB]);
 
     useEffect(() => {
         fetch("https://docs.google.com/spreadsheets/d/1ooFfP_H35NlmBCqbKOfwDJQoxhgwfdC0LysBbo6NfTg/gviz/tq?tqx=out:json&sheet=Sheet1")
@@ -1246,9 +1256,90 @@ function LineupCreator() {
         player,
         remove,
         swapWith,
+        isSub,
     }) => {
         let newTeamA = [...teamA];
         let newTeamB = [...teamB];
+        let newSubsA = [...subsA];
+        let newSubsB = [...subsB];
+
+        // Remove from subs
+        if (isSub && remove) {
+            if (toTeam === "subsA") newSubsA[toIndex] = null;
+            if (toTeam === "subsB") newSubsB[toIndex] = null;
+            setSubsA(newSubsA);
+            setSubsB(newSubsB);
+            return;
+        }
+
+        // Swap between subs and formation
+        if (
+            (fromTeam === "subsA" && toTeam === "teamA") ||
+            (fromTeam === "teamA" && toTeam === "subsA")
+        ) {
+            if (fromTeam === "subsA" && toTeam === "teamA") {
+                const subPlayer = subsA[fromIndex];
+                const mainPlayer = teamA[toIndex];
+                newTeamA[toIndex] = subPlayer;
+                newSubsA[fromIndex] = mainPlayer;
+            } else if (fromTeam === "teamA" && toTeam === "subsA") {
+                const mainPlayer = teamA[fromIndex];
+                const subPlayer = subsA[toIndex];
+                newSubsA[toIndex] = mainPlayer;
+                newTeamA[fromIndex] = subPlayer;
+            }
+            setTeamA(newTeamA);
+            setSubsA(newSubsA);
+            return;
+        }
+        if (
+            (fromTeam === "subsB" && toTeam === "teamB") ||
+            (fromTeam === "teamB" && toTeam === "subsB")
+        ) {
+            if (fromTeam === "subsB" && toTeam === "teamB") {
+                const subPlayer = subsB[fromIndex];
+                const mainPlayer = teamB[toIndex];
+                newTeamB[toIndex] = subPlayer;
+                newSubsB[fromIndex] = mainPlayer;
+            } else if (fromTeam === "teamB" && toTeam === "subsB") {
+                const mainPlayer = teamB[fromIndex];
+                const subPlayer = subsB[toIndex];
+                newSubsB[toIndex] = mainPlayer;
+                newTeamB[fromIndex] = subPlayer;
+            }
+            setTeamB(newTeamB);
+            setSubsB(newSubsB);
+            return;
+        }
+
+        // --- Swap between subs within the same team ---
+        if (fromTeam === "subsA" && toTeam === "subsA" && fromIndex !== toIndex) {
+            const temp = newSubsA[toIndex];
+            newSubsA[toIndex] = newSubsA[fromIndex];
+            newSubsA[fromIndex] = temp;
+            setSubsA(newSubsA);
+            return;
+        }
+        if (fromTeam === "subsB" && toTeam === "subsB" && fromIndex !== toIndex) {
+            const temp = newSubsB[toIndex];
+            newSubsB[toIndex] = newSubsB[fromIndex];
+            newSubsB[fromIndex] = temp;
+            setSubsB(newSubsB);
+            return;
+        }
+
+        // Existing logic for main formation and subs
+        if (isSub) {
+            if (toTeam === "subsA") {
+                newSubsA[toIndex] = player;
+                setSubsA(newSubsA);
+            }
+            if (toTeam === "subsB") {
+                newSubsB[toIndex] = player;
+                setSubsB(newSubsB);
+            }
+            return;
+        }
 
         if (remove) {
             if (toTeam === "teamA") newTeamA[toIndex] = null;
@@ -1340,6 +1431,8 @@ function LineupCreator() {
     function handleClearAll() {
         setTeamA(Array(PLAYER_COUNTS[mode]).fill(null));
         setTeamB(Array(PLAYER_COUNTS[mode]).fill(null));
+        setSubsA(Array(NUM_SUBS).fill(null));
+        setSubsB(Array(NUM_SUBS).fill(null));
     }
 
     function handleRandomize() {
@@ -1405,42 +1498,66 @@ function LineupCreator() {
             <h1 className="text-4xl font-extrabold mb-6 text-center text-green-900 drop-shadow">Lineup Creator A</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <DroppableTeam
-                    id="teamA"
-                    label="Team A"
-                    players={displayTeamA}
-                    onPlayerDrop={handlePlayerDrop}
-                    formation={formationA}
-                    onFormationChange={setFormationA}
-                    allPlayers={playersDisplay}
-                    useMotm={useMotm}
-                    globalActiveSlot={globalActiveSlot}
-                    setGlobalActiveSlot={setGlobalActiveSlot}
-                    playerSelectModal={playerSelectModal}
-                    setPlayerSelectModal={setPlayerSelectModal}
-                    otherFormationPositions={formationMap[formationB]}
-                    setCompareHover={setCompareHover}
-                    handleDragStart={handleDragStart}
-                    handleDragEnd={handleDragEnd}
-                />
-                <DroppableTeam
-                    id="teamB"
-                    label="Team B"
-                    players={displayTeamB}
-                    onPlayerDrop={handlePlayerDrop}
-                    formation={formationB}
-                    onFormationChange={setFormationB}
-                    allPlayers={playersDisplay}
-                    useMotm={useMotm}
-                    globalActiveSlot={globalActiveSlot}
-                    setGlobalActiveSlot={setGlobalActiveSlot}
-                    playerSelectModal={playerSelectModal}
-                    setPlayerSelectModal={setPlayerSelectModal}
-                    otherFormationPositions={formationMap[formationA]}
-                    setCompareHover={setCompareHover}
-                    handleDragStart={handleDragStart}
-                    handleDragEnd={handleDragEnd}
-                />
+                <div>
+                    <DroppableTeam
+                        id="teamA"
+                        label="Team A"
+                        players={displayTeamA}
+                        onPlayerDrop={handlePlayerDrop}
+                        formation={formationA}
+                        onFormationChange={setFormationA}
+                        allPlayers={playersDisplay}
+                        useMotm={useMotm}
+                        globalActiveSlot={globalActiveSlot}
+                        setGlobalActiveSlot={setGlobalActiveSlot}
+                        playerSelectModal={playerSelectModal}
+                        setPlayerSelectModal={setPlayerSelectModal}
+                        otherFormationPositions={formationMap[formationB]}
+                        setCompareHover={setCompareHover}
+                        handleDragStart={handleDragStart}
+                        handleDragEnd={handleDragEnd}
+                    />
+                    <div className="mt-2 mb-8">
+                        <div className="text-center text-xs text-gray-600 font-semibold mb-1">Substitutes</div>
+                        <SubstitutesRow
+                            subs={subsA}
+                            onPlayerDrop={handlePlayerDrop}
+                            allPlayers={playersDisplay}
+                            teamId="subsA"
+                            setPlayerSelectModal={setPlayerSelectModal}
+                        />
+                    </div>
+                </div>
+                <div>
+                    <DroppableTeam
+                        id="teamB"
+                        label="Team B"
+                        players={displayTeamB}
+                        onPlayerDrop={handlePlayerDrop}
+                        formation={formationB}
+                        onFormationChange={setFormationB}
+                        allPlayers={playersDisplay}
+                        useMotm={useMotm}
+                        globalActiveSlot={globalActiveSlot}
+                        setGlobalActiveSlot={setGlobalActiveSlot}
+                        playerSelectModal={playerSelectModal}
+                        setPlayerSelectModal={setPlayerSelectModal}
+                        otherFormationPositions={formationMap[formationA]}
+                        setCompareHover={setCompareHover}
+                        handleDragStart={handleDragStart}
+                        handleDragEnd={handleDragEnd}
+                    />
+                    <div className="mt-2 mb-8">
+                        <div className="text-center text-xs text-gray-600 font-semibold mb-1">Substitutes</div>
+                        <SubstitutesRow
+                            subs={subsB}
+                            onPlayerDrop={handlePlayerDrop}
+                            allPlayers={playersDisplay}
+                            teamId="subsB"
+                            setPlayerSelectModal={setPlayerSelectModal}
+                        />
+                    </div>
+                </div>
             </div>
 
             <div className="flex flex-wrap justify-center gap-4 mb-4">
@@ -1525,6 +1642,82 @@ function LineupCreator() {
                     useMotm={useMotm}
                 />
             </DndContext>
+        </div>
+    );
+}
+
+// 2. Add SubstitutesRow component
+function SubstitutesRow({ subs, onPlayerDrop, allPlayers, teamId, setPlayerSelectModal }) {
+    return (
+        <div className="flex justify-center gap-4 mt-4">
+            {subs.map((player, i) => (
+                <div
+                    key={i}
+                    className="relative"
+                    onDragOver={e => e.preventDefault()}
+                    onDrop={e => {
+                        const data = JSON.parse(e.dataTransfer.getData("application/json"));
+                        // Allow drop from formation to sub, or sub to sub (for swapping)
+                        if (
+                            (teamId === "subsA" && (data.fromTeam === "teamA" || data.fromTeam === "subsA")) ||
+                            (teamId === "subsB" && (data.fromTeam === "teamB" || data.fromTeam === "subsB"))
+                        ) {
+                            onPlayerDrop({
+                                toTeam: teamId,
+                                toIndex: i,
+                                fromTeam: data.fromTeam,
+                                fromIndex: data.fromIndex,
+                                player: data.player,
+                            });
+                        }
+                    }}
+                >
+                    {player ? (
+                        <div
+                            onClick={() => onPlayerDrop({
+                                toTeam: teamId,
+                                toIndex: i,
+                                isSub: true,
+                                player: null,
+                                remove: true,
+                            })}
+                            className="cursor-pointer"
+                            title="Remove sub"
+                        >
+                            <DraggablePlayer
+                                player={player}
+                                fromTeam={teamId}
+                                fromIndex={i}
+                                small
+                                assigned
+                            />
+                        </div>
+                    ) : (
+                        <div
+                            className="w-16 h-24 flex items-center justify-center bg-gray-200 border-2 border-dashed border-gray-400 rounded-lg cursor-pointer"
+                            onClick={() => setPlayerSelectModal({
+                                open: true,
+                                slotIdx: i,
+                                slotLabel: "SUB",
+                                eligiblePlayers: allPlayers.filter(
+                                    p => !subs.some(s => s && s.name === p.name)
+                                ),
+                                onSelect: (p) => {
+                                    onPlayerDrop({
+                                        toTeam: teamId,
+                                        toIndex: i,
+                                        isSub: true,
+                                        player: p,
+                                    });
+                                    setPlayerSelectModal({ open: false });
+                                },
+                            })}
+                        >
+                            <span className="text-2xl text-gray-400">+</span>
+                        </div>
+                    )}
+                </div>
+            ))}
         </div>
     );
 }
