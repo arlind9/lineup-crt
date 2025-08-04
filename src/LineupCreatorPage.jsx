@@ -1518,14 +1518,16 @@ function LineupCreator() {
                         handleDragEnd={handleDragEnd}
                     />
                     <div className="mt-2 mb-8">
-                        <div className="text-center text-xs text-gray-600 font-semibold mb-1">Substitutes</div>
-                        <SubstitutesRow
-                            subs={subsA}
-                            onPlayerDrop={handlePlayerDrop}
-                            allPlayers={playersDisplay}
-                            teamId="subsA"
-                            setPlayerSelectModal={setPlayerSelectModal}
-                        />
+                        <div className="text-center text-xs font-bold mb-1 text-green-800">Team A Subs</div>
+                        <div className="rounded-lg border-2 border-green-400 bg-green-50 py-2">
+                            <SubstitutesRow
+                                subs={subsA}
+                                onPlayerDrop={handlePlayerDrop}
+                                allPlayers={playersDisplay}
+                                teamId="subsA"
+                                setPlayerSelectModal={setPlayerSelectModal}
+                            />
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -1548,14 +1550,16 @@ function LineupCreator() {
                         handleDragEnd={handleDragEnd}
                     />
                     <div className="mt-2 mb-8">
-                        <div className="text-center text-xs text-gray-600 font-semibold mb-1">Substitutes</div>
-                        <SubstitutesRow
-                            subs={subsB}
-                            onPlayerDrop={handlePlayerDrop}
-                            allPlayers={playersDisplay}
-                            teamId="subsB"
-                            setPlayerSelectModal={setPlayerSelectModal}
-                        />
+                        <div className="text-center text-xs font-bold mb-1 text-red-800">Team B Subs</div>
+                        <div className="rounded-lg border-2 border-red-400 bg-red-50 py-2">
+                            <SubstitutesRow
+                                subs={subsB}
+                                onPlayerDrop={handlePlayerDrop}
+                                allPlayers={playersDisplay}
+                                teamId="subsB"
+                                setPlayerSelectModal={setPlayerSelectModal}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
