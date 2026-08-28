@@ -1887,52 +1887,50 @@ export default function App() {
         setMobileMenuOpen(false);
     }, [view]);
 
-    return (
-        <div className="min-h-screen bg-gray-50 text-gray-800">
-            <header
-                className={
-                    "z-50 sticky top-0 left-0 w-full transition-all duration-300 bg-white shadow " +
-                    (scrolled
-                        ? "py-1 shadow-md border-b border-gray-200"
-                        : "py-4")
-                }
-                style={{
-                    backdropFilter: scrolled ? "blur(4px)" : undefined,
-                }}
-            >
-                <nav className="container mx-auto flex justify-between items-center transition-all duration-300 relative">
-                    <div className="flex items-center gap-6">
+    const navigation = [
+        { id: "home", label: "Home", shortLabel: "Home", icon: "⌂" },
+        { id: "lineup", label: "Lineup Creator", shortLabel: "Lineup", icon: "⚽" },
+        { id: "database", label: "Player Database", shortLabel: "Players", icon: "♟" },
+        { id: "cardcreator", label: "Card Creator", shortLabel: "Cards", icon: "◇" },
+        { id: "review", label: "Review & Request", shortLabel: "Review", icon: "✦" },
+        { id: "motm", label: "MOTM", shortLabel: "MOTM", icon: "★" },
+        { id: "gallery", label: "Gallery", shortLabel: "Gallery", icon: "▧" },
+    ];
 
-                        <h1
-                            className="font-bold transition-all duration-300 cursor-pointer text-xl"
-                            style={{ letterSpacing: "0.02em" }}
-                            onClick={() => setView("home")}
-                        >
-                            Grupi i Futbollit
-                        </h1>
+    return (
+        <div className="app-shell min-h-screen text-gray-800">
+            <header
+                className={`site-header z-50 sticky top-0 left-0 w-full transition-all duration-300 ${scrolled ? "is-scrolled" : ""}`}
+            >
+                <nav className="site-nav container mx-auto flex justify-between items-center relative" aria-label="Main navigation">
+                    <button
+                        className="brand flex items-center gap-3 text-left"
+                        onClick={() => setView("home")}
+                        aria-label="Go to home"
+                    >
+                        <span className="brand-mark" aria-hidden="true">GF</span>
+                        <span><strong>Grupi i Futbollit</strong><small>Matchday hub</small></span>
+                    </button>
+                    <div className="desktop-nav hidden lg:flex">
+                        {navigation.map(item => (
+                            <button key={item.id} className={`nav-link ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}>
+                                {item.label}
+                            </button>
+                        ))}
                     </div>
-                    <div className="hidden sm:flex gap-4 text-lg">
-                        <button className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("home")}>Home</button>
-                        <button className={`hover:underline ${view === "lineup" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("lineup")}>Lineup Creator</button>
-                        <button className={`hover:underline ${view === "database" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("database")}>Player Database</button>
-                        <button className={`hover:underline ${view === "cardcreator" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("cardcreator")}>Card Creator</button>
-                        <button className={`hover:underline ${view === "review" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("review")}>Review & Request</button>
-                        <button className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("motm")}>MOTM</button>
-                        <button className={`hover:underline ${view === "gallery" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("gallery")}>Gallery</button>
-                    </div>
+                    <button className="menu-toggle lg:hidden" type="button" aria-label="Toggle navigation menu" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(open => !open)}>
+                        <span></span><span></span><span></span>
+                    </button>
                 </nav>
-                {/* Mobile navigation */}
-                <div className="flex sm:hidden gap-2 justify-center py-2 bg-white border-t border-gray-200">
-                    <button className={`hover:underline ${view === "home" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("home")}>Home</button>
-                    <button className={`hover:underline ${view === "lineup" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("lineup")}>Lineup</button>
-                    <button className={`hover:underline ${view === "database" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("database")}>Database</button>
-                    <button className={`hover:underline ${view === "cardcreator" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("cardcreator")}>Cards</button>
-                    <button className={`hover:underline ${view === "review" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("review")}>Review</button>
-                    <button className={`hover:underline ${view === "motm" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("motm")}>MOTM</button>
-                    <button className={`hover:underline ${view === "gallery" ? "font-bold text-blue-700" : ""}`} onClick={() => setView("gallery")}>Gallery</button>
+                <div className={`mobile-menu lg:hidden ${mobileMenuOpen ? "open" : ""}`}>
+                    {navigation.map(item => (
+                        <button key={item.id} className={`mobile-nav-link ${view === item.id ? "active" : ""}`} onClick={() => setView(item.id)} aria-current={view === item.id ? "page" : undefined}>
+                            <span aria-hidden="true">{item.icon}</span>{item.shortLabel}
+                        </button>
+                    ))}
                 </div>
             </header>
-            <main className="container mx-auto p-4">
+            <main className="main-content container mx-auto p-4">
                 {view === "home" && <Home />}
                 {view === "lineup" && <LineupCreatorPage />}
                 {view === "database" && <PlayerDatabase />}
